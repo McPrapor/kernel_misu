@@ -1,0 +1,12 @@
+ov5670v36mipi_Sensor.c:1283:19:close	0	static
+ov5670v36mipi_Sensor.c:1435:19:get_resolution	0	static
+ov5670v36mipi_Sensor.c:1456:19:get_info	0	static
+ov5670v36mipi_Sensor.c:186:13:write_cmos_sensor	48	static
+ov5670v36mipi_Sensor.c:344:19:set_gain	64	static
+ov5670v36mipi_Sensor.c:1110:16:sensor_vendor_show	32	static
+ov5670v36mipi_Sensor.c:1310:19:preview.isra.7	32	static
+ov5670v36mipi_Sensor.c:1559:19:control	48	static
+ov5670v36mipi_Sensor.c:1210:19:open	144	static
+ov5670v36mipi_Sensor.c:205:13:set_max_framerate	96	static
+ov5670v36mipi_Sensor.c:1751:19:feature_control	160	static
+ov5670v36mipi_Sensor.c:1877:8:OV5670V36_MIPI_RAW_SensorInit	0	static

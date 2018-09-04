@@ -1,0 +1,1 @@
+../../../pinctrl/mediatek/pinctrl-mtk-common.h

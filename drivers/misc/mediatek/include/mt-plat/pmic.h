@@ -1,0 +1,1 @@
+../../power/mt6735/pmic.h

@@ -1,0 +1,1 @@
+mt6735/extd_platform.h

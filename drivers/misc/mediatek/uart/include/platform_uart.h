@@ -1,0 +1,1 @@
+../mt6735/platform_uart.h

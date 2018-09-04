@@ -1,0 +1,1 @@
+../gpio/mt6735/gpio_cfg.h

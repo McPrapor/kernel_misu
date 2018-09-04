@@ -1,0 +1,8 @@
+ov13850v36_otp_cal.c:40:12:OV13850_R2A_read_i2c	48	static
+ov13850v36_otp_cal.c:47:12:OV13850_R2A_write_i2c	16	static
+ov13850v36_otp_cal.c:333:6:LumaDecoder	160	static
+ov13850v36_otp_cal.c:486:6:ColorDecoder	96	static
+ov13850v36_otp_cal.c:63:5:Decode_13850R2A	32	static
+ov13850v36_otp_cal.c:84:5:read_otp	496	static
+ov13850v36_otp_cal.c:250:5:apply_otp	448	static
+ov13850v36_otp_cal.c:54:6:otp_cali	288	static

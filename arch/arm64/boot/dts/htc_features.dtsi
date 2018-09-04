@@ -1,0 +1,61 @@
+/ {
+	htc,config-data {
+	/* <debugflag kernelflag bootloaderflag radioflag radioflag_ex1 radioflag_ex2>*/
+	config-data = <0x0 0x0 0x0 0x0 0x0 0x0>;
+	};
+
+	htc,sku-data {
+		sku-data = <0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		status = "okay";
+		ranges;
+
+		htc_reboot_info@83C30000 {
+			reg = <0x0 0x83C30000 0x0 0x400>;
+			save-emmc-feature = <1>;
+			save-emmc-partition = "/dev/block/platform/mtk-msdc.0/by-name/para";
+			save-emmc-offset = <0x24600>;
+			no-map;
+			compatible = "htc,reboot-info";
+			reg-names = "htc_reboot_info_res";
+		};
+
+		htc_bldr_log@83B00000 {
+			compatible = "htc,bldr_log";
+			reg = <0 0x83B00000 0 0x80000>, <0 0x83B80000 0 0x80000>;
+			no-map;
+			reg-names = "bl_log", "bl_old_log";
+		};	
+		qcom,msm_rtb{
+			reg = <0 0x83E00000 0 0x100000>, <0x0 0x83C10000 0x0 0x20000>;
+			no-map;
+			reg-names = "msm_rtb_res", "htc_debug_rtb_res";	
+		};
+	};
+	
+	qcom,msm-rtb {
+		compatible = "qcom,msm-rtb";
+		reg = <0 0x83E00000 0 0x100000>, <0x0 0x83C10000 0x0 0x20000>;
+		reg-names = "msm_rtb_res", "htc_debug_rtb_res";
+	};	
+
+	keycombo {
+		compatible = "keycombo";
+		/* clear_hw_reset */
+		clr_gpio	= <58>;
+		key_down_delay	= <0>;		/* ms */
+		keys_down	= <116 0>;
+		/* cancel clear_hw_reset */
+		keys_up		= <115 0>;
+	};
+
+	keyreset {
+		compatible	= "keyreset";
+		key_down_delay	= <9000>;
+		keys_down	= <116 115 0>;
+	};
+};

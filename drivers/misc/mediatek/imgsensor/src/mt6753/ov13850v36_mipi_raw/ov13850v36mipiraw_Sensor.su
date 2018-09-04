@@ -1,0 +1,15 @@
+ov13850v36mipiraw_Sensor.c:1744:19:close	0	static
+ov13850v36mipiraw_Sensor.c:1898:19:get_resolution	0	static
+ov13850v36mipiraw_Sensor.c:1919:19:get_info	0	static
+ov13850v36mipiraw_Sensor.c:204:13:write_cmos_sensor	48	static
+ov13850v36mipiraw_Sensor.c:194:19:read_cmos_sensor	64	static
+ov13850v36mipiraw_Sensor.c:470:13:set_mirror_flip	32	static
+ov13850v36mipiraw_Sensor.c:1539:16:sensor_vendor_show	32	static
+ov13850v36mipiraw_Sensor.c:1550:16:otp_show	32	static
+ov13850v36mipiraw_Sensor.c:1771:19:preview.isra.7	48	static
+ov13850v36mipiraw_Sensor.c:2022:19:control	64	static
+ov13850v36mipiraw_Sensor.c:1660:19:open	144	static
+ov13850v36mipiraw_Sensor.c:418:19:set_gain	96	static
+ov13850v36mipiraw_Sensor.c:225:13:set_max_framerate	96	static
+ov13850v36mipiraw_Sensor.c:2208:19:feature_control	144	static
+ov13850v36mipiraw_Sensor.c:2335:8:OV13850V36_MIPI_RAW_SensorInit	0	static

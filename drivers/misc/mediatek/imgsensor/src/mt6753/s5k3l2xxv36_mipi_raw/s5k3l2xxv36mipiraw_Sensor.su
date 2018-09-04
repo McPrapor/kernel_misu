@@ -1,0 +1,15 @@
+s5k3l2xxv36mipiraw_Sensor.c:2130:19:close	0	static
+s5k3l2xxv36mipiraw_Sensor.c:2305:19:get_info	0	static
+s5k3l2xxv36mipiraw_Sensor.c:175:19:read_cmos_sensor	64	static
+s5k3l2xxv36mipiraw_Sensor.c:227:13:check_output_stream_off	32	static
+s5k3l2xxv36mipiraw_Sensor.c:207:13:check_output_stream_on	32	static
+s5k3l2xxv36mipiraw_Sensor.c:187:13:write_cmos_sensor1	48	static
+s5k3l2xxv36mipiraw_Sensor.c:197:13:write_cmos_sensor	48	static
+s5k3l2xxv36mipiraw_Sensor.c:1600:13:preview_setting	32	static
+s5k3l2xxv36mipiraw_Sensor.c:2281:19:get_resolution	32	static
+s5k3l2xxv36mipiraw_Sensor.c:1962:16:sensor_vendor_show	32	static
+s5k3l2xxv36mipiraw_Sensor.c:2157:19:preview.isra.6	32	static
+s5k3l2xxv36mipiraw_Sensor.c:2408:19:control	48	static
+s5k3l2xxv36mipiraw_Sensor.c:2062:19:open	128	static
+s5k3l2xxv36mipiraw_Sensor.c:2581:19:feature_control	128	static
+s5k3l2xxv36mipiraw_Sensor.c:2727:8:S5K3L2XXV36_MIPI_RAW_SensorInit	0	static

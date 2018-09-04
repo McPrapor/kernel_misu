@@ -1,0 +1,31 @@
+### USE TRUSTY !!! ###
+apt-get update
+apt-get install -y git-core gnupg flex bison gperf libsdl1.2-dev libesd0-dev libwxgtk2.8-dev squashfs-tools build-essential zip curl libncurses5-dev zlib1g-dev pngcrush schedtool g++-multilib lib32z1-dev lib32ncurses5-dev lib32readline-gplv2-dev libxml2-utils u-boot-tools libc6-dev x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 libgl1-mesa-dev mingw32 tofrodos python-markdown xsltproc
+apt-get install  libx11-dev libreadline6-dev libgl1-mesa-glx wget
+apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip python bc
+apt-get install software-properties-common
+add-apt-repository ppa:openjdk-r/ppa 
+sudo apt-get update 
+sudo apt-get install openjdk-8-jdk
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+mv ./aarch64-linux-android-4.9/ /usr/local/bin/
+#--------------------#
+tar -xf kernel-3.18.tbz2
+cd kernel-3.18
+export ARCH=arm64 
+export TARGET_ARCH=arm64
+export CROSS_COMPILE=/usr/local/bin/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+
+make abyrvalg_defconfig
+./FIX.sh
+make -j$(nproc --all)
+
+
+
+Use Image.gz-dtb as kernel image
+./arch/arm64/boot/Image.gz-dtb ==> boot.img-kernel
+
+
+
+Clean:
+make mrproper

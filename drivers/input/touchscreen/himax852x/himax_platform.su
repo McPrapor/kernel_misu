@@ -1,0 +1,9 @@
+himax_platform.c:40:5:i2c_himax_read	160	static
+himax_platform.c:87:5:i2c_himax_write	144	static
+himax_platform.c:130:5:i2c_himax_read_command	0	static
+himax_platform.c:135:5:i2c_himax_write_command	16	static
+himax_platform.c:140:5:i2c_himax_master_write	128	static
+himax_platform.c:180:6:himax_int_enable	48	static
+himax_platform.c:201:6:himax_rst_gpio_set	16	static
+himax_platform.c:225:9:himax_int_gpio_read	16	static
+himax_platform.c:231:5:himax_gpio_power_config	80	static
