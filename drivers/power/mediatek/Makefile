@@ -10,6 +10,9 @@ else
 obj-$(CONFIG_MTK_SMART_BATTERY) += battery_meter.o battery_common.o
 endif
 
+ifeq ($(CONFIG_ARCH_MTK_PROJECT),"v36bml")
+   ccflags-y += -DV36BML_BATT=1
+endif
 
 ifeq ($(CONFIG_MTK_FAN5402_SUPPORT),y)
 	obj-$(CONFIG_MTK_SMART_BATTERY) += switch_charging.o

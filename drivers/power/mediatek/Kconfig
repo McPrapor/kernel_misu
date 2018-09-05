@@ -39,6 +39,19 @@ config MTK_SWCHR_SUPPORT
 	  Set to no if pmic pulse charger is used.
 	default n
 
+config MTK_BQ24158_SUPPORT
+        bool "MTK_BQ24158_SUPPORT"
+        help
+          BQ24158 charger IC support Yes to support bq24158 No to not
+          support bq24158
+
+config MTK_BQ24296_SUPPORT
+        bool "MTK_BQ24296_SUPPORT"
+        help
+          BQ24296 charger IC support Yes to support bq24296 No to not
+          support bq24296
+
+
 config MTK_BQ24160_SUPPORT
 	bool "MTK_BQ24160_SUPPORT"
 	help

@@ -20,6 +20,19 @@
         touch_fw_update: touch_fw_update {
                 compatible = "htc,touch_fwu";
         };
+        keycombo {
+                compatible = "keycombo";
+                clr_gpio = <0x3a>;
+                key_down_delay = <0x0>;
+                keys_down = <0x74 0x0>;
+                keys_up = <0x73 0x0>;
+        };
+
+        keyreset {
+                compatible = "keyreset";
+                key_down_delay = <0x2328>;
+                keys_down = <0x74 0x73 0x0>;
+        };
         htc,config-data {
 /*        <debugflag kernelflag bootloaderflag radioflag radioflag_ex1 radioflag_ex2> */
                 config-data = <0x0 0x0 0x0 0x0 0x0 0x0>;
