@@ -12,6 +12,7 @@ obj-$(CONFIG_MTK_BMA222E_NEW)   +=  bma222E-new/
 obj-$(CONFIG_MTK_MPU6050G)   +=  mpu6050g/
 obj-$(CONFIG_MTK_MPU6050G_NEW)   +=  mpu6050g-new/
 obj-$(CONFIG_MTK_BMA250)   +=  bma250/
+obj-$(CONFIG_MTK_BMA253)   +=  bma253/
 obj-$(CONFIG_MTK_KXTIK1004)   +=  kxtik1004/
 obj-$(CONFIG_MTK_MPU6515A)   +=  mpu6515/
 obj-$(CONFIG_MTK_KXTJ2_1009)   +=  KXTJ2_1009/

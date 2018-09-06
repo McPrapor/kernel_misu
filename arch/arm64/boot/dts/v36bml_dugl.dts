@@ -104,6 +104,8 @@
                 vib_limit = <9>;
                 vib_vol= <5>;
         };
+
+
 };
 
 /* USB GPIO Kernal Standardization start */
@@ -535,6 +537,125 @@
                 headset-four-key-threshold = <0 58 121 192 450>;
 };
 /* wtf2 end */
+/* cm3886 proximity */
+&i2c2 {
+    cm36686@60 {
+        compatible = "mediatek,alsps";
+        reg = <0x60>;
+        cm36686,irq-gpio = <0x41>;
+        cm36686,engineer-id = <0x0>;
+        cm36686,levels = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
+        cm36686,levels_2 = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
+        cm36686,golden_adc = <0x399>;
+        cm36686,golden_adc_2 = <0x399>;
+        cm36686,cm36686_slave_address = <0x60>;
+        cm36686,ps1_thd_set = <0x15>;
+        cm36686,ps1_thd_no_cal = <0x5f>;
+        cm36686,dynamical_threshold = <0x1>;
+        cm36686,dark_level = <0x3>;
+        cm36686,ps_duty = <0x0>;
+        cm36686,ps_pers = <0x1>;
+        cm36686,ps_it = <0x7>;
+        cm36686,ps_hd = <0x0>;
+        cm36686,ps_led_current = <0x2>;
+    };
+};
+
+/* bq24158 power charger */
+&i2c1 {
+	bq24158:bq24158@7c {
+		compatible = "ti,bq24158";
+		reg = <0x7c>;
+
+		ti,current-limit = <100>;
+		ti,charge-current = <650>;
+		ti,weak-battery-voltage = <3400>;
+		ti,battery-regulation-voltage = <4200>;
+		ti,termination-current = <100>;
+		ti,resistor-sense = <68>;
+
+		ti,usb-charger-detection = <0>;
+	};
+};
+
+/* mt6311 pmic */
+&i2c4 {
+	mt6311: pmic@6b {
+		compatible = "mediatek,mt6311-regulator";
+		reg = <0x6b>;
+/*
+		regulators {
+			mt6311_vcpu_reg: VDVFS {
+				regulator-name = "VDVFS";
+				regulator-min-microvolt = < 600000>;
+				regulator-max-microvolt = <1400000>;
+				regulator-ramp-delay = <10000>;
+			};
+			mt6311_ldo_reg: VBIASN {
+				regulator-name = "VBIASN";
+				regulator-min-microvolt = <200000>;
+				regulator-max-microvolt = <800000>;
+			};
+		};
+*/
+	};
+};
+
+/* tps65132 pmic */
+&i2c1 {
+	tps65132:tps65132@3e {
+        	compatible = "ti,tps65132";
+	        reg = <0x3e>;
+/*
+        	i2c-pwr-supply = <&pm8916_l6>;
+	        regulators {
+        	        tps65132_pos: pos-boost {
+	                        regulator-name  = "tps65132_pos";
+                        	regulator-min-microvolt = <5400000>;
+                	        regulator-max-microvolt = <5400000>;
+        	                ti,discharge-enable;
+	                        ti,enable-time = <800>;
+                        	ti,current-limit = <200000>;
+                	        ti,en-gpio = <&pio 97 0>;
+        	        };
+
+	                tps65132_neg: neg-boost {
+                	        regulator-name = "tps65132_neg";
+        	                regulator-min-microvolt = <5400000>;
+	                        regulator-max-microvolt = <5400000>;
+                	        ti,discharge-enable;
+        	                ti,enable-time = <800>;
+	                        ti,current-limit = <40000>;
+                        	ti,en-gpio = <&pio 32 0>;
+                	};
+        	};
+*/
+	};
+};
+
+/* leds-lcm3642 */
+&i2c2 {
+	lm3642:lm3642@63 {
+		compatible = "mediatek,leds-lm3642";
+		reg = <0x63>;
+	};
+};
+
+/* bma253 accelometer */
+&i2c2 {
+	bma253: g_sensor_bma253@18 {
+                compatible = "htc_g_sensor,bma253_bosch";
+                reg = <0x18>;
+                g_sensor_bma253,intr = <0x0>;
+                g_sensor_bma253,chip_layout = <0x4>;
+                g_sensor_bma253,axis_map_x = <0x0>;
+                g_sensor_bma253,axis_map_y = <0x1>;
+                g_sensor_bma253,axis_map_z = <0x2>;
+                g_sensor_bma253,negate_x = <0x1>;
+                g_sensor_bma253,negate_y = <0x1>;
+                g_sensor_bma253,negate_z = <0x0>;
+        };
+};
 
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"

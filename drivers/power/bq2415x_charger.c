@@ -1550,6 +1550,7 @@ static int bq2415x_probe(struct i2c_client *client,
 	struct device_node *np = client->dev.of_node;
 	struct bq2415x_platform_data *pdata = client->dev.platform_data;
 
+	dev_info(&client->dev, "[bq2415x] charger probe start");
 	if (!np && !pdata) {
 		dev_err(&client->dev, "platform data missing\n");
 		return -ENODEV;
@@ -1691,6 +1692,7 @@ error_1:
 	idr_remove(&bq2415x_id, num);
 	mutex_unlock(&bq2415x_id_mutex);
 
+	dev_info(&client->dev, "[bq2415x] charger probe end");
 	return ret;
 }
 
