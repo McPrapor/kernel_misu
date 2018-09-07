@@ -562,7 +562,7 @@
 };
 
 /* bq24158 power charger */
-&i2c0 {
+&i2c1 {
 /*	bq24158:bq24158@6a {
 		compatible = "ti,bq24158";
 		reg = <0x6a>;
