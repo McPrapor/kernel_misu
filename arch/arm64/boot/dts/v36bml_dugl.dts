@@ -540,7 +540,7 @@
 /* cm3886 proximity */
 &i2c2 {
     cm36686@60 {
-        compatible = "mediatek,alsps";
+        compatible = "mediatek,CM36686_";
         reg = <0x60>;
         cm36686,irq-gpio = <0x41>;
         cm36686,engineer-id = <0x0>;
@@ -562,10 +562,10 @@
 };
 
 /* bq24158 power charger */
-&i2c1 {
-	bq24158:bq24158@7c {
+&i2c0 {
+/*	bq24158:bq24158@6a {
 		compatible = "ti,bq24158";
-		reg = <0x7c>;
+		reg = <0x6a>;
 
 		ti,current-limit = <100>;
 		ti,charge-current = <650>;
@@ -574,40 +574,23 @@
 		ti,termination-current = <100>;
 		ti,resistor-sense = <68>;
 
-		ti,usb-charger-detection = <0>;
+		ti,usb-charger-detection = <>;
 	};
-};
-
-/* mt6311 pmic */
-&i2c4 {
-	mt6311: pmic@6b {
-		compatible = "mediatek,mt6311-regulator";
-		reg = <0x6b>;
-/*
-		regulators {
-			mt6311_vcpu_reg: VDVFS {
-				regulator-name = "VDVFS";
-				regulator-min-microvolt = < 600000>;
-				regulator-max-microvolt = <1400000>;
-				regulator-ramp-delay = <10000>;
-			};
-			mt6311_ldo_reg: VBIASN {
-				regulator-name = "VBIASN";
-				regulator-min-microvolt = <200000>;
-				regulator-max-microvolt = <800000>;
-			};
-		};
 */
+	swithing_charger@6a {
+		compatible = "mediatek,swithing_charger";
+		reg = <0x6a>;
+		status = "okay";
 	};
 };
 
 /* tps65132 pmic */
-&i2c1 {
+&i2c0 {
 	tps65132:tps65132@3e {
         	compatible = "ti,tps65132";
 	        reg = <0x3e>;
-/*
-        	i2c-pwr-supply = <&pm8916_l6>;
+
+/*        	i2c-pwr-supply = <&regulators_supply>; */
 	        regulators {
         	        tps65132_pos: pos-boost {
 	                        regulator-name  = "tps65132_pos";
@@ -629,7 +612,7 @@
                         	ti,en-gpio = <&pio 32 0>;
                 	};
         	};
-*/
+
 	};
 };
 
@@ -659,5 +642,6 @@
 
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
-#include "v36bml/cust.dtsi"
+#include "cust.dtsi"
+/* #include "v36bml/cust.dtsi" */
 /* DTS FILE */
