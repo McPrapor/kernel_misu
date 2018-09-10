@@ -1,11 +1,20 @@
+/*  Date: 2011/11/02 17:00:00
+ *  Revision: 2.9
+ */
+
 /*
  * This software program is licensed subject to the GNU General Public License
  * (GPL).Version 2,June 1991, available at http://www.fsf.org/copyleft/gpl.html
+
  * (C) Copyright 2011 Bosch Sensortec GmbH
  * All Rights Reserved
  */
 
 
+/* file bma253_bosch.c
+   brief This file contains all function implementations for the BMA253 in linux
+
+ */
 
 #undef CONFIG_HAS_EARLYSUSPEND
 
@@ -29,11 +38,23 @@
 
 #include "bma253.h"
 
+//#include <mach/rpm-regulator.h>
 #include <linux/regulator/consumer.h>
 
 #define IS_MTK_PLATFORM 1
 
 #ifdef IS_MTK_PLATFORM
+/*
+#include <mach/mt_gpio.h>
+#include <mach/eint.h>
+#include <mach/mt_pm_ldo.h>
+*/
+#include <mt-plat/mt_gpio.h>
+// shouldn't do that but....
+#define GPIO_NFC_ENABLE 0
+#define GPIO_OUT_ONE 1
+#define GPIO_DIR_OUT 1
+
 #include <linux/of_irq.h>
 #endif
 
@@ -95,7 +116,7 @@ struct bma253_data {
 	struct class *g_sensor_class;
 	struct device *g_sensor_dev;
 	struct device *g_sensor_user_cali_dev;
-#endif 
+#endif /* HTC_ATTR */
 
 	struct bma253_platform_data *pdata;
 	short offset_buf[3];
@@ -163,7 +184,7 @@ static int bma253_smbus_read_byte_block(struct i2c_client *client,
 static int bma253_set_mode(struct i2c_client *client, unsigned char Mode)
 {
 	int comres = 0;
-	unsigned char data1 = 0;
+	unsigned char data1;
 
 #ifdef CONFIG_CIR_ALWAYS_READY
 	if(cir_flag && Mode == BMA253_MODE_SUSPEND) {
@@ -214,7 +235,7 @@ static int bma253_set_int1_pad_sel(struct i2c_client *client, unsigned char
 		int1sel)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 	unsigned char state;
 	state = 0x01;
 
@@ -282,13 +303,13 @@ static int bma253_set_int1_pad_sel(struct i2c_client *client, unsigned char
 
 	return comres;
 }
-#endif 
+#endif /* BMA253_ENABLE_INT1 */
 #ifdef BMA253_ENABLE_INT2
 static int bma253_set_int2_pad_sel(struct i2c_client *client, unsigned char
 		int2sel)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 	unsigned char state;
 	state = 0x01;
 
@@ -356,13 +377,13 @@ static int bma253_set_int2_pad_sel(struct i2c_client *client, unsigned char
 
 	return comres;
 }
-#endif 
+#endif /* BMA253_ENABLE_INT2 */
 
 static int bma253_set_Int_Enable(struct i2c_client *client, unsigned char
 		InterruptType , unsigned char value)
 {
 	int comres = 0;
-	unsigned char data1 = 0, data2 = 0;
+	unsigned char data1, data2;
 
 
 	comres = bma253_smbus_read_byte(client, BMA253_INT_ENABLE1_REG, &data1);
@@ -371,70 +392,70 @@ static int bma253_set_Int_Enable(struct i2c_client *client, unsigned char
 	value = value & 1;
 	switch (InterruptType) {
 	case 0:
-		
+		/* Low G Interrupt  */
 		data2 = BMA253_SET_BITSLICE(data2, BMA253_EN_LOWG_INT, value);
 		break;
 	case 1:
-		
+		/* High G X Interrupt */
 
 		data2 = BMA253_SET_BITSLICE(data2, BMA253_EN_HIGHG_X_INT,
 				value);
 		break;
 	case 2:
-		
+		/* High G Y Interrupt */
 
 		data2 = BMA253_SET_BITSLICE(data2, BMA253_EN_HIGHG_Y_INT,
 				value);
 		break;
 	case 3:
-		
+		/* High G Z Interrupt */
 
 		data2 = BMA253_SET_BITSLICE(data2, BMA253_EN_HIGHG_Z_INT,
 				value);
 		break;
 	case 4:
-		
+		/* New Data Interrupt  */
 
 		data2 = BMA253_SET_BITSLICE(data2, BMA253_EN_NEW_DATA_INT,
 				value);
 		break;
 	case 5:
-		
+		/* Slope X Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_SLOPE_X_INT,
 				value);
 		break;
 	case 6:
-		
+		/* Slope Y Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_SLOPE_Y_INT,
 				value);
 		break;
 	case 7:
-		
+		/* Slope Z Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_SLOPE_Z_INT,
 				value);
 		break;
 	case 8:
-		
+		/* Single Tap Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_SINGLE_TAP_INT,
 				value);
 		break;
 	case 9:
-		
+		/* Double Tap Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_DOUBLE_TAP_INT,
 				value);
 		break;
 	case 10:
-		
+		/* Orient Interrupt  */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_ORIENT_INT, value);
 		break;
 	case 11:
-		
+		/* Flat Interrupt */
 
 		data1 = BMA253_SET_BITSLICE(data1, BMA253_EN_FLAT_INT, value);
 		break;
@@ -466,16 +487,16 @@ static int bma253_get_mode(struct i2c_client *client, unsigned char *Mode)
 static int bma253_set_range(struct i2c_client *client, unsigned char Range)
 {
 	int comres = 0;
-	unsigned char data1 = 0;
+	unsigned char data1;
 
 
-	if (0 <= Range && Range < 4) {
+	if (Range < 4) {
 		comres = bma253_smbus_read_byte(client,
 				BMA253_RANGE_SEL_REG, &data1);
 		switch (Range) {
 		case 0:
 			data1  = BMA253_SET_BITSLICE(data1,
-					BMA253_RANGE_SEL, 3);
+					BMA253_RANGE_SEL, 0);
 			break;
 		case 1:
 			data1  = BMA253_SET_BITSLICE(data1,
@@ -495,7 +516,6 @@ static int bma253_set_range(struct i2c_client *client, unsigned char Range)
 		comres += bma253_smbus_write_byte(client,
 				BMA253_RANGE_SEL_REG, &data1);
 	} else{
-		E("%s: Range(=%d) is not correct, it should be in 0~3\n", __func__,Range);
 		comres = -1;
 	}
 
@@ -506,7 +526,7 @@ static int bma253_set_range(struct i2c_client *client, unsigned char Range)
 static int bma253_get_range(struct i2c_client *client, unsigned char *Range)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client, BMA253_RANGE_SEL__REG,
@@ -522,7 +542,7 @@ static int bma253_get_range(struct i2c_client *client, unsigned char *Range)
 static int bma253_set_bandwidth(struct i2c_client *client, unsigned char BW)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 	int Bandwidth = 0;
 
 	if (BW > 7 && BW < 16) {
@@ -585,7 +605,7 @@ static int bma253_get_interruptstatus1(struct i2c_client *client, unsigned char
 		*intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_STATUS1_REG, &data);
 	*intstatus = data;
@@ -598,7 +618,7 @@ static int bma253_get_HIGH_first(struct i2c_client *client, unsigned char
 						param, unsigned char *intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	switch (param) {
 	case 0:
@@ -630,7 +650,7 @@ static int bma253_get_HIGH_sign(struct i2c_client *client, unsigned char
 		*intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_STATUS_ORIENT_HIGH_REG,
 			&data);
@@ -644,7 +664,7 @@ static int bma253_get_slope_first(struct i2c_client *client, unsigned char
 	param, unsigned char *intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	switch (param) {
 	case 0:
@@ -675,7 +695,7 @@ static int bma253_get_slope_sign(struct i2c_client *client, unsigned char
 		*intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_STATUS_TAP_SLOPE_REG,
 			&data);
@@ -688,7 +708,7 @@ static int bma253_get_orient_status(struct i2c_client *client, unsigned char
 		*intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_STATUS_ORIENT_HIGH_REG,
 			&data);
@@ -702,7 +722,7 @@ static int bma253_get_orient_flat_status(struct i2c_client *client, unsigned
 		char *intstatus)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_STATUS_ORIENT_HIGH_REG,
 			&data);
@@ -712,11 +732,11 @@ static int bma253_get_orient_flat_status(struct i2c_client *client, unsigned
 	return comres;
 }
 #endif
-#endif 
+#endif /* defined(BMA253_ENABLE_INT1)||defined(BMA253_ENABLE_INT2) */
 static int bma253_set_Int_Mode(struct i2c_client *client, unsigned char Mode)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -732,7 +752,7 @@ static int bma253_set_Int_Mode(struct i2c_client *client, unsigned char Mode)
 static int bma253_get_Int_Mode(struct i2c_client *client, unsigned char *Mode)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -747,7 +767,7 @@ static int bma253_set_slope_duration(struct i2c_client *client, unsigned char
 		duration)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -764,7 +784,7 @@ static int bma253_get_slope_duration(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -780,7 +800,7 @@ static int bma253_set_slope_threshold(struct i2c_client *client,
 		unsigned char threshold)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -797,7 +817,7 @@ static int bma253_get_slope_threshold(struct i2c_client *client,
 		unsigned char *status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 
 	comres = bma253_smbus_read_byte(client,
@@ -812,7 +832,7 @@ static int bma253_set_low_g_duration(struct i2c_client *client, unsigned char
 		duration)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_LOWG_DUR__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_LOWG_DUR, duration);
@@ -825,7 +845,7 @@ static int bma253_get_low_g_duration(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_LOW_DURN_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_LOWG_DUR);
@@ -838,7 +858,7 @@ static int bma253_set_low_g_threshold(struct i2c_client *client, unsigned char
 		threshold)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_LOWG_THRES__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_LOWG_THRES, threshold);
@@ -851,7 +871,7 @@ static int bma253_get_low_g_threshold(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_LOW_THRES_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_LOWG_THRES);
@@ -864,7 +884,7 @@ static int bma253_set_high_g_duration(struct i2c_client *client, unsigned char
 		duration)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_HIGHG_DUR__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_HIGHG_DUR, duration);
@@ -877,7 +897,7 @@ static int bma253_get_high_g_duration(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_HIGH_DURN_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_HIGHG_DUR);
@@ -890,7 +910,7 @@ static int bma253_set_high_g_threshold(struct i2c_client *client, unsigned char
 		threshold)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_HIGHG_THRES__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_HIGHG_THRES, threshold);
@@ -904,7 +924,7 @@ static int bma253_get_high_g_threshold(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_HIGH_THRES_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_HIGHG_THRES);
@@ -918,7 +938,7 @@ static int bma253_set_tap_duration(struct i2c_client *client, unsigned char
 		duration)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_DUR__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_TAP_DUR, duration);
@@ -931,7 +951,7 @@ static int bma253_get_tap_duration(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_TAP_DUR);
@@ -943,7 +963,7 @@ static int bma253_get_tap_duration(struct i2c_client *client, unsigned char
 static int bma253_set_tap_shock(struct i2c_client *client, unsigned char setval)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_SHOCK_DURN__REG,
 			&data);
@@ -958,7 +978,7 @@ static int bma253_get_tap_shock(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_TAP_SHOCK_DURN);
@@ -971,7 +991,7 @@ static int bma253_set_tap_quiet(struct i2c_client *client, unsigned char
 		duration)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_QUIET_DURN__REG,
 			&data);
@@ -986,7 +1006,7 @@ static int bma253_get_tap_quiet(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_TAP_QUIET_DURN);
@@ -999,7 +1019,7 @@ static int bma253_set_tap_threshold(struct i2c_client *client, unsigned char
 		threshold)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_THRES__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_TAP_THRES, threshold);
@@ -1012,7 +1032,7 @@ static int bma253_get_tap_threshold(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_THRES_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_TAP_THRES);
@@ -1024,7 +1044,7 @@ static int bma253_get_tap_threshold(struct i2c_client *client, unsigned char
 static int bma253_set_tap_samp(struct i2c_client *client, unsigned char samp)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_SAMPLES__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_TAP_SAMPLES, samp);
@@ -1037,7 +1057,7 @@ static int bma253_set_tap_samp(struct i2c_client *client, unsigned char samp)
 static int bma253_get_tap_samp(struct i2c_client *client, unsigned char *status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_TAP_THRES_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_TAP_SAMPLES);
@@ -1049,7 +1069,7 @@ static int bma253_get_tap_samp(struct i2c_client *client, unsigned char *status)
 static int bma253_set_orient_mode(struct i2c_client *client, unsigned char mode)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_MODE__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_ORIENT_MODE, mode);
@@ -1063,7 +1083,7 @@ static int bma253_get_orient_mode(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_ORIENT_MODE);
@@ -1076,7 +1096,7 @@ static int bma253_set_orient_blocking(struct i2c_client *client, unsigned char
 		samp)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_BLOCK__REG,
 			&data);
@@ -1091,7 +1111,7 @@ static int bma253_get_orient_blocking(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_ORIENT_BLOCK);
@@ -1104,7 +1124,7 @@ static int bma253_set_orient_hyst(struct i2c_client *client, unsigned char
 		orienthyst)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_HYST__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_ORIENT_HYST, orienthyst);
@@ -1118,7 +1138,7 @@ static int bma253_get_orient_hyst(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_ORIENT_PARAM_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_ORIENT_HYST);
@@ -1130,7 +1150,7 @@ static int bma253_set_theta_blocking(struct i2c_client *client, unsigned char
 		thetablk)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_THETA_BLOCK__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_THETA_BLOCK, thetablk);
@@ -1144,7 +1164,7 @@ static int bma253_get_theta_blocking(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_THETA_BLOCK_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_THETA_BLOCK);
@@ -1157,7 +1177,7 @@ static int bma253_set_theta_flat(struct i2c_client *client, unsigned char
 		thetaflat)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_THETA_FLAT__REG, &data);
 	data = BMA253_SET_BITSLICE(data, BMA253_THETA_FLAT, thetaflat);
@@ -1170,7 +1190,7 @@ static int bma253_get_theta_flat(struct i2c_client *client, unsigned char
 		*status)
 {
 	int comres = 0 ;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_THETA_FLAT_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_THETA_FLAT);
@@ -1183,7 +1203,7 @@ static int bma253_set_flat_hold_time(struct i2c_client *client, unsigned char
 		holdtime)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_FLAT_HOLD_TIME__REG,
 			&data);
@@ -1198,7 +1218,7 @@ static int bma253_get_flat_hold_time(struct i2c_client *client, unsigned char
 		*holdtime)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_FLAT_HOLD_TIME_REG,
 			&data);
@@ -1222,7 +1242,7 @@ static int bma253_set_offset_target_x(struct i2c_client *client, unsigned char
 		offsettarget)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client,
 			BMA253_COMP_TARGET_OFFSET_X__REG, &data);
@@ -1238,7 +1258,7 @@ static int bma253_get_offset_target_x(struct i2c_client *client, unsigned char
 		*offsettarget)
 {
 	int comres = 0 ;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_OFFSET_PARAMS_REG,
 			&data);
@@ -1252,7 +1272,7 @@ static int bma253_set_offset_target_y(struct i2c_client *client, unsigned char
 		offsettarget)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client,
 			BMA253_COMP_TARGET_OFFSET_Y__REG, &data);
@@ -1268,7 +1288,7 @@ static int bma253_get_offset_target_y(struct i2c_client *client, unsigned char
 		*offsettarget)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_OFFSET_PARAMS_REG,
 			&data);
@@ -1282,7 +1302,7 @@ static int bma253_set_offset_target_z(struct i2c_client *client, unsigned char
 		offsettarget)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client,
 			BMA253_COMP_TARGET_OFFSET_Z__REG, &data);
@@ -1298,7 +1318,7 @@ static int bma253_get_offset_target_z(struct i2c_client *client, unsigned char
 		*offsettarget)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_OFFSET_PARAMS_REG,
 			&data);
@@ -1312,7 +1332,7 @@ static int bma253_get_cal_ready(struct i2c_client *client, unsigned char
 		*calrdy)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_OFFSET_CTRL_REG, &data);
 	data = BMA253_GET_BITSLICE(data, BMA253_FAST_COMP_RDY_S);
@@ -1325,7 +1345,7 @@ static int bma253_set_cal_trigger(struct i2c_client *client, unsigned char
 		caltrigger)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_EN_FAST_COMP__REG,
 			&data);
@@ -1340,7 +1360,7 @@ static int bma253_set_selftest_st(struct i2c_client *client, unsigned char
 		selftest)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_EN_SELF_TEST__REG,
 			&data);
@@ -1354,7 +1374,7 @@ static int bma253_set_selftest_st(struct i2c_client *client, unsigned char
 static int bma253_set_selftest_stn(struct i2c_client *client, unsigned char stn)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client, BMA253_NEG_SELF_TEST__REG,
 			&data);
@@ -1368,7 +1388,7 @@ static int bma253_set_selftest_stn(struct i2c_client *client, unsigned char stn)
 static int bma253_set_ee_w(struct i2c_client *client, unsigned char eew)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client,
 			BMA253_UNLOCK_EE_WRITE_SETTING__REG, &data);
@@ -1381,7 +1401,7 @@ static int bma253_set_ee_w(struct i2c_client *client, unsigned char eew)
 static int bma253_set_ee_prog_trig(struct i2c_client *client)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 	unsigned char eeprog;
 	eeprog = 0x01;
 
@@ -1398,7 +1418,7 @@ static int bma253_get_eeprom_writing_status(struct i2c_client *client,
 							unsigned char *eewrite)
 {
 	int comres = 0;
-	unsigned char data = 0;
+	unsigned char data;
 
 	comres = bma253_smbus_read_byte(client,
 				BMA253_EEPROM_CTRL_REG, &data);
@@ -1471,6 +1491,7 @@ static int bma253_read_accel_xyz(struct i2c_client *client,
 	int comres;
 	unsigned char data[6];
 
+//	int i =0;
 	comres = bma253_smbus_read_byte_block(client,
 			BMA253_ACC_X_LSB__REG, data, 6);
 	
@@ -1571,13 +1592,13 @@ static ssize_t bma253_register_show(struct device *dev,
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	size_t count = 0;
-	u8 reg[0x40];
+	u8 reg[0x3d];
 	int i;
 
-	for (i = 0 ; i < 0x40; i++) {
+	for (i = 0 ; i < 0x3d; i++) {
 		bma253_smbus_read_byte(bma253->bma253_client, i, reg+i);
 
-		count += snprintf(&buf[count], PAGE_SIZE - count, "0x%x: %d\n", i, reg[i]);
+		count += sprintf(&buf[count], "0x%x: %d\n", i, reg[i]);
 	}
 	return count;
 
@@ -1586,14 +1607,14 @@ static ssize_t bma253_register_show(struct device *dev,
 static ssize_t bma253_range_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_range(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 }
 
 static ssize_t bma253_range_store(struct device *dev,
@@ -1605,7 +1626,7 @@ static ssize_t bma253_range_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_range(bma253->bma253_client, (unsigned char) data) < 0)
@@ -1617,14 +1638,14 @@ static ssize_t bma253_range_store(struct device *dev,
 static ssize_t bma253_bandwidth_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_bandwidth(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -1637,7 +1658,7 @@ static ssize_t bma253_bandwidth_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_bandwidth(bma253->bma253_client,
@@ -1653,7 +1674,7 @@ static void debug_do_work(struct work_struct *w)
 }
 
 
-static ssize_t bma253_chip_layout_show(struct device *dev,	
+static ssize_t bma253_chip_layout_show(struct device *dev,	/* show chip layou attribute */
 		struct device_attribute *attr, char *buf)
 {
 	if (gdata == NULL) {
@@ -1661,7 +1682,7 @@ static ssize_t bma253_chip_layout_show(struct device *dev,
 		return 0;
 	}
 
-	return snprintf(buf, PAGE_SIZE, "chip_layout = %d\n"
+	return sprintf(buf, "chip_layout = %d\n"
 			    "axis_map_x = %d, axis_map_y = %d,"
 			    " axis_map_z = %d\n"
 			    "negate_x = %d, negate_y = %d, negate_z = %d\n",
@@ -1679,9 +1700,9 @@ static ssize_t bma253_chip_layout_store(struct device *dev,
 	unsigned long data = 0;
 	int error = 0;
 
-	
+	/*D("%s++: debug: data = %lu\n", __func__, data);*/
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -1693,13 +1714,13 @@ static ssize_t bma253_chip_layout_store(struct device *dev,
 		cancel_delayed_work(&debug_work);
 	}
 
-	
+	/*D("%s: debug: data = %lu\n", __func__, data);*/
 
 	return count;
 }
 
 
-static ssize_t bma253_get_raw_data_show(struct device *dev,	
+static ssize_t bma253_get_raw_data_show(struct device *dev,	/* show chip layou attribute */
 		struct device_attribute *attr, char *buf)
 {
 	struct bma253_data *bma253 = gdata;
@@ -1712,7 +1733,7 @@ static ssize_t bma253_get_raw_data_show(struct device *dev,
 
 	bma253_read_accel_xyz(bma253->bma253_client, &acc);
 
-	return snprintf(buf, PAGE_SIZE, "x = %d, y = %d, z = %d\n",
+	return sprintf(buf, "x = %d, y = %d, z = %d\n",
 			    acc.x, acc.y, acc.z);
 }
 
@@ -1728,7 +1749,7 @@ static ssize_t bma253_set_k_value_show(struct device *dev,
 		return 0;
 	}
 
-	return snprintf(buf, PAGE_SIZE, "gs_kvalue = 0x%x\n", bma253->pdata->gs_kvalue);
+	return sprintf(buf, "gs_kvalue = 0x%x\n", bma253->pdata->gs_kvalue);
 }
 
 static ssize_t bma253_set_k_value_store(struct device *dev,
@@ -1782,7 +1803,7 @@ static ssize_t get_nvram_cali_data_show(struct device *dev, struct device_attrib
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 	int ret;
 
-	ret = snprintf(buf, PAGE_SIZE, "nvram_gs_kvalue = 0x%08x\n", bma253->nvram_gs_kvalue);
+	ret = sprintf(buf, "nvram_gs_kvalue = 0x%08x\n", bma253->nvram_gs_kvalue);
 	return ret;
 }
 
@@ -1791,7 +1812,7 @@ static ssize_t set_nvram_cali_data_store(struct device *dev, struct device_attri
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	sscanf(buf, "%d", &bma253->nvram_gs_kvalue);
+	sscanf(buf, "%x", &bma253->nvram_gs_kvalue);
 	bma253->pdata->gs_kvalue = bma253->nvram_gs_kvalue;
 	I("%s: nvram_gs_kvalue=0x%x\n", __func__, bma253->nvram_gs_kvalue);
 
@@ -1802,14 +1823,14 @@ static ssize_t set_nvram_cali_data_store(struct device *dev, struct device_attri
 static ssize_t bma253_mode_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_mode(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 }
 
 static ssize_t bma253_mode_store(struct device *dev,
@@ -1821,7 +1842,7 @@ static ssize_t bma253_mode_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 	I("bma253_mode_store\n");
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_mode(bma253->bma253_client, (unsigned char) data) < 0)
@@ -1842,7 +1863,7 @@ static ssize_t bma253_value_show(struct device *dev,
 	acc_value = bma253->value;
 	mutex_unlock(&bma253->value_mutex);
 
-	return snprintf(buf, PAGE_SIZE, "%d %d %d\n", acc_value.x, acc_value.y,
+	return sprintf(buf, "%d %d %d\n", acc_value.x, acc_value.y,
 			acc_value.z);
 }
 
@@ -1875,7 +1896,7 @@ static ssize_t bma253_cali_value_show(struct device *dev,
 		cali_acc.y = hw_d[1];
 		cali_acc.z = hw_d[2];
 
-	return snprintf(buf, PAGE_SIZE, "%d %d %d\n", cali_acc.x, cali_acc.y,
+	return sprintf(buf, "%d %d %d\n", cali_acc.x, cali_acc.y,
 			cali_acc.z);
 }
 
@@ -1885,7 +1906,7 @@ static ssize_t bma253_delay_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma253->delay));
+	return sprintf(buf, "%d\n", atomic_read(&bma253->delay));
 
 }
 
@@ -1898,7 +1919,7 @@ static ssize_t bma253_delay_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (data > BMA253_MAX_DELAY)
@@ -1915,7 +1936,7 @@ static ssize_t bma253_enable_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma253->enable));
+	return sprintf(buf, "%d\n", atomic_read(&bma253->enable));
 
 }
 
@@ -2091,7 +2112,7 @@ static ssize_t bma253_enable_store(struct device *dev,
 	unsigned long data;
 	int error;
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if ((data == 0) || (data == 1))
@@ -2119,14 +2140,14 @@ static ssize_t bma253_enable_int_store(struct device *dev,
 static ssize_t bma253_int_mode_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_Int_Mode(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 }
 
 static ssize_t bma253_int_mode_store(struct device *dev,
@@ -2138,7 +2159,7 @@ static ssize_t bma253_int_mode_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2150,14 +2171,14 @@ static ssize_t bma253_int_mode_store(struct device *dev,
 static ssize_t bma253_slope_duration_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_slope_duration(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2170,7 +2191,7 @@ static ssize_t bma253_slope_duration_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2184,14 +2205,14 @@ static ssize_t bma253_slope_duration_store(struct device *dev,
 static ssize_t bma253_slope_threshold_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_slope_threshold(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2204,7 +2225,7 @@ static ssize_t bma253_slope_threshold_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_slope_threshold(bma253->bma253_client, (unsigned
@@ -2216,14 +2237,14 @@ static ssize_t bma253_slope_threshold_store(struct device *dev,
 static ssize_t bma253_high_g_duration_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_high_g_duration(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2236,7 +2257,7 @@ static ssize_t bma253_high_g_duration_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2250,14 +2271,14 @@ static ssize_t bma253_high_g_duration_store(struct device *dev,
 static ssize_t bma253_high_g_threshold_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_high_g_threshold(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2270,7 +2291,7 @@ static ssize_t bma253_high_g_threshold_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_high_g_threshold(bma253->bma253_client, (unsigned
@@ -2283,14 +2304,14 @@ static ssize_t bma253_high_g_threshold_store(struct device *dev,
 static ssize_t bma253_low_g_duration_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_low_g_duration(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2303,7 +2324,7 @@ static ssize_t bma253_low_g_duration_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2317,14 +2338,14 @@ static ssize_t bma253_low_g_duration_store(struct device *dev,
 static ssize_t bma253_low_g_threshold_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_low_g_threshold(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2337,7 +2358,7 @@ static ssize_t bma253_low_g_threshold_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_low_g_threshold(bma253->bma253_client, (unsigned
@@ -2349,14 +2370,14 @@ static ssize_t bma253_low_g_threshold_store(struct device *dev,
 static ssize_t bma253_tap_threshold_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_tap_threshold(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2369,7 +2390,7 @@ static ssize_t bma253_tap_threshold_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 	if (bma253_set_tap_threshold(bma253->bma253_client, (unsigned char)data)
@@ -2381,14 +2402,14 @@ static ssize_t bma253_tap_threshold_store(struct device *dev,
 static ssize_t bma253_tap_duration_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_tap_duration(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2401,7 +2422,7 @@ static ssize_t bma253_tap_duration_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2414,14 +2435,14 @@ static ssize_t bma253_tap_duration_store(struct device *dev,
 static ssize_t bma253_tap_quiet_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_tap_quiet(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2434,7 +2455,7 @@ static ssize_t bma253_tap_quiet_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2448,14 +2469,14 @@ static ssize_t bma253_tap_quiet_store(struct device *dev,
 static ssize_t bma253_tap_shock_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_tap_shock(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2468,7 +2489,7 @@ static ssize_t bma253_tap_shock_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2482,14 +2503,14 @@ static ssize_t bma253_tap_shock_store(struct device *dev,
 static ssize_t bma253_tap_samp_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_tap_samp(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2502,7 +2523,7 @@ static ssize_t bma253_tap_samp_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2515,14 +2536,14 @@ static ssize_t bma253_tap_samp_store(struct device *dev,
 static ssize_t bma253_orient_mode_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_orient_mode(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2535,7 +2556,7 @@ static ssize_t bma253_orient_mode_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2549,14 +2570,14 @@ static ssize_t bma253_orient_mode_store(struct device *dev,
 static ssize_t bma253_orient_blocking_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_orient_blocking(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2569,7 +2590,7 @@ static ssize_t bma253_orient_blocking_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2582,14 +2603,14 @@ static ssize_t bma253_orient_blocking_store(struct device *dev,
 static ssize_t bma253_orient_hyst_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_orient_hyst(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2602,7 +2623,7 @@ static ssize_t bma253_orient_hyst_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2616,14 +2637,14 @@ static ssize_t bma253_orient_hyst_store(struct device *dev,
 static ssize_t bma253_orient_theta_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_theta_blocking(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2636,7 +2657,7 @@ static ssize_t bma253_orient_theta_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2650,14 +2671,14 @@ static ssize_t bma253_orient_theta_store(struct device *dev,
 static ssize_t bma253_flat_theta_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_theta_flat(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2670,7 +2691,7 @@ static ssize_t bma253_flat_theta_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2683,14 +2704,14 @@ static ssize_t bma253_flat_theta_store(struct device *dev,
 static ssize_t bma253_flat_hold_time_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_flat_hold_time(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2703,7 +2724,7 @@ static ssize_t bma253_flat_hold_time_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2720,14 +2741,14 @@ static ssize_t bma253_fast_calibration_x_show(struct device *dev,
 {
 
 
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_offset_target_x(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2742,7 +2763,7 @@ static ssize_t bma253_fast_calibration_x_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2757,7 +2778,7 @@ static ssize_t bma253_fast_calibration_x_store(struct device *dev,
 		mdelay(2);
 		bma253_get_cal_ready(bma253->bma253_client, &tmp);
 
-	
+	/*	I("wait 2ms cal ready flag is %d\n",tmp);*/
 		timeout++;
 		if (timeout == 50) {
 			I("get fast calibration ready error\n");
@@ -2775,14 +2796,14 @@ static ssize_t bma253_fast_calibration_y_show(struct device *dev,
 {
 
 
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_offset_target_y(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2797,7 +2818,7 @@ static ssize_t bma253_fast_calibration_y_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2812,7 +2833,7 @@ static ssize_t bma253_fast_calibration_y_store(struct device *dev,
 		mdelay(2);
 		bma253_get_cal_ready(bma253->bma253_client, &tmp);
 
-	
+	/*	I("wait 2ms cal ready flag is %d\n",tmp);*/
 		timeout++;
 		if (timeout == 50) {
 			I("get fast calibration ready error\n");
@@ -2830,14 +2851,14 @@ static ssize_t bma253_fast_calibration_z_show(struct device *dev,
 {
 
 
-	unsigned char data = 0;
+	unsigned char data;
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
 	if (bma253_get_offset_target_z(bma253->bma253_client, &data) < 0)
-		return snprintf(buf, PAGE_SIZE, "Read error\n");
+		return sprintf(buf, "Read error\n");
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", data);
+	return sprintf(buf, "%d\n", data);
 
 }
 
@@ -2852,7 +2873,7 @@ static ssize_t bma253_fast_calibration_z_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2867,7 +2888,7 @@ static ssize_t bma253_fast_calibration_z_store(struct device *dev,
 		mdelay(2);
 		bma253_get_cal_ready(bma253->bma253_client, &tmp);
 
-	
+	/*	I("wait 2ms cal ready flag is %d\n",tmp);*/
 		timeout++;
 		if (timeout == 50) {
 			I("get fast calibration ready error\n");
@@ -2888,7 +2909,7 @@ static ssize_t bma253_selftest_show(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	return snprintf(buf, PAGE_SIZE, "%d\n", atomic_read(&bma253->selftest_result));
+	return sprintf(buf, "%d\n", atomic_read(&bma253->selftest_result));
 
 }
 
@@ -2907,24 +2928,26 @@ static ssize_t bma253_selftest_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
 
 	if (data != 1)
 		return -EINVAL;
-	
+	/* set to 2 G range */
 	if (bma253_set_range(bma253->bma253_client, 0) < 0)
 		return -EINVAL;
 
 	bma253_write_reg(bma253->bma253_client, 0x32, &clear_value);
 
-	bma253_set_selftest_st(bma253->bma253_client, 1); 
-	bma253_set_selftest_stn(bma253->bma253_client, 0); 
+	bma253_set_selftest_st(bma253->bma253_client, 1); /* 1 for x-axis*/
+	bma253_set_selftest_stn(bma253->bma253_client, 0); /* positive
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_x(bma253->bma253_client, &value1);
-	bma253_set_selftest_stn(bma253->bma253_client, 1); 
+	bma253_set_selftest_stn(bma253->bma253_client, 1); /* negative
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_x(bma253->bma253_client, &value2);
 	diff = value1-value2;
@@ -2935,11 +2958,13 @@ static ssize_t bma253_selftest_store(struct device *dev,
 	if (abs(diff) < 204)
 		result |= 1;
 
-	bma253_set_selftest_st(bma253->bma253_client, 2); 
-	bma253_set_selftest_stn(bma253->bma253_client, 0); 
+	bma253_set_selftest_st(bma253->bma253_client, 2); /* 2 for y-axis*/
+	bma253_set_selftest_stn(bma253->bma253_client, 0); /* positive
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_y(bma253->bma253_client, &value1);
-	bma253_set_selftest_stn(bma253->bma253_client, 1); 
+	bma253_set_selftest_stn(bma253->bma253_client, 1); /* negative
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_y(bma253->bma253_client, &value2);
 	diff = value1-value2;
@@ -2949,11 +2974,13 @@ static ssize_t bma253_selftest_store(struct device *dev,
 		result |= 2;
 
 
-	bma253_set_selftest_st(bma253->bma253_client, 3); 
-	bma253_set_selftest_stn(bma253->bma253_client, 0); 
+	bma253_set_selftest_st(bma253->bma253_client, 3); /* 3 for z-axis*/
+	bma253_set_selftest_stn(bma253->bma253_client, 0); /* positive
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_z(bma253->bma253_client, &value1);
-	bma253_set_selftest_stn(bma253->bma253_client, 1); 
+	bma253_set_selftest_stn(bma253->bma253_client, 1); /* negative
+							      direction*/
 	mdelay(10);
 	bma253_read_accel_z(bma253->bma253_client, &value2);
 	diff = value1-value2;
@@ -2983,7 +3010,7 @@ static ssize_t bma253_eeprom_writing_store(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &data);
+	error = strict_strtoul(buf, 10, &data);
 	if (error)
 		return error;
 
@@ -2992,7 +3019,7 @@ static ssize_t bma253_eeprom_writing_store(struct device *dev,
 	if (data != 1)
 		return -EINVAL;
 
-	
+	/* unlock eeprom */
 	if (bma253_set_ee_w(bma253->bma253_client, 1) < 0)
 		return -EINVAL;
 
@@ -3017,7 +3044,7 @@ static ssize_t bma253_eeprom_writing_store(struct device *dev,
 
 	I("eeprom writing is finished\n");
 
-	
+	/* unlock eeprom */
 	if (bma253_set_ee_w(bma253->bma253_client, 0) < 0)
 		return -EINVAL;
 
@@ -3035,27 +3062,27 @@ static ssize_t bma253_enable_interrupt(struct device *dev,
 	struct i2c_client *client = to_i2c_client(dev);
 	struct bma253_data *bma253 = i2c_get_clientdata(client);
 
-	error = kstrtoul(buf, 10, &enable);
+	error = strict_strtoul(buf, 10, &enable);
 		if (error)
 		return error;
 	I("bma253_enable_interrupt, power_key_pressed = %d\n", power_key_pressed);
-	if(enable == 1 && !power_key_pressed){ 
+	if(enable == 1 && !power_key_pressed){ // Slope interrupt
 
 	    cir_flag = 1;
 
-	    
+	    //Don't change to low power mode due to enabling interrupt mode
 	    if(bma253->pdata->power_LPM)
 		bma253->pdata->power_LPM(0);
-	    
-	    error = bma253_set_Int_Mode(bma253->bma253_client, 1);
+	    /*Set the related parameters*/
+	    error = bma253_set_Int_Mode(bma253->bma253_client, 1);/*latch interrupt 250ms*/
 
-	    error += bma253_set_slope_duration(bma253->bma253_client, 0x01);
-	    error += bma253_set_slope_threshold(bma253->bma253_client, 0x07);
+	    error += bma253_set_slope_duration(bma253->bma253_client, 0x01);//dur+1
+	    error += bma253_set_slope_threshold(bma253->bma253_client, 0x07);//0x07 * 3.91  =
 
-	    
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 5, 1);
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 6, 1);
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 7, 0);
+	    /*Enable the interrupts*/
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 5, 1);//Slope X
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 6, 1);//Slope Y
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 7, 0);//Slope Z
 	    error += bma253_set_int1_pad_sel(bma253->bma253_client, PAD_SLOP);
 
 	    error += bma253_set_mode(bma253->bma253_client, BMA253_MODE_NORMAL);
@@ -3066,9 +3093,9 @@ static ssize_t bma253_enable_interrupt(struct device *dev,
 
 	}  else if(enable == 0){
 
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 5, 0);
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 6, 0);
-	    error += bma253_set_Int_Enable(bma253->bma253_client, 7, 0);
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 5, 0);//Slope X
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 6, 0);//Slope Y
+	    error += bma253_set_Int_Enable(bma253->bma253_client, 7, 0);//Slope Z
 
 	    power_key_pressed = 0;
 	    cir_flag = 0;
@@ -3084,7 +3111,7 @@ static ssize_t bma253_clear_powerkey_pressed(struct device *dev,
 {
 	unsigned long powerkey_pressed;
 	int error;
-	error = kstrtoul(buf, 10, &powerkey_pressed);
+	error = strict_strtoul(buf, 10, &powerkey_pressed);
 	if (error)
 	    return error;
 
@@ -3099,7 +3126,7 @@ static ssize_t bma253_clear_powerkey_pressed(struct device *dev,
 static ssize_t bma253_get_powerkry_pressed(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%d\n", power_key_pressed);
+	return sprintf(buf, "%d\n", power_key_pressed);
 }
 static DEVICE_ATTR(enable_cir_interrupt, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		NULL, bma253_enable_interrupt);
@@ -3107,85 +3134,85 @@ static DEVICE_ATTR(clear_powerkey_flag, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		bma253_get_powerkry_pressed, bma253_clear_powerkey_pressed);
 #endif
 
-static DEVICE_ATTR(range, 0664,
+static DEVICE_ATTR(range, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_range_show, bma253_range_store);
-static DEVICE_ATTR(bandwidth, 0664,
+static DEVICE_ATTR(bandwidth, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_bandwidth_show, bma253_bandwidth_store);
-static DEVICE_ATTR(mode, 0664,
+static DEVICE_ATTR(mode, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_mode_show, bma253_mode_store);
-static DEVICE_ATTR(value, 0440,
+static DEVICE_ATTR(value, S_IRUGO,
 		bma253_value_show, NULL);
-static DEVICE_ATTR(cali_value, 0440,
+static DEVICE_ATTR(cali_value, S_IRUGO,
 		bma253_cali_value_show, NULL);
-static DEVICE_ATTR(delay, 0664,
+static DEVICE_ATTR(delay, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_delay_show, bma253_delay_store);
-static DEVICE_ATTR(enable, 0664,
+static DEVICE_ATTR(enable, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_enable_show, bma253_enable_store);
-static DEVICE_ATTR(enable_int, 0220,
+static DEVICE_ATTR(enable_int, S_IWUSR|S_IWGRP|S_IWOTH,
 		NULL, bma253_enable_int_store);
-static DEVICE_ATTR(int_mode, 0664,
+static DEVICE_ATTR(int_mode, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_int_mode_show, bma253_int_mode_store);
-static DEVICE_ATTR(slope_duration, 0664,
+static DEVICE_ATTR(slope_duration, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_slope_duration_show, bma253_slope_duration_store);
-static DEVICE_ATTR(slope_threshold, 0664,
+static DEVICE_ATTR(slope_threshold, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_slope_threshold_show, bma253_slope_threshold_store);
-static DEVICE_ATTR(high_g_duration, 0664,
+static DEVICE_ATTR(high_g_duration, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_high_g_duration_show, bma253_high_g_duration_store);
-static DEVICE_ATTR(high_g_threshold, 0664,
+static DEVICE_ATTR(high_g_threshold, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_high_g_threshold_show, bma253_high_g_threshold_store);
-static DEVICE_ATTR(low_g_duration, 0664,
+static DEVICE_ATTR(low_g_duration, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_low_g_duration_show, bma253_low_g_duration_store);
-static DEVICE_ATTR(low_g_threshold, 0664,
+static DEVICE_ATTR(low_g_threshold, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_low_g_threshold_show, bma253_low_g_threshold_store);
-static DEVICE_ATTR(tap_duration, 0664,
+static DEVICE_ATTR(tap_duration, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_tap_duration_show, bma253_tap_duration_store);
-static DEVICE_ATTR(tap_threshold, 0664,
+static DEVICE_ATTR(tap_threshold, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_tap_threshold_show, bma253_tap_threshold_store);
-static DEVICE_ATTR(tap_quiet, 0664,
+static DEVICE_ATTR(tap_quiet, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_tap_quiet_show, bma253_tap_quiet_store);
-static DEVICE_ATTR(tap_shock, 0664,
+static DEVICE_ATTR(tap_shock, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_tap_shock_show, bma253_tap_shock_store);
-static DEVICE_ATTR(tap_samp, 0664,
+static DEVICE_ATTR(tap_samp, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_tap_samp_show, bma253_tap_samp_store);
-static DEVICE_ATTR(orient_mode, 0664,
+static DEVICE_ATTR(orient_mode, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_orient_mode_show, bma253_orient_mode_store);
-static DEVICE_ATTR(orient_blocking, 0664,
+static DEVICE_ATTR(orient_blocking, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_orient_blocking_show, bma253_orient_blocking_store);
-static DEVICE_ATTR(orient_hyst, 0664,
+static DEVICE_ATTR(orient_hyst, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_orient_hyst_show, bma253_orient_hyst_store);
-static DEVICE_ATTR(orient_theta, 0664,
+static DEVICE_ATTR(orient_theta, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_orient_theta_show, bma253_orient_theta_store);
-static DEVICE_ATTR(flat_theta, 0664,
+static DEVICE_ATTR(flat_theta, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_flat_theta_show, bma253_flat_theta_store);
-static DEVICE_ATTR(flat_hold_time, 0664,
+static DEVICE_ATTR(flat_hold_time, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_flat_hold_time_show, bma253_flat_hold_time_store);
-static DEVICE_ATTR(reg, 0664,
+static DEVICE_ATTR(reg, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_register_show, bma253_register_store);
-static DEVICE_ATTR(fast_calibration_x, 0664,
+static DEVICE_ATTR(fast_calibration_x, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_fast_calibration_x_show,
 		bma253_fast_calibration_x_store);
-static DEVICE_ATTR(fast_calibration_y, 0664,
+static DEVICE_ATTR(fast_calibration_y, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_fast_calibration_y_show,
 		bma253_fast_calibration_y_store);
-static DEVICE_ATTR(fast_calibration_z, 0664,
+static DEVICE_ATTR(fast_calibration_z, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_fast_calibration_z_show,
 		bma253_fast_calibration_z_store);
-static DEVICE_ATTR(selftest, 0664,
+static DEVICE_ATTR(selftest, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		bma253_selftest_show, bma253_selftest_store);
-static DEVICE_ATTR(eeprom_writing, 0664,
+static DEVICE_ATTR(eeprom_writing, S_IRUGO|S_IWUSR|S_IWGRP|S_IWOTH,
 		NULL, bma253_eeprom_writing_store);
 
-static DEVICE_ATTR(chip_layout, 0664,
+static DEVICE_ATTR(chip_layout,S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		bma253_chip_layout_show, bma253_chip_layout_store);
 
-static DEVICE_ATTR(get_raw_data, 0440,
+static DEVICE_ATTR(get_raw_data, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		bma253_get_raw_data_show, NULL);
 
-static DEVICE_ATTR(set_k_value, 0664,
+static DEVICE_ATTR(set_k_value, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		bma253_set_k_value_show, bma253_set_k_value_store);
 
 #ifdef IS_MTK_PLATFORM
-static DEVICE_ATTR(nvram_cali_data, 0664,
+static DEVICE_ATTR(nvram_cali_data, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		get_nvram_cali_data_show, set_nvram_cali_data_store);
 #endif
 
@@ -3311,7 +3338,7 @@ static ssize_t bma253_sensor_user_offset_show(struct device *dev,
 		E("%s: bma253 == NULL\n", __func__);
 		return 0;
 	}
-	return snprintf(buf, PAGE_SIZE, "bma253->user_calibration_flag = %d, bma253->user_offset_buf[0] = %d, bma253->user_offset_buf[1] = %d, bma253->user_offset_buf[2] = %d\n",
+	return sprintf(buf, "bma253->user_calibration_flag = %d, bma253->user_offset_buf[0] = %d, bma253->user_offset_buf[1] = %d, bma253->user_offset_buf[2] = %d\n",
 			    bma253->user_calibration_flag, bma253->user_offset_buf[0], bma253->user_offset_buf[1],bma253->user_offset_buf[2]);
 }
 
@@ -3376,7 +3403,7 @@ static irqreturn_t bma253_irq_handler(int irq, void *handle)
 
 }
 #endif
-#endif 
+#endif /* defined(BMA253_ENABLE_INT1)||defined(BMA253_ENABLE_INT2) */
 
 /*
 #ifdef IS_MTK_PLATFORM
@@ -3407,6 +3434,7 @@ static int bma253_irq_registration(unsigned int irq, irq_handler_t handler, unsi
 }
 #endif
 */
+
 static int bma253_parse_dt(struct device *dev, struct bma253_platform_data *pdata)
 {
 	struct property *prop = NULL;
@@ -3541,6 +3569,10 @@ static int bma253_probe(struct i2c_client *client,
 	int res;
 #endif
 
+/*
+	omap_mux_init_gpio(145, OMAP_PIN_INPUT);
+	omap_mux_init_gpio(146, OMAP_PIN_INPUT);
+*/
 
 #ifdef IS_MTK_PLATFORM
 #if 0
@@ -3550,7 +3582,10 @@ static int bma253_probe(struct i2c_client *client,
 #endif
 
 #ifndef NO_GPIO_NFC_ENABLE
-	
+	// TODO NFC enable
+	mt_set_gpio_mode(GPIO_NFC_ENABLE, 0);
+	mt_set_gpio_dir(GPIO_NFC_ENABLE, GPIO_DIR_OUT);
+	mt_set_gpio_out(GPIO_NFC_ENABLE, GPIO_OUT_ONE);
 #endif	
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
@@ -3562,7 +3597,7 @@ static int bma253_probe(struct i2c_client *client,
 		err = -ENOMEM;
 		goto exit;
 	}
-	
+	/* read chip id */
 	tempvalue = i2c_smbus_read_byte_data(client, BMA253_CHIP_ID_REG);
 
 	if (tempvalue == BMA253_CHIP_ID || tempvalue == 0xF8) {
@@ -3609,6 +3644,7 @@ static int bma253_probe(struct i2c_client *client,
 	if (data->pdata) {
 		data->chip_layout = data->pdata->chip_layout;
 		if (!(client->dev.of_node)) {
+//			data->pdata->gs_kvalue = gs_kvalue;
 			I("%s: Use ATAG Calibration data\n", __func__);
 		}
 	} else {
@@ -3622,14 +3658,30 @@ static int bma253_probe(struct i2c_client *client,
 	D("%s: layout = %d\n", __func__, gdata->chip_layout);
 
 #if defined(BMA253_ENABLE_INT1) || defined(BMA253_ENABLE_INT2)
+//	bma253_set_Int_Mode(client, 1);/*latch interrupt 250ms*/
 #endif
+	/*8,single tap
+	  10,orient
+	  11,flat*/
+/*	bma253_set_Int_Enable(client,8, 1);
+	bma253_set_Int_Enable(client,10, 1);
+	bma253_set_Int_Enable(client,11, 1);
+*/
 #ifdef BMA253_ENABLE_INT1
-	
+	/* maps interrupt to INT1 pin */
+	/*
+	bma253_set_int1_pad_sel(client, PAD_LOWG);
+	bma253_set_int1_pad_sel(client, PAD_HIGHG);
+	bma253_set_int1_pad_sel(client, PAD_SLOP);
+	bma253_set_int1_pad_sel(client, PAD_DOUBLE_TAP);
+	bma253_set_int1_pad_sel(client, PAD_SINGLE_TAP);
+	bma253_set_int1_pad_sel(client, PAD_ORIENT);
+	bma253_set_int1_pad_sel(client, PAD_FLAT);*/
 #endif
 
 
 #ifdef BMA253_ENABLE_INT2
-	
+	/* maps interrupt to INT2 pin */
 	bma253_set_int2_pad_sel(client, PAD_LOWG);
 	bma253_set_int2_pad_sel(client, PAD_HIGHG);
 	bma253_set_int2_pad_sel(client, PAD_SLOP);
@@ -3673,7 +3725,7 @@ static int bma253_probe(struct i2c_client *client,
 	dev_cir = input_allocate_device();
 	if (!dev_cir) {
 	    kfree(data);
-	    input_free_device(dev);
+	    input_free_device(dev);//free the successful dev and return
 	    return -ENOMEM;
 	}
 #endif
@@ -3928,7 +3980,7 @@ static int bma253_suspend(struct device *dev)
 	mutex_unlock(&data->enable_mutex);
 
 #ifdef CONFIG_CIR_ALWAYS_READY
-	
+	//Add CIR Flag for always ready feature
 	if ((data->pdata->power_LPM) && !cir_flag){
 #else
 
@@ -3964,7 +4016,7 @@ static int bma253_resume(struct device *dev)
 #define bma253_suspend		NULL
 #define bma253_resume		NULL
 
-#endif 
+#endif /* CONFIG_PM */
 
 static const struct dev_pm_ops bma253_pm_ops = {
 #ifdef CONFIG_PM
