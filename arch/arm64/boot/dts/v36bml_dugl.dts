@@ -3,6 +3,7 @@
 
 #include "mt6753.dtsi"
 #include "dt-bindings/lcm/hx8394f_hd720_dsi_vdo_truly_v36.dtsi"
+#include "cust.dtsi"
 
 / {
         bus {
@@ -15,6 +16,11 @@
                         compatible = "mediatek,MTKFB";
                         reg = <0x7F000000 0x1000000>;
                 };
+                eintc {
+			ALS@65 {
+
+			};
+		};
 
         };
         touch_fw_update: touch_fw_update {
@@ -104,8 +110,6 @@
                 vib_limit = <9>;
                 vib_vol= <5>;
         };
-
-
 };
 
 /* USB GPIO Kernal Standardization start */
@@ -537,46 +541,9 @@
                 headset-four-key-threshold = <0 58 121 192 450>;
 };
 /* wtf2 end */
-/* cm3886 proximity */
-&i2c2 {
-    cm36686@60 {
-        compatible = "mediatek,CM36686_";
-        reg = <0x60>;
-        cm36686,irq-gpio = <0x41>;
-        cm36686,engineer-id = <0x0>;
-        cm36686,levels = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
-        cm36686,levels_2 = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
-        cm36686,golden_adc = <0x399>;
-        cm36686,golden_adc_2 = <0x399>;
-        cm36686,cm36686_slave_address = <0x60>;
-        cm36686,ps1_thd_set = <0x15>;
-        cm36686,ps1_thd_no_cal = <0x5f>;
-        cm36686,dynamical_threshold = <0x1>;
-        cm36686,dark_level = <0x3>;
-        cm36686,ps_duty = <0x0>;
-        cm36686,ps_pers = <0x1>;
-        cm36686,ps_it = <0x7>;
-        cm36686,ps_hd = <0x0>;
-        cm36686,ps_led_current = <0x2>;
-    };
-};
 
 /* bq24158 power charger */
 &i2c1 {
-/*	bq24158:bq24158@6a {
-		compatible = "ti,bq24158";
-		reg = <0x6a>;
-
-		ti,current-limit = <100>;
-		ti,charge-current = <650>;
-		ti,weak-battery-voltage = <3400>;
-		ti,battery-regulation-voltage = <4200>;
-		ti,termination-current = <100>;
-		ti,resistor-sense = <68>;
-
-		ti,usb-charger-detection = <>;
-	};
-*/
 	swithing_charger@6a {
 		compatible = "mediatek,swithing_charger";
 		reg = <0x6a>;
@@ -640,8 +607,57 @@
         };
 };
 
+/* cm3886 proximity alsps */
+&pio {
+                        alsps_pin_cfg: alspspincfg {
+                                pins_cmd_dat {
+                                        pins = <0x400>;
+                                        slew-rate = <0x0>;
+                                        bias-pull-up = <0x0>;
+                                };
+                        };
+
+                        alsps_pin_default: alspsdefaultcfg {
+                        };
+};
+/*
+&i2c2{
+                        alsps@60 {
+                                compatible = "mediatek,alsps";
+                                reg = <0x60>;
+                                status = "okay";
+                                pinctrl-names = "pin_default", "pin_cfg";
+                                pinctrl-0 = <&alsps_pin_default>;
+                                pinctrl-1 = <&alsps_pin_cfg>;
+                        };
+};
+*/
+/ {
+als_ps@0 {
+                        compatible = "mediatek,als_ps";
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+                        status = "okay";
+	};
+cust_alsps@0 {
+                compatible = "mediatek,cm36686";
+                i2c_num = <0x2>;
+                i2c_addr = <0x60 0x0 0x0 0x0>;
+                polling_mode_ps = <0x0>;
+                polling_mode_als = <0x1>;
+                power_id = <0xffff>;
+                power_vol = <0x0>;
+                als_level = <0x0 0x101 0x27d 0x403 0x8f9 0x15d4 0x1a4a 0x2c25 0x4fe1 0x64a8 0x7992 0xb1f0 0xe251 0xe251 0xe251>;
+                als_value = <0x0 0x84 0x130 0x1f6 0x3ec 0x7d3 0xbbe 0x138e 0x1f44 0x2710 0x2ee0 0x3e80 0x4e20 0x4e20 0x4e20 0x4e20>;
+                ps_threshold_high = <0x46>;
+                ps_threshold_low = <0x28>;
+                is_batch_supported_ps = <0x1>;
+                is_batch_supported_als = <0x1>;
+};
+};
+
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
-#include "cust.dtsi"
 /* #include "v36bml/cust.dtsi" */
 /* DTS FILE */
