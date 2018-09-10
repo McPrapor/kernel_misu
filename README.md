@@ -1,4 +1,5 @@
 # kernel_misu
+looks ok:
 + hx8394f_hd720_dsi_vdo_truly_v36 lcm
 + himax 852xes touchpad
 + bq24158 charger
