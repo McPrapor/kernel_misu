@@ -17,3 +17,4 @@ todo:
 - gyro?
 - nfc? magentic?
 - keypad dts has wrong voldown reg
+- flashlight
