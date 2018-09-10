@@ -19,3 +19,5 @@ todo:
 - keypad dts has wrong voldown reg
 - flashlight
 - battery meter tables
+- no iio
+- ril? sms?
