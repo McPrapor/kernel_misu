@@ -21,3 +21,5 @@ todo:
 - battery meter tables
 - no iio
 - ril? sms?
+- hall_ak8789
+- iio sensor hub
