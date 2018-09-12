@@ -1,0 +1,12 @@
+#ifndef _SENTRAL_VERSION_H_
+#define _SENTRAL_VERSION_H_
+
+#define SEN_DRV_PROJECT_ID "2"
+#define SEN_DRV_SUBPROJECT_ID "2"
+#define SEN_DRV_VERSION "1.5.6"
+#define SEN_DRV_BUILD "1"
+#define SEN_DRV_DATE "Tue Apr 05 16:20:58 PDT 2016"
+#define SEN_DRV_BRANCH_NAME "master"
+#define LATEST_COMMIT_ID "e87d1050b7936bd54dab36c7536ea3c516467b15"
+
+#endif

@@ -592,6 +592,39 @@
 };
 
 /* bma253 accelometer */
+&pio {
+                        gyro_pin_cfg: gyropincfg {
+                                pins_cmd_dat {
+                                        pins = <0x900>;
+                                        slew-rate = <0x0>;
+                                        bias-pull-down = <0x0>;
+                                };
+                        };
+
+                        gyro_pin_default: gyrodefaultcfg {
+                        };
+};
+
+/*
+/ {
+		/delete-node/ gyroscope@0;
+                gyroscope@0 {
+                        compatible = "mediatek,gyroscope";
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&gyro_pin_default>;
+                        pinctrl-1 = <&gyro_pin_cfg>;
+                        status = "okay";
+                };
+		gyro {
+			compatible = "mediatek, gyro-eint";
+        		interrupt-parent = <&eintc>;
+		        interrupts = <9 IRQ_TYPE_LEVEL_LOW>;
+		        debounce = <9 0>;
+		        status = "okay";
+		};
+};
+*/
+
 &i2c2 {
 	bma253: g_sensor_bma253@18 {
                 compatible = "htc_g_sensor,bma253_bosch";

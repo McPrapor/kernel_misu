@@ -136,4 +136,6 @@ config I2C_DEBUG_BUS
 
 endif # I2C
 
+source drivers/i2c/chips/Kconfig
+
 endmenu
