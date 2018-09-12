@@ -18,11 +18,14 @@
 #include <linux/debugfs.h>
 #include <linux/device.h>
 #include <linux/miscdevice.h>
-#include <linux/shub_ctrl.h>
+//#include <linux/shub_ctrl.h>
+#include "shub_ctrl.h"
 #include <linux/completion.h>
 #include <asm/uaccess.h>
 
-#include <linux/htc_flags.h>
+//#include <linux/htc_flags.h>
+#include "htc_flags.h"
+#include <linux/slab.h>
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -33,13 +36,19 @@
 #include "sentral-iio-debug.h"
 
 #ifdef CONFIG_MTK
-#include <linux/vibtrig.h>
+//#include <linux/vibtrig.h>
+#include "vibtrig.h"
 #endif /* CONFIG_MTK */
 
 #ifdef CONFIG_MTK
-#include <mach/mt_gpio.h>
-#include <cust_eint.h>
+//#include <mach/mt_gpio.h>
+#include <mt-plat/mt_gpio.h>
+//#include <cust_eint.h>
 #endif /* CONFIG_MTK */
+
+#ifndef INIT_COMPLETION
+#define INIT_COMPLETION(x)    ((x).done = 0)
+#endif
 
 static const char *sentral_meta_event_strings[SEN_META_MAX] = {
 	[SEN_META_FLUSH_COMPLETE] = "Flush Complete",
@@ -130,9 +139,15 @@ static const char *sentral_debug_event_id_strings[SEN_DEBUG_CODE_MAX] = {
 	[SEN_DEBUG_CODE_MORE_THAN_ONE_FINGER] = "DEBUG_CODE_MORE_THAN_ONE_FINGER",
 };
 
+#ifdef NULL
+#undef NULL
+#define NULL 0
+#endif
+
 #ifdef SHUB_MTK_DMA
 static u8 *sentral_i2c_dma_va = NULL;
-static u32 sentral_i2c_dma_pa = NULL;
+//static u32 sentral_i2c_dma_pa = NULL;
+static u8 sentral_i2c_dma_pa = NULL;
 #endif /* SHUB_MTK_DMA */
 
 static struct sentral_device *priv_sentral;
@@ -182,7 +197,7 @@ int sentral_write_block(struct sentral_device *sentral, u8 reg,
 		.addr = (client->addr & I2C_MASK_FLAG),
 		.ext_flag = (client->ext_flag | I2C_ENEXT_FLAG | I2C_DMA_FLAG),
 		.flags = 0,
-		.buf = sentral_i2c_dma_pa,
+		.buf = &sentral_i2c_dma_pa,
 		.len = 1 + count,
 		.timing = 400
 	};
@@ -289,7 +304,7 @@ int sentral_read_block(struct sentral_device *sentral, u8 reg,
 			.addr = (client->addr & I2C_MASK_FLAG),
 			.ext_flag = (client->ext_flag | I2C_ENEXT_FLAG | I2C_DMA_FLAG),
 			.flags = I2C_M_RD,
-			.buf = sentral_i2c_dma_pa,
+			.buf = &sentral_i2c_dma_pa,
 			.len = count,
 			.timing = 400
 		},
@@ -3516,7 +3531,8 @@ static ssize_t sentral_sysfs_chip_control_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(chip_control, S_IRUGO, sentral_sysfs_chip_control_show,
+//static DEVICE_ATTR(chip_control, S_IRUGO, sentral_sysfs_chip_control_show,
+static DEVICE_ATTR(chip_control, 0444, sentral_sysfs_chip_control_show,
 		NULL);
 
 // host status
@@ -3550,7 +3566,8 @@ static ssize_t sentral_sysfs_host_status_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(host_status, S_IRUGO, sentral_sysfs_host_status_show, NULL);
+//static DEVICE_ATTR(host_status, S_IRUGO, sentral_sysfs_host_status_show, NULL);
+static DEVICE_ATTR(host_status, 0444, sentral_sysfs_host_status_show, NULL);
 
 // chip status
 
@@ -3578,7 +3595,8 @@ static ssize_t sentral_sysfs_chip_status_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(chip_status, S_IRUGO, sentral_sysfs_chip_status_show, NULL);
+//static DEVICE_ATTR(chip_status, S_IRUGO, sentral_sysfs_chip_status_show, NULL);
+static DEVICE_ATTR(chip_status, 0444, sentral_sysfs_chip_status_show, NULL);
 
 // registers
 
@@ -3634,7 +3652,8 @@ static ssize_t sentral_sysfs_registers_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(registers, S_IRUGO | S_IWUGO, sentral_sysfs_registers_show, sentral_sysfs_registers_store);
+//static DEVICE_ATTR(registers, S_IRUGO | S_IWUGO, sentral_sysfs_registers_show, sentral_sysfs_registers_store);
+static DEVICE_ATTR(registers, 0660, sentral_sysfs_registers_show, sentral_sysfs_registers_store);
 
 // sensor info
 
@@ -3680,7 +3699,8 @@ static ssize_t sentral_sysfs_sensor_info_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(sensor_info, S_IRUGO, sentral_sysfs_sensor_info_show, NULL);
+//static DEVICE_ATTR(sensor_info, S_IRUGO, sentral_sysfs_sensor_info_show, NULL);
+static DEVICE_ATTR(sensor_info, 0444, sentral_sysfs_sensor_info_show, NULL);
 
 // sensor config
 
@@ -3723,7 +3743,8 @@ static ssize_t sentral_sysfs_sensor_config_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(sensor_config, S_IRUGO, sentral_sysfs_sensor_config_show,
+//static DEVICE_ATTR(sensor_config, S_IRUGO, sentral_sysfs_sensor_config_show,
+static DEVICE_ATTR(sensor_config, 0444, sentral_sysfs_sensor_config_show,
 		NULL);
 
 static ssize_t sentral_sysfs_phys_status_show(struct device *dev,
@@ -3765,7 +3786,8 @@ static ssize_t sentral_sysfs_phys_status_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(phys_status, S_IRUGO, sentral_sysfs_phys_status_show, NULL);
+//static DEVICE_ATTR(phys_status, S_IRUGO, sentral_sysfs_phys_status_show, NULL);
+static DEVICE_ATTR(phys_status, 0444, sentral_sysfs_phys_status_show, NULL);
 
 // sensor status
 
@@ -3822,7 +3844,8 @@ static ssize_t sentral_sysfs_sensor_status_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(sensor_status, S_IRUGO, sentral_sysfs_sensor_status_show,
+//static DEVICE_ATTR(sensor_status, S_IRUGO, sentral_sysfs_sensor_status_show,
+static DEVICE_ATTR(sensor_status, 0444, sentral_sysfs_sensor_status_show,
 		NULL);
 
 static ssize_t sentral_sysfs_touch_status_show(struct device *dev,
@@ -3857,7 +3880,8 @@ static ssize_t sentral_sysfs_touch_status_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(touch_status, S_IRUGO, sentral_sysfs_touch_status_show, NULL);
+//static DEVICE_ATTR(touch_status, S_IRUGO, sentral_sysfs_touch_status_show, NULL);
+static DEVICE_ATTR(touch_status, 0444, sentral_sysfs_touch_status_show, NULL);
 
 // algo standby
 
@@ -3879,7 +3903,8 @@ static ssize_t sentral_sysfs_algo_standby_enable_store(struct device *dev,
 	return sentral_set_host_algo_standby_enable(sentral, !!enable);
 }
 
-static DEVICE_ATTR(algo_standby, S_IWUGO, NULL, sentral_sysfs_algo_standby_enable_store);
+//static DEVICE_ATTR(algo_standby, S_IWUGO, NULL, sentral_sysfs_algo_standby_enable_store);
+static DEVICE_ATTR(algo_standby, 0220, NULL, sentral_sysfs_algo_standby_enable_store);
 
 static ssize_t sentral_sysfs_ps_autok_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -3913,7 +3938,8 @@ static ssize_t sentral_sysfs_ps_autok_store(struct device *dev,
 	return sentral_config_ps_autok_set(sentral, !!value);
 }
 
-static DEVICE_ATTR(ps_autok, S_IRUGO | S_IWUGO, sentral_sysfs_ps_autok_show,
+//static DEVICE_ATTR(ps_autok, S_IRUGO | S_IWUGO, sentral_sysfs_ps_autok_show,
+static DEVICE_ATTR(ps_autok, 0660, sentral_sysfs_ps_autok_show,
 		sentral_sysfs_ps_autok_store);
 
 static ssize_t sentral_sysfs_ps_data_show(struct device *dev,
@@ -3934,7 +3960,8 @@ static ssize_t sentral_sysfs_ps_data_show(struct device *dev,
 			ps_data.flag_pocket);
 }
 
-static DEVICE_ATTR(ps_data, S_IRUGO, sentral_sysfs_ps_data_show, NULL);
+//static DEVICE_ATTR(ps_data, S_IRUGO, sentral_sysfs_ps_data_show, NULL);
+static DEVICE_ATTR(ps_data, 0444, sentral_sysfs_ps_data_show, NULL);
 
 // pm sensor enable
 
@@ -3960,7 +3987,8 @@ static ssize_t sentral_sysfs_pm_enable_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(pm_enable, S_IWUGO, NULL, sentral_sysfs_pm_enable_store);
+//static DEVICE_ATTR(pm_enable, S_IWUGO, NULL, sentral_sysfs_pm_enable_store);
+static DEVICE_ATTR(pm_enable, 0220, NULL, sentral_sysfs_pm_enable_store);
 
 // reqest sensor self-test
 
@@ -3971,7 +3999,8 @@ static ssize_t sentral_sysfs_self_test_store(struct device *dev,
 	return sentral_set_host_self_test_request(sentral);
 }
 
-static DEVICE_ATTR(self_test, S_IWUGO, NULL, sentral_sysfs_self_test_store);
+//static DEVICE_ATTR(self_test, S_IWUGO, NULL, sentral_sysfs_self_test_store);
+static DEVICE_ATTR(self_test, 0220, NULL, sentral_sysfs_self_test_store);
 
 // pass-through mode enable
 
@@ -3991,7 +4020,8 @@ static ssize_t sentral_sysfs_pt_enable_store(struct device *dev,
 	return sentral_set_pt_enable(sentral, !!enable);
 }
 
-static DEVICE_ATTR(pt_enable, S_IWUGO, NULL, sentral_sysfs_pt_enable_store);
+//static DEVICE_ATTR(pt_enable, S_IWUGO, NULL, sentral_sysfs_pt_enable_store);
+static DEVICE_ATTR(pt_enable, 0220, NULL, sentral_sysfs_pt_enable_store);
 
 static ssize_t sentral_sysfs_reset_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
@@ -4003,7 +4033,8 @@ static ssize_t sentral_sysfs_reset_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(reset, S_IWUGO, NULL, sentral_sysfs_reset_store);
+//static DEVICE_ATTR(reset, S_IWUGO, NULL, sentral_sysfs_reset_store);
+static DEVICE_ATTR(reset, 0220, NULL, sentral_sysfs_reset_store);
 
 // FIFO read
 
@@ -4017,7 +4048,8 @@ static ssize_t sentral_sysfs_fifo_read_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(fifo_read, S_IWUGO, NULL, sentral_sysfs_fifo_read_store);
+//static DEVICE_ATTR(fifo_read, S_IWUGO, NULL, sentral_sysfs_fifo_read_store);
+static DEVICE_ATTR(fifo_read, 0220, NULL, sentral_sysfs_fifo_read_store);
 
 // debug registers
 
@@ -4054,7 +4086,8 @@ static ssize_t sentral_sysfs_debug_show(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(debug, S_IRUGO, sentral_sysfs_debug_show, NULL);
+//static DEVICE_ATTR(debug, S_IRUGO, sentral_sysfs_debug_show, NULL);
+static DEVICE_ATTR(debug, 0444, sentral_sysfs_debug_show, NULL);
 
 // debug htc_param
 
@@ -4066,7 +4099,8 @@ static ssize_t sentral_sysfs_debug_param_htc_show(struct device *dev,
 			SP_FL_HTC_FIRST, SP_FL_HTC_LAST);
 }
 
-static DEVICE_ATTR(debug_param_htc, S_IRUGO,
+//static DEVICE_ATTR(debug_param_htc, S_IRUGO,
+static DEVICE_ATTR(debug_param_htc, 0444,
 		sentral_sysfs_debug_param_htc_show, NULL);
 
 // debug warm-start
@@ -4079,7 +4113,8 @@ static ssize_t sentral_sysfs_debug_param_warm_start_show(struct device *dev,
 			SPP_ALGO_WARM_START, SP_FL_WARM_START_FIRST, SP_FL_WARM_START_LAST);
 }
 
-static DEVICE_ATTR(debug_param_warm_start, S_IRUGO,
+//static DEVICE_ATTR(debug_param_warm_start, S_IRUGO,
+static DEVICE_ATTR(debug_param_warm_start, 0444,
 		sentral_sysfs_debug_param_warm_start_show, NULL);
 
 // debug algo
@@ -4092,7 +4127,8 @@ static ssize_t sentral_sysfs_debug_param_algo_show(struct device *dev,
 			SP_FL_ALGO_FIRST, SP_FL_ALGO_LAST);
 }
 
-static DEVICE_ATTR(debug_param_algo, S_IRUGO,
+//static DEVICE_ATTR(debug_param_algo, S_IRUGO,
+static DEVICE_ATTR(debug_param_algo, 0444,
 		sentral_sysfs_debug_param_algo_show, NULL);
 
 // easy access
@@ -4149,7 +4185,8 @@ static ssize_t sentral_sysfs_easyaccess_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(easyaccess, S_IWUGO | S_IRUGO, sentral_sysfs_easyaccess_show,
+//static DEVICE_ATTR(easyaccess, S_IWUGO | S_IRUGO, sentral_sysfs_easyaccess_show,
+static DEVICE_ATTR(easyaccess, 0660, sentral_sysfs_easyaccess_show,
 		sentral_sysfs_easyaccess_store);
 
 // smart cover
@@ -4200,7 +4237,8 @@ static ssize_t sentral_sysfs_smart_cover_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(smart_cover, S_IRUGO | S_IWUGO,
+//static DEVICE_ATTR(smart_cover, S_IRUGO | S_IWUGO,
+static DEVICE_ATTR(smart_cover, 0660,
 		sentral_sysfs_smart_cover_show, sentral_sysfs_smart_cover_store);
 
 static ssize_t sentral_sysfs_version_show(struct device *dev,
@@ -4386,7 +4424,8 @@ exit_error:
 	return rc;
 }
 
-static DEVICE_ATTR(enable, S_IWUGO, sentral_sysfs_enable_show,
+//static DEVICE_ATTR(enable, S_IWUGO, sentral_sysfs_enable_show,
+static DEVICE_ATTR(enable, 0220, sentral_sysfs_enable_show,
 		sentral_sysfs_enable_store);
 
 // set_delay
@@ -4428,7 +4467,8 @@ static ssize_t sentral_sysfs_delay_ms_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(delay_ms, S_IWUGO, NULL, sentral_sysfs_delay_ms_store);
+//static DEVICE_ATTR(delay_ms, S_IWUGO, NULL, sentral_sysfs_delay_ms_store);
+static DEVICE_ATTR(delay_ms, 0220, NULL, sentral_sysfs_delay_ms_store);
 
 // batch
 
@@ -4478,7 +4518,8 @@ static ssize_t sentral_sysfs_batch_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(batch_enable, S_IWUGO, sentral_sysfs_batch_show, sentral_sysfs_batch_store);
+//static DEVICE_ATTR(batch_enable, S_IWUGO, sentral_sysfs_batch_show, sentral_sysfs_batch_store);
+static DEVICE_ATTR(batch_enable, 0220, sentral_sysfs_batch_show, sentral_sysfs_batch_store);
 
 // flush
 
@@ -4520,7 +4561,8 @@ static ssize_t sentral_sysfs_flush_store(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(flush, S_IWUGO, sentral_sysfs_flush_show, sentral_sysfs_flush_store);
+//static DEVICE_ATTR(flush, S_IWUGO, sentral_sysfs_flush_show, sentral_sysfs_flush_store);
+static DEVICE_ATTR(flush, 0220, sentral_sysfs_flush_show, sentral_sysfs_flush_store);
 
 static ssize_t set_g_sensor_user_offset(struct device *dev,
 		struct device_attribute *attr,
@@ -4533,9 +4575,9 @@ static ssize_t set_g_sensor_user_offset(struct device *dev,
 	long input_val[3] = {0};
 	int rc, i;
 	short temp_kvalue[3] = {0};
-	sentral->user_calibration_flag = false;
 	int user_cali_offset_buf[3] = {0};
 
+	sentral->user_calibration_flag = false;
 	str_buf = kstrndup(buf, count, GFP_KERNEL);
 	if (str_buf == NULL) {
 		LOGE(&sentral->client->dev, "%s: cannot allocate buffer\n", __func__);
@@ -4608,8 +4650,10 @@ static DEVICE_ATTR(g_sensor_user_offset, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP,
 		g_sensor_user_offset_show, set_g_sensor_user_offset);
 
 
-static DEVICE_ATTR(data_warm, S_IRUGO | S_IWUGO, sentral_sysfs_warm_data_show, sentral_sysfs_warm_data_store);
-static DEVICE_ATTR(data_warm_enable, S_IRUGO | S_IWUGO, sentral_sysfs_warm_data_enable_show, sentral_sysfs_warm_data_enable_store);
+//static DEVICE_ATTR(data_warm, S_IRUGO | S_IWUGO, sentral_sysfs_warm_data_show, sentral_sysfs_warm_data_store);
+static DEVICE_ATTR(data_warm, 0660, sentral_sysfs_warm_data_show, sentral_sysfs_warm_data_store);
+//static DEVICE_ATTR(data_warm_enable, S_IRUGO | S_IWUGO, sentral_sysfs_warm_data_enable_show, sentral_sysfs_warm_data_enable_store);
+static DEVICE_ATTR(data_warm_enable, 0660, sentral_sysfs_warm_data_enable_show, sentral_sysfs_warm_data_enable_store);
 
 static struct attribute *sentral_attributes[] = {
 	&dev_attr_chip_control.attr,
@@ -4764,7 +4808,10 @@ static ssize_t sentral_sysfs_cw_cal_data_mag_show(struct device *dev,
 	int i = 0;
 	int rc;
 	int count=0;
-	char page[PAGE_SIZE];
+        int psize = 1280;
+//	char page[PAGE_SIZE];
+/* omg some black magic */
+	char page[psize];
 
 	memset(data_mag, 0, SEN_CW_MAG_MAX*sizeof(int));
 
@@ -4781,11 +4828,12 @@ static ssize_t sentral_sysfs_cw_cal_data_mag_show(struct device *dev,
     {
         //data_mag[i] = *(int*)warm_start_page_items[0].param_data
         memcpy(&data_mag[i], warm_start_page_items[i].param_data, sizeof(int));
-        count += scnprintf(buf+count, PAGE_SIZE-count, "%d ", data_mag[i]);
+//        count += scnprintf(buf+count, PAGE_SIZE-count, "%d ", data_mag[i]);
+        count += scnprintf(buf+count, psize-count, "%d ", data_mag[i]);
         
     }
-    
-    count += scnprintf(buf+count, PAGE_SIZE-count, "\n");
+//    count += scnprintf(buf+count, PAGE_SIZE-count, "\n");
+    count += scnprintf(buf+count, psize-count, "\n");
 	
 	return count;
 }
@@ -4797,9 +4845,12 @@ static ssize_t sentral_sysfs_cw_cal_data_mag_store(struct device *dev,
     int i;
     int n=0;
 	int data_mag[SEN_CW_MAG_MAX];
-	char page[PAGE_SIZE];
-
-	memset(page, 0, PAGE_SIZE);
+//	char page[PAGE_SIZE];
+/* omg some black magic again */
+	int psize = 1280;
+	char page[psize];
+//	memset(page, 0, PAGE_SIZE);
+	memset(page, 0, psize);
     
 	rc = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
 	    , &data_mag[0],  &data_mag[1],  &data_mag[2],  &data_mag[3],  &data_mag[4]
@@ -5751,21 +5802,21 @@ static struct device_attribute sentral_cw_attrs[] = {
 			NULL),
 	__ATTR(calibrator_status_gyro, 0440, sentral_sysfs_cw_cal_status_gyro_show,
 			NULL),
-	__ATTR(calibrator_data_acc, 0666, sentral_sysfs_cw_cal_data_accel_show,
+	__ATTR(calibrator_data_acc, 0660, sentral_sysfs_cw_cal_data_accel_show,
 			sentral_sysfs_cw_cal_data_accel_store),
 	__ATTR(calibrator_data_acc_rl, 0440,
 			sentral_sysfs_cw_cal_data_accel_rl_show, NULL),
 	__ATTR(ap_calibrator_data_acc_rl, 0440,
 			sentral_sysfs_cw_cal_data_ap_accel_rl_show, NULL),
-	__ATTR(calibrator_data_mag, 0666, sentral_sysfs_cw_cal_data_mag_show,
+	__ATTR(calibrator_data_mag, 0660, sentral_sysfs_cw_cal_data_mag_show,
 			sentral_sysfs_cw_cal_data_mag_store),
-	__ATTR(calibrator_data_gyro, 0666, sentral_sysfs_cw_cal_data_gyro_show,
+	__ATTR(calibrator_data_gyro, 0660, sentral_sysfs_cw_cal_data_gyro_show,
 			sentral_sysfs_cw_cal_data_gyro_store),
-	__ATTR(calibrator_data_light, 0666, sentral_sysfs_cw_cal_data_light_show,
+	__ATTR(calibrator_data_light, 0660, sentral_sysfs_cw_cal_data_light_show,
 			sentral_sysfs_cw_cal_data_light_store),
-	__ATTR(calibrator_data_proximity, 0666, sentral_sysfs_cw_cal_data_prox_show,
+	__ATTR(calibrator_data_proximity, 0660, sentral_sysfs_cw_cal_data_prox_show,
 			sentral_sysfs_cw_cal_data_prox_store),
-	__ATTR(calibrator_data_barometer, 0666, sentral_sysfs_cw_cal_data_baro_show,
+	__ATTR(calibrator_data_barometer, 0660, sentral_sysfs_cw_cal_data_baro_show,
 			sentral_sysfs_cw_cal_data_baro_store),
 	__ATTR(gesture_motion, 0660, sentral_sysfs_cw_gesture_show,
 			sentral_sysfs_cw_gesture_store),
@@ -5777,7 +5828,7 @@ static struct device_attribute sentral_cw_attrs[] = {
 			NULL),
 	__ATTR(ls_mechanism, 0444, sentral_sysfs_cw_als_mode_show, NULL),
 	__ATTR(sensor_hub_rdata, 0220, NULL, sentral_sysfs_cw_data_hub_store),
-	__ATTR(ps_canc, 0666, sentral_sysfs_cw_ps_canc_show,
+	__ATTR(ps_canc, 0660, sentral_sysfs_cw_ps_canc_show,
 			sentral_sysfs_cw_ps_canc_store),
 	__ATTR(data_light_kadc, 0440, sentral_sysfs_cw_als_kadc_show, NULL),
 	__ATTR(firmware_version, 0440, sentral_sysfs_cw_firmware_version_show,
@@ -5796,10 +5847,10 @@ static struct device_attribute sentral_cw_attrs[] = {
 	__ATTR(vibrate_ms, 0220, NULL, sentral_sysfs_cw_vibrate_ms_store),
 	__ATTR(crash_count, 0440, sentral_sysfs_cw_mcu_crash_show, NULL),
 #ifdef NVRAM_DATA_ONESHOT
-	__ATTR(nvram_cali_data, 0666, get_nvram_cali_data, set_nvram_cali_data),
+	__ATTR(nvram_cali_data, 0660, get_nvram_cali_data, set_nvram_cali_data),
 #endif
 #ifdef CONFIG_MTK
-	__ATTR(testing_ptmode, 0666, sentral_sysfs_testing_ptmode_show, NULL),
+	__ATTR(testing_ptmode, 0660, sentral_sysfs_testing_ptmode_show, NULL),
 #endif /* CONFIG_MTK */
 
 };
@@ -5826,16 +5877,19 @@ static int sentral_class_create(struct sentral_device *sentral)
 	}
 
 	// set device data
+/* doesnt work anymore
 	rc = dev_set_drvdata(sentral->hub_device, sentral);
 	if (rc) {
 		LOGE(&sentral->client->dev, "error setting device data: %d\n", rc);
 		goto exit_device_created;
 	}
-
+*/
+	dev_set_drvdata(sentral->hub_device, sentral);
 	return 0;
-
+/*
 exit_device_created:
 	device_unregister(sentral->hub_device);
+*/
 exit_class_created:
 	class_destroy(sentral->hub_class);
 exit:
@@ -5871,10 +5925,12 @@ static int sentral_sysfs_create(struct sentral_device *sentral)
 		goto err_bma253_device_create;
 	}
 
+/* doesnt work anymore
 	rc = dev_set_drvdata(sentral->bma253_dev, sentral);
 	if (rc)
 		goto err_bma253_set_drvdata;
-
+*/
+	dev_set_drvdata(sentral->bma253_dev, sentral);
 	rc = device_create_file(sentral->bma253_dev,
 				 &dev_attr_g_sensor_user_offset);
 	if (rc) {
@@ -5918,7 +5974,9 @@ static int sentral_sysfs_create(struct sentral_device *sentral)
 
 error:
 err_create_bma253_device_file:
+/*
 err_bma253_set_drvdata:
+*/
 	put_device(sentral->bma253_dev);
 	device_unregister(sentral->bma253_dev);
 err_bma253_device_create:
@@ -6151,6 +6209,10 @@ static int sentral_read_raw(struct iio_dev *indio_dev,
 	return ret;
 }
 
+#ifndef IIO_ST
+#define IIO_ST(si, rb, sb, sh)                                          \
+        { .sign = si, .realbits = rb, .storagebits = sb, .shift = sh }
+#endif
 
 #define SENTRAL_IIO_CHANNEL(i) \
 {\
@@ -6416,6 +6478,9 @@ static int sentral_probe(struct i2c_client *client,
 	struct iio_dev *indio_dev;
 	int rc;
 	char gsensor_id[2] = {2};
+#ifdef SHUB_MTK_DMA
+        dma_addr_t u32_sentral_i2c_dma_pa;
+#endif /* SHUB_MTK_DMA */
 
 	// check i2c capabilities
 	rc = i2c_check_functionality(client->adapter,
@@ -6439,8 +6504,9 @@ static int sentral_probe(struct i2c_client *client,
 	}
 
 #ifdef SHUB_MTK_DMA
+	u32_sentral_i2c_dma_pa = sentral_i2c_dma_pa;
 	sentral_i2c_dma_va = (u8 *)dma_alloc_coherent(&client->dev, 4096,
-			&sentral_i2c_dma_pa, GFP_KERNEL);
+			&u32_sentral_i2c_dma_pa, GFP_KERNEL);
 
 	if (NULL == sentral_i2c_dma_va) {
 		LOGE(dev, "couldn't allocate I2C DMA buffer\n");

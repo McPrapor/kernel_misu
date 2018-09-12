@@ -5,6 +5,8 @@
 # implement rather than to the bus they are connected to.
 #
 
+obj-y += htc_devices_dtb.o
+
 obj-$(CONFIG_INPUT_CAPELLA_CM36686)     += cm36686.o
 obj-$(CONFIG_BOSCH_BMA253)  += bma253_bosch.o
 #obj-$(CONFIG_SENSORS_AK09916)   += akm09916.o

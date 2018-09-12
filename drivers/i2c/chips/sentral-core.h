@@ -17,7 +17,8 @@
 #endif
 
 #ifdef CONFIG_AK8789_HALLSENSOR
-#include <linux/hall_sensor.h>
+//#include <linux/hall_sensor.h>
+#include "hall_sensor.h"
 #endif
 
 // comment out the following to use printk logging instead of dyndbg

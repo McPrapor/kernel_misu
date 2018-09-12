@@ -749,12 +749,13 @@ ssize_t sentral_sysfs_warm_data_store(struct device *dev,
 	struct sentral_device *sentral = dev_get_drvdata(dev);
 
     int n;
-    int item_size = SEN_PARAM_WARM_START_MAX;
-    int mode = SEN_PARAM_PAGE_WARM_START_WRITE;
+//    int item_size = SEN_PARAM_WARM_START_MAX;
+//    int mode = SEN_PARAM_PAGE_WARM_START_WRITE;
     int param_number;
     int param_size;
     int param_test;
-    int rc, i;
+//    int rc, i;
+    int rc;
     unsigned char param_data[PARAM_READ_SIZE_MAX];
     struct sentral_param_page_item *items = warm_start_page_items;
 
