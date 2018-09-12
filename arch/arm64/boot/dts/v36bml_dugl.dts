@@ -53,9 +53,10 @@
         hall_1: hall_1 { };
         hall_2: hall_2 { };
         htc_sensor_hub: htc_sensor_hub { };
+/*
         ovp_det: ovp_det { };
         irq_nfc: irq_nfc { };
-
+*/
         led@0 {
                compatible = "mediatek,red";
                led_mode = <0x0>;
@@ -585,45 +586,21 @@
 
 /* leds-lcm3642 */
 &i2c2 {
+	/delete-node/ strobe_main@63;
 	lm3642:lm3642@63 {
 		compatible = "mediatek,leds-lm3642";
 		reg = <0x63>;
 	};
 };
 
+/* SENtral sensor hub and sensors: ak8789, bma253, cm36686 */
+&htc_sensor_hub {
+                                compatible = "mediatek, HTC_SENSOR_HUB-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x50 0x4>;
+                                debounce = <0x50 0x0>;
+                        };
 /* bma253 accelometer */
-&pio {
-                        gyro_pin_cfg: gyropincfg {
-                                pins_cmd_dat {
-                                        pins = <0x900>;
-                                        slew-rate = <0x0>;
-                                        bias-pull-down = <0x0>;
-                                };
-                        };
-
-                        gyro_pin_default: gyrodefaultcfg {
-                        };
-};
-
-/*
-/ {
-		/delete-node/ gyroscope@0;
-                gyroscope@0 {
-                        compatible = "mediatek,gyroscope";
-                        pinctrl-names = "pin_default", "pin_cfg";
-                        pinctrl-0 = <&gyro_pin_default>;
-                        pinctrl-1 = <&gyro_pin_cfg>;
-                        status = "okay";
-                };
-		gyro {
-			compatible = "mediatek, gyro-eint";
-        		interrupt-parent = <&eintc>;
-		        interrupts = <9 IRQ_TYPE_LEVEL_LOW>;
-		        debounce = <9 0>;
-		        status = "okay";
-		};
-};
-*/
 
 &i2c2 {
 	bma253: g_sensor_bma253@18 {
@@ -640,7 +617,55 @@
         };
 };
 
+/* ak8789 */
+/ {
+        hall_ak8789 {
+                compatible = "hall_sensor,ak8789";
+                hall,att_used = <0x2>;
+                hall,att_gpio = <0x3>;
+                hall,att_gpio_s = <0x1>;
+        };
+};
+                        &hall_1 {
+                                compatible = "mediatek, HALL_1-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x1 0x8>;
+                                debounce = <0x1 0x0>;
+                        };
+                        &hall_2 {
+                                compatible = "mediatek, HALL_2-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x3 0x8>;
+                                debounce = <0x3 0x0>;
+                        };
+
 /* cm3886 proximity alsps */
+/* see sensor hub */
+&i2c2 {
+			/delete-node/ alsps@60;
+                        cm36686@60 {
+                                compatible = "CM36686";
+                                reg = <0x60>;
+                                cm36686,irq-gpio = <0x4>;
+                                cm36686,engineer-id = <0x0>;
+                                cm36686,levels = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
+                                cm36686,levels_2 = <0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0>;
+                                cm36686,golden_adc = <0x399>;
+                                cm36686,golden_adc_2 = <0x399>;
+                                cm36686,cm36686_slave_address = <0x60>;
+                                cm36686,ps1_thd_set = <0x15>;
+                                cm36686,ps1_thd_no_cal = <0x5f>;
+                                cm36686,dynamical_threshold = <0x1>;
+                                cm36686,dark_level = <0x3>;
+                                cm36686,ps_duty = <0x0>;
+                                cm36686,ps_pers = <0x1>;
+                                cm36686,ps_it = <0x7>;
+                                cm36686,ps_hd = <0x0>;
+                                cm36686,ps_led_current = <0x2>;
+                        };
+};
+
+/*
 &pio {
                         alsps_pin_cfg: alspspincfg {
                                 pins_cmd_dat {
@@ -653,6 +678,7 @@
                         alsps_pin_default: alspsdefaultcfg {
                         };
 };
+*/
 /*
 &i2c2{
                         alsps@60 {
@@ -665,7 +691,7 @@
                         };
 };
 */
-/ {
+/*/ {
 als_ps@0 {
                         compatible = "mediatek,als_ps";
                         pinctrl-names = "pin_default", "pin_cfg";
@@ -689,6 +715,7 @@ cust_alsps@0 {
                 is_batch_supported_als = <0x1>;
 };
 };
+*/
 
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
