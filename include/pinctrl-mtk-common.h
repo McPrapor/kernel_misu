@@ -1,1 +1,0 @@
-../drivers/pinctrl/mediatek/pinctrl-mtk-common.h

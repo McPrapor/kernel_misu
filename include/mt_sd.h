@@ -1,1 +1,0 @@
-../drivers/mmc/host/mediatek/mt6735/mt_sd.h

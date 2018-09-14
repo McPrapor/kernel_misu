@@ -644,7 +644,7 @@
 &i2c2 {
 			/delete-node/ alsps@60;
                         cm36686@60 {
-                                compatible = "CM36686";
+                                compatible = "CM36686","mediatek,alsps";
                                 reg = <0x60>;
                                 cm36686,irq-gpio = <0x4>;
                                 cm36686,engineer-id = <0x0>;
@@ -662,6 +662,31 @@
                                 cm36686,ps_it = <0x7>;
                                 cm36686,ps_hd = <0x0>;
                                 cm36686,ps_led_current = <0x2>;
+                                status = "okay";
+                                pinctrl-names = "pin_default", "pin_cfg";
+                                pinctrl-0 = <&alsps_pin_default>;
+                                pinctrl-1 = <&alsps_pin_cfg>;
+                        };
+};
+/{
+als_ps@0 {
+                        compatible = "mediatek,als_ps";
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+                        status = "okay";
+	};
+};
+&pio {
+                        alsps_pin_cfg: alspspincfg {
+                                pins_cmd_dat {
+                                        pins = <0x400>;
+                                        slew-rate = <0x0>;
+                                        bias-pull-up = <0x0>;
+                                };
+                        };
+
+                        alsps_pin_default: alspsdefaultcfg {
                         };
 };
 

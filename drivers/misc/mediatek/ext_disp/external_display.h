@@ -1,1 +1,0 @@
-mt6735/external_display.h

@@ -10,15 +10,25 @@ sudo apt-get install openjdk-8-jdk
 git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
 mv ./aarch64-linux-android-4.9/ /usr/local/bin/
 #--------------------#
+# wrong way:
+#export ARCH=arm64 
+#export TARGET_ARCH=arm64
+#export CROSS_COMPILE=/usr/local/bin/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+#make abyrvalg_defconfig
+#./FIX.sh
+#make -j$(nproc --all)
+# the right way
 tar -xf kernel-3.18.tbz2
 cd kernel-3.18
-export ARCH=arm64 
-export TARGET_ARCH=arm64
+export ARCH=arm64
+export SUBARCH=arm64
 export CROSS_COMPILE=/usr/local/bin/aarch64-linux-android-4.9/bin/aarch64-linux-android-
-
-make abyrvalg_defconfig
-./FIX.sh
-make -j$(nproc --all)
+make dep
+make clean
+make mrproper
+mkdir out 
+make O=out TARGET_ARCH=arm64 abyrvalg_defconfig
+make -j$(nproc --all) O=out TARGET_ARCH=arm64 | tee -a out/build.log
 
 
 
