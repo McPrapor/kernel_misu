@@ -479,7 +479,6 @@
 };
 /* mmc end */
 
-/* wtf1? */
 /* CONSYS GPIO standardization */
 &pio {
         consys_pins_default: consys_default {
@@ -526,9 +525,19 @@
 
 };
 /* CONSYS end */
-/* wtf1 end */
+/* wifi/bt */
+/ {
+        bus {
+                /delete-node/ btcvsd@10000000;
+                btcvsd@18000000 {
+                        compatible = "mediatek,audio_bt_cvsd";
+                        reg = <0x18000000 0x1000 0x18080000 0x1000>;
+                        interrupts = <0x0 0xe6 0x8>;
+                };
+        };
+};
 
-/* wtf2 */
+/* headphones */
 &accdet {
                 accdet-mic-vol = <7>;
                 headset-mode-setting = <0x500 0x200 1 0x1F0 0x800 0x800 0x20>;
@@ -541,7 +550,6 @@
                 /*0--MD_MAX--VOICE_MAX--UP_MAX--DW_MAX*/
                 headset-four-key-threshold = <0 58 121 192 450>;
 };
-/* wtf2 end */
 
 /* bq24158 power charger */
 &i2c1 {
@@ -746,3 +754,4 @@ cust_alsps@0 {
 #include "v36bml_touchpad.dtsi"
 /* #include "v36bml/cust.dtsi" */
 /* DTS FILE */
+
