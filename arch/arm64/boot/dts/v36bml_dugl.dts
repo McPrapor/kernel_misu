@@ -543,8 +543,57 @@
 };
 
 /* headphones */
+&eintc {
+ACCDET@6{
+    compatible = "mediatek, ACCDET-eint";
+    interrupt-parent = <&eintc>;
+    interrupts = <6 8>;
+    debounce = <6 256000>;
+};
+};
+&pio{
+    accdet_pins_default: accdetdefault{
+    };
+    accdet_pins_eint_as_int: accdeteint@0 {
+        pins_cmd_dat {
+            pins = <PINMUX_GPIO6__FUNC_GPIO6>;
+            slew-rate = <0>;
+            bias-disable;
+        };
+    };
+};
 &accdet {
-		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet", "mediatek, ACCDET-eint";
+		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet";
+/* try later
+        accdet-mic-vol = <7>;//mic電壓2.5v
+        headset-mode-setting = <0x500 0x200 1 0x1F0 0x800 0x800 0x20>;
+        accdet-plugout-debounce = <20>;//拔出耳機去抖時間間隔
+*/
+        /*1:ACC mode, 2:low cost without in bias, 6:low cost with in bias*/
+/*
+        accdet-mic-mode = <1>;
+*/
+        /*0--MD_MAX--UP_MAX--DW_MAX*/
+        /*
+        三段式耳機(MID/UP/DOWN PMIC內部通過AUXADC采樣)檢測電壓范圍(mV)
+        0<= Vol < 80: MID
+        80<= Vol < 228: UP
+        228<= Vol < 500: DOWN
+        */
+/*
+        headset-three-key-threshold = <0 80 220 500>;
+*/
+        /*0--MD_MAX--VOICE_MAX--UP_MAX--DW_MAX*/
+        /*
+        四段式耳機(MID/VOICE/UP/DOWN PMIC內部通過AUXADC采樣)檢測電壓范圍(mV)
+        0<= Vol < 58: MID
+        58<= Vol < 121: VOICE
+        121<= Vol < 192: UP
+        192<= Vol < 450: DOWN
+        */
+/*
+        headset-four-key-threshold = <0 58 121 192 450>;
+*/
                 accdet-mic-vol = <7>;
                 headset-mode-setting = <0x500 0x200 1 0x1F0 0x800 0x800 0x20>;
                 accdet-plugout-debounce = <20>;
@@ -555,6 +604,10 @@
                 headset-three-key-threshold-CDD = <0 178 283 600>;
                 /*0--MD_MAX--VOICE_MAX--UP_MAX--DW_MAX*/
                 headset-four-key-threshold = <0 58 121 192 450>;
+        pinctrl-names = "default", "state_eint_as_int";
+        pinctrl-0 = <&accdet_pins_default>;
+        pinctrl-1 = <&accdet_pins_eint_as_int>;
+        status = "okay";
 };
 /*
 / {
