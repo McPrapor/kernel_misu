@@ -307,6 +307,14 @@
         interrupts = <0xa 0x2>;
         debounce = <0xa 0x0>;
 };
+&eintc {
+                        TOUCH_PANEL@10 {
+                                compatible = "mediatek, TOUCH_PANEL-eint";
+                                interrupt-parent = <0xa>;
+                                interrupts = <0xa 0x2>;
+                                debounce = <0xa 0x0>;
+                        };
+};
 /* TOUCH end */
 /* mmc start */
 &mmc0 {
