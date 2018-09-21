@@ -493,7 +493,7 @@
         gpslna_pins_init: gpslna@0 {
 
             pins_cmd_dat {
-                        pins = <PINMUX_GPIO79__FUNC_GPIO79>;
+                        pins = <PINMUX_GPIO64__FUNC_GPIO64>;
                         slew-rate = <0>;
                         bias-disable;
                         output-low;
@@ -503,7 +503,7 @@
         gpslna_pins_oh: gpslna@1 {
 
             pins_cmd_dat {
-                        pins = <PINMUX_GPIO79__FUNC_GPIO79>;
+                        pins = <PINMUX_GPIO64__FUNC_GPIO64>;
                         slew-rate = <1>;
                         output-high;
                 };
@@ -512,7 +512,7 @@
         gpslna_pins_ol: gpslna@2 {
 
             pins_cmd_dat {
-                        pins = <PINMUX_GPIO79__FUNC_GPIO79>;
+                        pins = <PINMUX_GPIO64__FUNC_GPIO64>;
                         slew-rate = <1>;
                         output-low;
                 };
@@ -828,15 +828,20 @@ cust_alsps@0 {
 			interrupts = <0x0 0x90 0x8>;
 		};
 		mt_soc_dl1_pcm@11220000 {
+			interrupts = <0x0 0x90 0x8>;
+			extspkamp-gpio = <0x15 0x0>;
+/*
 		            pinctrl-names = "default", "extamp-pullhigh", "extamp-pulllow";
 		            pinctrl-0 = <&audiodefault>;
 		            pinctrl-1 = <&audiohigh>;
 		            pinctrl-2 = <&audiolow>;
 		            status = "okay";
+*/
 		};
 	};
 };
 
+/*
 &pio {
 		audiodefault: audiodefault {
 			};
@@ -858,7 +863,7 @@ cust_alsps@0 {
 			};
 
 };
-
+*/
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
 /* #include "v36bml/cust.dtsi" */
