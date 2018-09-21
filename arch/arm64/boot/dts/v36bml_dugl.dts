@@ -821,6 +821,44 @@ cust_alsps@0 {
 };
 */
 
+/* AUDIO */
+/ {
+	bus {
+		audio@11220000 {
+			interrupts = <0x0 0x90 0x8>;
+		};
+		mt_soc_dl1_pcm@11220000 {
+		            pinctrl-names = "default", "extamp-pullhigh", "extamp-pulllow";
+		            pinctrl-0 = <&audiodefault>;
+		            pinctrl-1 = <&audiohigh>;
+		            pinctrl-2 = <&audiolow>;
+		            status = "okay";
+		};
+	};
+};
+
+&pio {
+		audiodefault: audiodefault {
+			};
+
+	audiohigh: audexamphigh {
+				pins_cmd_dat {
+					pins = <0x1500>;
+					slew-rate = <0x1>;
+					output-high;
+				};
+			};
+
+	audiolow: audexamplow {
+				pins_cmd_dat {
+					pins = <0x1500>;
+					slew-rate = <0x1>;
+					output-low;
+				};
+			};
+
+};
+
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
 /* #include "v36bml/cust.dtsi" */
