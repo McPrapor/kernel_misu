@@ -543,16 +543,14 @@
 };
 
 /* headphones */
-/*
 &eintc {
-ACCDET@6{
-    compatible = "mediatek, ACCDET-eint";
-    interrupt-parent = <&eintc>;
-    interrupts = <6 8>;
-    debounce = <6 256000>;
+	ACCDET@6{
+	    compatible = "mediatek, ACCDET-eint";
+	    interrupt-parent = <&eintc>;
+	    interrupts = <6 8>;
+	    debounce = <6 256000>;
+	};
 };
-};
-*/
 &pio{
     accdet_pins_default: accdetdefault{
     };
@@ -565,10 +563,7 @@ ACCDET@6{
     };
 };
 &accdet {
-		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet", "mediatek, ACCDET-eint";
-    interrupt-parent = <&eintc>;
-    interrupts = <6 8>;
-    debounce = <6 256000>;
+		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet";
 /* try later
         accdet-mic-vol = <7>;//mic電壓2.5v
         headset-mode-setting = <0x500 0x200 1 0x1F0 0x800 0x800 0x20>;
