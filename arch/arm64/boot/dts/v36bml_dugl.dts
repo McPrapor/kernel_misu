@@ -302,6 +302,11 @@
                 };
         };
 };
+&touch_panel {
+        interrupt-parent = <&eintc>;
+        interrupts = <0xa 0x2>;
+        debounce = <0xa 0x0>;
+};
 /* TOUCH end */
 /* mmc start */
 &mmc0 {
@@ -539,6 +544,7 @@
 
 /* headphones */
 &accdet {
+		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet", "mediatek, ACCDET-eint";
                 accdet-mic-vol = <7>;
                 headset-mode-setting = <0x500 0x200 1 0x1F0 0x800 0x800 0x20>;
                 accdet-plugout-debounce = <20>;
@@ -550,6 +556,18 @@
                 /*0--MD_MAX--VOICE_MAX--UP_MAX--DW_MAX*/
                 headset-four-key-threshold = <0 58 121 192 450>;
 };
+/*
+/ {
+	soc {
+		accdet {
+			        compatible = "mediatek, ACCDET-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x6 0x8>;
+                                debounce = <0x6 0x3e800>;
+		};
+	};
+};
+*/
 
 /* bq24158 power charger */
 &i2c1 {
