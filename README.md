@@ -7,6 +7,8 @@ looks ok:
 + mt6311 pmic
 + cm36686 alsps sensor
 + bma253 acceleration sensor
++ headphones detection, keys, sound
++ wifi
 
 todo:
 - ramconsole bad addresing
@@ -21,5 +23,5 @@ todo:
 - battery meter tables
 - no iio
 - ril? sms?
-- hall_ak8789
+- hall_ak8789?
 - iio sensor hub
