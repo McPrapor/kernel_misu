@@ -166,6 +166,16 @@ config TABLET_PROJECT
 	help
 	  Is Tablet Project or not
 
+config MTK_SIM1_SOCKET_TYPE
+        string "MTK_SIM1_SOCKET_TYPE"
+        help
+          support SIM type 1 socket
+
+config MTK_SIM2_SOCKET_TYPE
+        string "MTK_SIM2_SOCKET_TYPE"
+        help
+          MTK_SIM1_SOCKET_TYPE=1: support type 1 socket type
+
 config HTC_V36BML_BATTERY
         bool "HTC v36bml_(d)ugl 2200mA battery"
 	default y

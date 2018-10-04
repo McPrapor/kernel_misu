@@ -16,12 +16,20 @@
                         compatible = "mediatek,MTKFB";
                         reg = <0x7F000000 0x1000000>;
                 };
-                eintc {
-			ALS@65 {
+                        nxp_tfa9895_amp@35 {
+                                compatible = "nxp,tfa9895-amp";
+                                reg = <0x35>;
+                        };
 
-			};
-		};
+                        nxp_tfa9895l_amp@34 {
+                                compatible = "nxp,tfa9895l-amp";
+                                reg = <0x34>;
+                        };
 
+                        tpa6130_hs_amp@60 {
+                                compatible = "tpa,tpa6130-hs-amp";
+                                reg = <0x60>;
+                        };
         };
         touch_fw_update: touch_fw_update {
                 compatible = "htc,touch_fwu";
@@ -50,9 +58,6 @@
         htc_board_info:htc_board_info {
                 htc_pid,htc_sku1 = <0x0 0x0>;
         };
-        hall_1: hall_1 { };
-        hall_2: hall_2 { };
-        htc_sensor_hub: htc_sensor_hub { };
 /*
         ovp_det: ovp_det { };
         irq_nfc: irq_nfc { };
@@ -112,7 +117,23 @@
                 vib_vol= <5>;
         };
 };
-
+&eintc {
+        hall_1: HALL_1@1 { };
+        irq_nfc: IRQ_NFC@2 {
+                                compatible = "mediatek, IRQ_NFC-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x2 0x4>;
+                                debounce = <0x2 0x0>;
+	};
+        hall_2: HALL_2@3 { };
+        ovp_det: OVP_DET@66 {
+                                compatible = "mediatek, OVP_DET-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x42 0x8>;
+                                debounce = <0x42 0x0>;
+	 };
+        htc_sensor_hub: HTC_SENSOR_HUB@80 { };
+};
 #include "cust.dtsi"
 
 /* USB GPIO Kernal Standardization start */
@@ -312,7 +333,7 @@
 &eintc {
                         TOUCH_PANEL@10 {
                                 compatible = "mediatek, TOUCH_PANEL-eint";
-                                interrupt-parent = <0xa>;
+                                interrupt-parent = <&eintc>;
                                 interrupts = <0xa 0x2>;
                                 debounce = <0xa 0x0>;
                         };
@@ -911,6 +932,12 @@ cust_alsps@0 {
 
 	AUD_pins_extamp2_low:extamp2outlow {
 	};
+};
+
+&keypad {
+        mediatek,kpd-hw-init-map = <114 114 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+                                0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+                                0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 >;
 };
 
 /* END OF THE */

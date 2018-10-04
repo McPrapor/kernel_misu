@@ -28,16 +28,16 @@ static u8 g_proximity_en = 0;
 #endif
 
 #if defined(HX_AUTO_UPDATE_FW)||defined(HX_AUTO_UPDATE_CONFIG)
-	static unsigned char i_CTPM_FW_C0X[]=
-	{
-		////#include "Booyi_T50KB110S3M_NewBund_C06_2016-02-22_1811.i"
-		//#include "Booyi_T50KB110S3M_NewBund_C10_2016-04-13_2001.i"
-	};
-	static unsigned char i_CTPM_FW_C5X[]=
-	{
-		////#include "Booyi_T50KB110S3M_NewBund_C52_2016-04-13_2002.i"
-		//#include "Booyi_T50KB110S3M_NewBund_C53_2016-04-18_2139.i"
-	};
+static unsigned char i_CTPM_FW_C0X[]=
+{
+	////#include "Booyi_T50KB110S3M_NewBund_C06_2016-02-22_1811.i"
+	//#include "Booyi_T50KB110S3M_NewBund_C10_2016-04-13_2001.i"
+};
+static unsigned char i_CTPM_FW_C5X[]=
+{
+	////#include "Booyi_T50KB110S3M_NewBund_C52_2016-04-13_2002.i"
+	//#include "Booyi_T50KB110S3M_NewBund_C53_2016-04-18_2139.i"
+};
 #endif
 
 #ifdef MTK
@@ -116,7 +116,7 @@ static ssize_t himax_chip_self_test_function(struct device *dev, struct device_a
 
 #if defined( CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self,
-				 unsigned long event, void *data);
+			 unsigned long event, void *data);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 static void himax_ts_early_suspend(struct early_suspend *h);
 static void himax_ts_late_resume(struct early_suspend *h);
@@ -133,8 +133,8 @@ MODULE_DEVICE_TABLE(of, himax_match_table);
 
 static struct of_device_id himax_match_table[] = {
 //	{.compatible = "mediatek,cap_touch_himax852" },	
-	{.compatible = "mediatek,cap_touch" },	
-	{},
+{.compatible = "mediatek,cap_touch" },	
+{},
 };
 
 #else
@@ -143,300 +143,212 @@ static struct of_device_id himax_match_table[] = {
 
 static int of_get_himax85xx_platform_data(struct device *dev)
 {
-	/*int ret, num;*/
+/*int ret, num;*/
 
-	if (dev->of_node) {
-		const struct of_device_id *match;
+if (dev->of_node) {
+	const struct of_device_id *match;
 
-		match = of_match_device(of_match_ptr(himax_match_table), dev);
-		if (!match) {
-			TPD_DMESG("Error: No device match found\n");
-			return -ENODEV;
-		}
+	match = of_match_device(of_match_ptr(himax_match_table), dev);
+	if (!match) {
+		TPD_DMESG("Error: No device match found\n");
+		return -ENODEV;
 	}
+}
 
-	//TPD_DMESG("g_vproc_en_gpio_number %d\n", tpd_rst_gpio_number);
-	//TPD_DMESG("g_vproc_vsel_gpio_number %d\n", tpd_int_gpio_number);
-	return 0;
+//TPD_DMESG("g_vproc_en_gpio_number %d\n", tpd_rst_gpio_number);
+//TPD_DMESG("g_vproc_vsel_gpio_number %d\n", tpd_int_gpio_number);
+return 0;
 }
 
 static int himax_hand_shaking(void)    //0:Running, 1:Stop, 2:I2C Fail
 {
-	int ret, result;
-	uint8_t hw_reset_check[1];
-	uint8_t hw_reset_check_2[1];
-	uint8_t buf0[2];
+int ret, result;
+uint8_t hw_reset_check[1];
+uint8_t hw_reset_check_2[1];
+uint8_t buf0[2];
 
-	memset(hw_reset_check, 0x00, sizeof(hw_reset_check));
-	memset(hw_reset_check_2, 0x00, sizeof(hw_reset_check_2));
+memset(hw_reset_check, 0x00, sizeof(hw_reset_check));
+memset(hw_reset_check_2, 0x00, sizeof(hw_reset_check_2));
 
-	buf0[0] = 0xF2;
-	if (IC_STATUS_CHECK == 0xAA) {
-		buf0[1] = 0xAA;
-		IC_STATUS_CHECK = 0x55;
-	} else {
-		buf0[1] = 0x55;
-		IC_STATUS_CHECK = 0xAA;
-	}
+buf0[0] = 0xF2;
+if (IC_STATUS_CHECK == 0xAA) {
+	buf0[1] = 0xAA;
+	IC_STATUS_CHECK = 0x55;
+} else {
+	buf0[1] = 0x55;
+	IC_STATUS_CHECK = 0xAA;
+}
 
-	ret = i2c_himax_master_write(private_ts->client, buf0, 2, DEFAULT_RETRY_CNT);
-	if (ret < 0) {
-		E("[Himax]:write 0xF2 failed line: %d \n",__LINE__);
-		goto work_func_send_i2c_msg_fail;
-	}
-	msleep(50); 
-  	
-	buf0[0] = 0xF2;
-	buf0[1] = 0x00;
-	ret = i2c_himax_master_write(private_ts->client, buf0, 2, DEFAULT_RETRY_CNT);
-	if (ret < 0) {
-		E("[Himax]:write 0x92 failed line: %d \n",__LINE__);
-		goto work_func_send_i2c_msg_fail;
-	}
+ret = i2c_himax_master_write(private_ts->client, buf0, 2, DEFAULT_RETRY_CNT);
+if (ret < 0) {
+	E("[Himax]:write 0xF2 failed line: %d \n",__LINE__);
+	goto work_func_send_i2c_msg_fail;
+}
+msleep(50); 
+
+buf0[0] = 0xF2;
+buf0[1] = 0x00;
+ret = i2c_himax_master_write(private_ts->client, buf0, 2, DEFAULT_RETRY_CNT);
+if (ret < 0) {
+	E("[Himax]:write 0x92 failed line: %d \n",__LINE__);
+	goto work_func_send_i2c_msg_fail;
+}
+msleep(2);
+
+ret = i2c_himax_read(private_ts->client, 0x90, hw_reset_check, 1, DEFAULT_RETRY_CNT);
+if (ret < 0) {
+	E("[Himax]:i2c_himax_read 0x90 failed line: %d \n",__LINE__);
+	goto work_func_send_i2c_msg_fail;
+}
+
+if ((IC_STATUS_CHECK != hw_reset_check[0])) {
 	msleep(2);
-  	
-	ret = i2c_himax_read(private_ts->client, 0x90, hw_reset_check, 1, DEFAULT_RETRY_CNT);
+	ret = i2c_himax_read(private_ts->client, 0x90, hw_reset_check_2, 1, DEFAULT_RETRY_CNT);
 	if (ret < 0) {
 		E("[Himax]:i2c_himax_read 0x90 failed line: %d \n",__LINE__);
 		goto work_func_send_i2c_msg_fail;
 	}
-	
-	if ((IC_STATUS_CHECK != hw_reset_check[0])) {
-		msleep(2);
-		ret = i2c_himax_read(private_ts->client, 0x90, hw_reset_check_2, 1, DEFAULT_RETRY_CNT);
-		if (ret < 0) {
-			E("[Himax]:i2c_himax_read 0x90 failed line: %d \n",__LINE__);
-			goto work_func_send_i2c_msg_fail;
-		}
-	
-		if (hw_reset_check[0] == hw_reset_check_2[0]) {
-			result = 1; 
-		} else {
-			result = 0; 
-		}
+
+	if (hw_reset_check[0] == hw_reset_check_2[0]) {
+		result = 1; 
 	} else {
 		result = 0; 
 	}
-	
-	return result;
+} else {
+	result = 0; 
+}
+
+return result;
 
 work_func_send_i2c_msg_fail:
-	return 2;
+return 2;
 }
 
 static int himax_ManualMode(int enter)
 {
-	uint8_t cmd[2];
-	cmd[0] = enter;
-	if ( i2c_himax_write(private_ts->client, 0x42 ,&cmd[0], 1, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
+uint8_t cmd[2];
+cmd[0] = enter;
+if ( i2c_himax_write(private_ts->client, 0x42 ,&cmd[0], 1, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
 	return 0;
+}
+return 0;
 }
 
 static int himax_FlashMode(int enter)
 {
-	uint8_t cmd[2];
-	cmd[0] = enter;
-	if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 1, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
+uint8_t cmd[2];
+cmd[0] = enter;
+if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 1, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
 	return 0;
+}
+return 0;
 }
 
 static int himax_lock_flash(int enable)
 {
-	uint8_t cmd[5];
+uint8_t cmd[5];
 
-	if (i2c_himax_write(private_ts->client, 0xAA ,&cmd[0], 0, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-			return 0;
-	}
-	
-	/* lock sequence start */
-	cmd[0] = 0x01;cmd[1] = 0x00;cmd[2] = 0x06;
-	if (i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
+if (i2c_himax_write(private_ts->client, 0xAA ,&cmd[0], 0, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
 		return 0;
-	}
+}
 
-	cmd[0] = 0x03;cmd[1] = 0x00;cmd[2] = 0x00;
-	if (i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
-	
-	if(enable!=0){
-			cmd[0] = 0x63;cmd[1] = 0x02;cmd[2] = 0x70;cmd[3] = 0x03;
-		}
-	else{
-			cmd[0] = 0x63;cmd[1] = 0x02;cmd[2] = 0x30;cmd[3] = 0x00;
-		}
-	
-	if (i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
-
-	if (i2c_himax_write_command(private_ts->client, 0x4A, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
-	msleep(50);
-
-	if (i2c_himax_write(private_ts->client, 0xA9 ,&cmd[0], 0, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return 0;
-	}
-	
+/* lock sequence start */
+cmd[0] = 0x01;cmd[1] = 0x00;cmd[2] = 0x06;
+if (i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
 	return 0;
-	/* lock sequence stop */
+}
+
+cmd[0] = 0x03;cmd[1] = 0x00;cmd[2] = 0x00;
+if (i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return 0;
+}
+
+if(enable!=0){
+		cmd[0] = 0x63;cmd[1] = 0x02;cmd[2] = 0x70;cmd[3] = 0x03;
+	}
+else{
+		cmd[0] = 0x63;cmd[1] = 0x02;cmd[2] = 0x30;cmd[3] = 0x00;
+	}
+
+if (i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return 0;
+}
+
+if (i2c_himax_write_command(private_ts->client, 0x4A, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return 0;
+}
+msleep(50);
+
+if (i2c_himax_write(private_ts->client, 0xA9 ,&cmd[0], 0, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return 0;
+}
+
+return 0;
+/* lock sequence stop */
 }
 
 
 static void himax_changeIref(int selected_iref){
 
-	unsigned char temp_iref[16][2] = {	{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
-										{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
-										{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
-										{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00}};  													
-	uint8_t cmd[10]; 
-	int i = 0;
-	int j = 0;
+unsigned char temp_iref[16][2] = {	{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
+									{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
+									{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00},
+									{0x00,0x00},{0x00,0x00},{0x00,0x00},{0x00,0x00}};  													
+uint8_t cmd[10]; 
+int i = 0;
+int j = 0;
 
-	I("%s: start to check iref,iref number = %d\n",__func__,selected_iref);
+I("%s: start to check iref,iref number = %d\n",__func__,selected_iref);
 
-	if (i2c_himax_write(private_ts->client, 0xAA ,&cmd[0], 0, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return;
-	}	
+if (i2c_himax_write(private_ts->client, 0xAA ,&cmd[0], 0, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return;
+}	
 
-	for(i=0; i<16; i++){
-		for(j=0; j<2; j++){
-			if(selected_iref == 1){
-				temp_iref[i][j] = E_IrefTable_1[i][j];
-			}
-					else if(selected_iref == 2){
-				temp_iref[i][j] = E_IrefTable_2[i][j];
-			}
-			else if(selected_iref == 3){
-				temp_iref[i][j] = E_IrefTable_3[i][j];
-			}
-			else if(selected_iref == 4){
-				temp_iref[i][j] = E_IrefTable_4[i][j];
-			}
-			else if(selected_iref == 5){
-				temp_iref[i][j] = E_IrefTable_5[i][j];
-			}
-			else if(selected_iref == 6){
-				temp_iref[i][j] = E_IrefTable_6[i][j];
-			}
-			else if(selected_iref == 7){
-				temp_iref[i][j] = E_IrefTable_7[i][j];
-			}
+for(i=0; i<16; i++){
+	for(j=0; j<2; j++){
+		if(selected_iref == 1){
+			temp_iref[i][j] = E_IrefTable_1[i][j];
+		}
+				else if(selected_iref == 2){
+			temp_iref[i][j] = E_IrefTable_2[i][j];
+		}
+		else if(selected_iref == 3){
+			temp_iref[i][j] = E_IrefTable_3[i][j];
+		}
+		else if(selected_iref == 4){
+			temp_iref[i][j] = E_IrefTable_4[i][j];
+		}
+		else if(selected_iref == 5){
+			temp_iref[i][j] = E_IrefTable_5[i][j];
+		}
+		else if(selected_iref == 6){
+			temp_iref[i][j] = E_IrefTable_6[i][j];
+		}
+		else if(selected_iref == 7){
+			temp_iref[i][j] = E_IrefTable_7[i][j];
 		}
 	}
-	
-	if(!iref_found){
-		//Read Iref
-		//Register 0x43
-		cmd[0] = 0x01;
-		cmd[1] = 0x00;
-		cmd[2] = 0x0A;
-		if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0){
-			E("%s: i2c access fail!\n", __func__);
-			return;
-		}
-		
-		//Register 0x44
-		cmd[0] = 0x00;
-		cmd[1] = 0x00;
-		cmd[2] = 0x00;
-		if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0){
-			E("%s: i2c access fail!\n", __func__);
-			return ;
-		}														
-	 
-		//Register 0x46
-		if( i2c_himax_write(private_ts->client, 0x46 ,&cmd[0], 0, 3) < 0){
-			E("%s: i2c access fail!\n", __func__);
-			return ;
-		}  
-		
-		//Register 0x59
-		if( i2c_himax_read(private_ts->client, 0x59, cmd, 4, 3) < 0){
-			E("%s: i2c access fail!\n", __func__);
-			return ;
-		}
-		
-		//find iref group , default is iref 3
-		for (i = 0; i < 16; i++){
-			if ((cmd[0] == temp_iref[i][0]) &&
-					(cmd[1] == temp_iref[i][1])){
-				iref_number = i;
-				iref_found = true;
-				break;
-			}
-		}
-		
-		if(!iref_found ){
-			E("%s: Can't find iref number!\n", __func__);
-			return ;
-		}
-		else{
-			I("%s: iref_number=%d, cmd[0]=0x%x, cmd[1]=0x%x\n", __func__, iref_number, cmd[0], cmd[1]);
-		}
-	}
+}
 
-	msleep(5);
-
-	//iref write
-	//Register 0x43
-	cmd[0] = 0x01;
-	cmd[1] = 0x00;
-	cmd[2] = 0x06;
-	if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0){
-		E("%s: i2c access fail!\n", __func__);
-		return ;
-	}  
-	
-	//Register 0x44
-	cmd[0] = 0x00;
-	cmd[1] = 0x00;
-	cmd[2] = 0x00;
-	if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0){
-		E("%s: i2c access fail!\n", __func__);
-		return ;
-	}  
-	
-	//Register 0x45
-	cmd[0] = temp_iref[iref_number][0];
-	cmd[1] = temp_iref[iref_number][1];
-	cmd[2] = 0x17;
-	cmd[3] = 0x28;
-
-	if( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, 3) < 0){
-		E("%s: i2c access fail!\n", __func__);
-		return ;
-	}  
-	
-	//Register 0x4A
-	if( i2c_himax_write(private_ts->client, 0x4A ,&cmd[0], 0, 3) < 0){
-		E("%s: i2c access fail!\n", __func__);
-		return ;
-	}  
-
-	//Read SFR to check the result
+if(!iref_found){
+	//Read Iref
 	//Register 0x43
 	cmd[0] = 0x01;
 	cmd[1] = 0x00;
 	cmd[2] = 0x0A;
 	if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0){
 		E("%s: i2c access fail!\n", __func__);
-		return ;
-	} 
+		return;
+	}
 	
 	//Register 0x44
 	cmd[0] = 0x00;
@@ -445,227 +357,293 @@ static void himax_changeIref(int selected_iref){
 	if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0){
 		E("%s: i2c access fail!\n", __func__);
 		return ;
-	} 
-	
+	}														
+ 
 	//Register 0x46
 	if( i2c_himax_write(private_ts->client, 0x46 ,&cmd[0], 0, 3) < 0){
 		E("%s: i2c access fail!\n", __func__);
 		return ;
-	} 
+	}  
 	
 	//Register 0x59
 	if( i2c_himax_read(private_ts->client, 0x59, cmd, 4, 3) < 0){
 		E("%s: i2c access fail!\n", __func__);
 		return ;
 	}
-
-	I( "%s:cmd[0]=%d,cmd[1]=%d,temp_iref_1=%d,temp_iref_2=%d\n",__func__, cmd[0], cmd[1], temp_iref[iref_number][0], temp_iref[iref_number][1]);
 	
-	if(cmd[0] != temp_iref[iref_number][0] || cmd[1] != temp_iref[iref_number][1]){
-		E("%s: IREF Read Back is not match.\n", __func__);
-		E("%s: Iref [0]=%d,[1]=%d\n", __func__,cmd[0],cmd[1]);
+	//find iref group , default is iref 3
+	for (i = 0; i < 16; i++){
+		if ((cmd[0] == temp_iref[i][0]) &&
+				(cmd[1] == temp_iref[i][1])){
+			iref_number = i;
+			iref_found = true;
+			break;
+		}
+	}
+	
+	if(!iref_found ){
+		E("%s: Can't find iref number!\n", __func__);
+		return ;
 	}
 	else{
-		I("%s: IREF Pass",__func__);
+		I("%s: iref_number=%d, cmd[0]=0x%x, cmd[1]=0x%x\n", __func__, iref_number, cmd[0], cmd[1]);
 	}
-	
-	if (i2c_himax_write(private_ts->client, 0xA9 ,&cmd[0], 0, 3) < 0) {
-		E("%s: i2c access fail!\n", __func__);
-		return;
-	}
-	
+}
+
+msleep(5);
+
+//iref write
+//Register 0x43
+cmd[0] = 0x01;
+cmd[1] = 0x00;
+cmd[2] = 0x06;
+if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+}  
+
+//Register 0x44
+cmd[0] = 0x00;
+cmd[1] = 0x00;
+cmd[2] = 0x00;
+if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+}  
+
+//Register 0x45
+cmd[0] = temp_iref[iref_number][0];
+cmd[1] = temp_iref[iref_number][1];
+cmd[2] = 0x17;
+cmd[3] = 0x28;
+
+if( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+}  
+
+//Register 0x4A
+if( i2c_himax_write(private_ts->client, 0x4A ,&cmd[0], 0, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+}  
+
+//Read SFR to check the result
+//Register 0x43
+cmd[0] = 0x01;
+cmd[1] = 0x00;
+cmd[2] = 0x0A;
+if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+} 
+
+//Register 0x44
+cmd[0] = 0x00;
+cmd[1] = 0x00;
+cmd[2] = 0x00;
+if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+} 
+
+//Register 0x46
+if( i2c_himax_write(private_ts->client, 0x46 ,&cmd[0], 0, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+} 
+
+//Register 0x59
+if( i2c_himax_read(private_ts->client, 0x59, cmd, 4, 3) < 0){
+	E("%s: i2c access fail!\n", __func__);
+	return ;
+}
+
+I( "%s:cmd[0]=%d,cmd[1]=%d,temp_iref_1=%d,temp_iref_2=%d\n",__func__, cmd[0], cmd[1], temp_iref[iref_number][0], temp_iref[iref_number][1]);
+
+if(cmd[0] != temp_iref[iref_number][0] || cmd[1] != temp_iref[iref_number][1]){
+	E("%s: IREF Read Back is not match.\n", __func__);
+	E("%s: Iref [0]=%d,[1]=%d\n", __func__,cmd[0],cmd[1]);
+}
+else{
+	I("%s: IREF Pass",__func__);
+}
+
+if (i2c_himax_write(private_ts->client, 0xA9 ,&cmd[0], 0, 3) < 0) {
+	E("%s: i2c access fail!\n", __func__);
+	return;
+}
+
 }
 
 static uint8_t himax_calculateChecksum(bool change_iref)
 {
-	
-	int iref_flag = 0;
-	uint8_t cmd[10];
 
-	memset(cmd, 0x00, sizeof(cmd));
-  
-  //Sleep out
-  if( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
-  {
-      E("%s: i2c access fail!\n", __func__);
-      return 0;
-  }
-  msleep(120);
-	
-	while(true){
+int iref_flag = 0;
+uint8_t cmd[10];
 
+memset(cmd, 0x00, sizeof(cmd));
+
+//Sleep out
+if( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
+{
+E("%s: i2c access fail!\n", __func__);
+return 0;
+}
+msleep(120);
+
+while(true){
+
+	if(change_iref)
+	{
+		if(iref_flag == 0){
+			himax_changeIref(2); //iref 2		
+		}	
+		else if(iref_flag == 1){
+			himax_changeIref(5); //iref 5
+		}
+		else if(iref_flag == 2){
+			himax_changeIref(1); //iref 1
+		}
+		else{
+			goto CHECK_FAIL;	
+		}
+		iref_flag ++;
+	}
+	
+	cmd[0] = 0x00;
+	cmd[1] = 0x04;
+	cmd[2] = 0x0A;
+	cmd[3] = 0x02;
+
+	if (i2c_himax_write(private_ts->client, 0xED ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0) {
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+
+	//Enable Flash
+	cmd[0] = 0x01;
+	cmd[1] = 0x00;
+	cmd[2] = 0x02;
+		
+	if (i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0) {
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+	cmd[0] = 0x05;
+	if (i2c_himax_write(private_ts->client, 0xD2 ,&cmd[0], 1, DEFAULT_RETRY_CNT) < 0) {
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+
+	cmd[0] = 0x01;
+	if (i2c_himax_write(private_ts->client, 0x53 ,&cmd[0], 1, DEFAULT_RETRY_CNT) < 0) {
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+	
+	msleep(200);
+
+	if (i2c_himax_read(private_ts->client, 0xAD, cmd, 4, DEFAULT_RETRY_CNT) < 0) {
+		E("%s: i2c access fail!\n", __func__);
+		return -1;
+	}
+	
+	I("%s 0xAD[0,1,2,3] = %d,%d,%d,%d \n",__func__,cmd[0],cmd[1],cmd[2],cmd[3]);
+
+	if (cmd[0] == 0 && cmd[1] == 0 && cmd[2] == 0 && cmd[3] == 0 ) {
+		himax_FlashMode(0);
+		goto CHECK_PASS;
+	} else {
+		himax_FlashMode(0);
+		goto CHECK_FAIL;
+	}
+	
+		
+	CHECK_PASS:
 		if(change_iref)
 		{
-			if(iref_flag == 0){
-				himax_changeIref(2); //iref 2		
-			}	
-			else if(iref_flag == 1){
-				himax_changeIref(5); //iref 5
+			if(iref_flag < 3){
+				continue;
 			}
-			else if(iref_flag == 2){
-				himax_changeIref(1); //iref 1
-			}
-			else{
-				goto CHECK_FAIL;	
-			}
-			iref_flag ++;
-		}
-		
-		cmd[0] = 0x00;
-		cmd[1] = 0x04;
-		cmd[2] = 0x0A;
-		cmd[3] = 0x02;
-    	
-		if (i2c_himax_write(private_ts->client, 0xED ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0) {
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-    	
-		//Enable Flash
-		cmd[0] = 0x01;
-		cmd[1] = 0x00;
-		cmd[2] = 0x02;
-		    	
-		if (i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0) {
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-		cmd[0] = 0x05;
-		if (i2c_himax_write(private_ts->client, 0xD2 ,&cmd[0], 1, DEFAULT_RETRY_CNT) < 0) {
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-    	
-		cmd[0] = 0x01;
-		if (i2c_himax_write(private_ts->client, 0x53 ,&cmd[0], 1, DEFAULT_RETRY_CNT) < 0) {
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-		
-		msleep(200);
-    	
-		if (i2c_himax_read(private_ts->client, 0xAD, cmd, 4, DEFAULT_RETRY_CNT) < 0) {
-			E("%s: i2c access fail!\n", __func__);
-			return -1;
-		}
-		
-		I("%s 0xAD[0,1,2,3] = %d,%d,%d,%d \n",__func__,cmd[0],cmd[1],cmd[2],cmd[3]);
-
-		if (cmd[0] == 0 && cmd[1] == 0 && cmd[2] == 0 && cmd[3] == 0 ) {
-			himax_FlashMode(0);
-			goto CHECK_PASS;
-		} else {
-			himax_FlashMode(0);
-			goto CHECK_FAIL;
-		}
-		
-			
-		CHECK_PASS:
-			if(change_iref)
-			{
-				if(iref_flag < 3){
-					continue;
-				}
-				else {
-					return 1;
-				}
-			}
-			else
-			{
+			else {
 				return 1;
 			}
-				
-		CHECK_FAIL:		
-			return 0;
-	}
-	return 0;
+		}
+		else
+		{
+			return 1;
+		}
+			
+	CHECK_FAIL:		
+		return 0;
+}
+return 0;
 }
 
 int fts_ctpm_fw_upgrade_with_fs(unsigned char *fw, int len, bool change_iref)
 {
-	unsigned char* ImageBuffer = fw;
-	int fullFileLength = len;
-	int i, j;
-	uint8_t cmd[5], last_byte, prePage;
-	int FileLength;
-	uint8_t checksumResult = 0;
+unsigned char* ImageBuffer = fw;
+int fullFileLength = len;
+int i, j;
+uint8_t cmd[5], last_byte, prePage;
+int FileLength;
+uint8_t checksumResult = 0;
 
-	//Try 3 Times
-	for (j = 0; j < 3; j++)
+//Try 3 Times
+for (j = 0; j < 3; j++)
+{
+	FileLength = fullFileLength;		
+
+	if ( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
 	{
-		FileLength = fullFileLength;		
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
 
-		if ( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
+	msleep(120);
+
+	himax_lock_flash(0);
+
+	cmd[0] = 0x05;cmd[1] = 0x00;cmd[2] = 0x02;
+	if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
+	{
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+
+	if ( i2c_himax_write(private_ts->client, 0x4F ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
+	{
+		E("%s: i2c access fail!\n", __func__);
+		return 0;
+	}
+	msleep(50);
+
+	himax_ManualMode(1);
+	himax_FlashMode(1);
+
+	FileLength = (FileLength + 3) / 4;
+	for (i = 0, prePage = 0; i < FileLength; i++)
+	{
+		last_byte = 0;
+		cmd[0] = i & 0x1F;
+		if (cmd[0] == 0x1F || i == FileLength - 1)
+		{
+			last_byte = 1;
+		}
+		cmd[1] = (i >> 5) & 0x1F;
+		cmd[2] = (i >> 10) & 0x1F;
+		if ( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
 		{
 			E("%s: i2c access fail!\n", __func__);
 			return 0;
 		}
 
-		msleep(120);
-
-		himax_lock_flash(0);
-
-		cmd[0] = 0x05;cmd[1] = 0x00;cmd[2] = 0x02;
-		if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
+		if (prePage != cmd[1] || i == 0)
 		{
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-
-		if ( i2c_himax_write(private_ts->client, 0x4F ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
-		{
-			E("%s: i2c access fail!\n", __func__);
-			return 0;
-		}
-		msleep(50);
-
-		himax_ManualMode(1);
-		himax_FlashMode(1);
-
-		FileLength = (FileLength + 3) / 4;
-		for (i = 0, prePage = 0; i < FileLength; i++)
-		{
-			last_byte = 0;
-			cmd[0] = i & 0x1F;
-			if (cmd[0] == 0x1F || i == FileLength - 1)
-			{
-				last_byte = 1;
-			}
-			cmd[1] = (i >> 5) & 0x1F;
-			cmd[2] = (i >> 10) & 0x1F;
-			if ( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
-			{
-				E("%s: i2c access fail!\n", __func__);
-				return 0;
-			}
-
-			if (prePage != cmd[1] || i == 0)
-			{
-				prePage = cmd[1];
-				cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				cmd[0] = 0x01;cmd[1] = 0x0D;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-			}
-
-			memcpy(&cmd[0], &ImageBuffer[4*i], 4);
-			if ( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0)
+			prePage = cmd[1];
+			cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
+			if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
 			{
 				E("%s: i2c access fail!\n", __func__);
 				return 0;
@@ -684,791 +662,436 @@ int fts_ctpm_fw_upgrade_with_fs(unsigned char *fw, int len, bool change_iref)
 				E("%s: i2c access fail!\n", __func__);
 				return 0;
 			}
+		}
 
-			if (last_byte == 1)
+		memcpy(&cmd[0], &ImageBuffer[4*i], 4);
+		if ( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0)
+		{
+			E("%s: i2c access fail!\n", __func__);
+			return 0;
+		}
+
+		cmd[0] = 0x01;cmd[1] = 0x0D;//cmd[2] = 0x02;
+		if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+		{
+			E("%s: i2c access fail!\n", __func__);
+			return 0;
+		}
+
+		cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
+		if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+		{
+			E("%s: i2c access fail!\n", __func__);
+			return 0;
+		}
+
+		if (last_byte == 1)
+		{
+			cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
+			if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
 			{
-				cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+				E("%s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			cmd[0] = 0x01;cmd[1] = 0x05;//cmd[2] = 0x02;
+			if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E("%s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
+			if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E("%s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			cmd[0] = 0x01;cmd[1] = 0x00;//cmd[2] = 0x02;
+			if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E("%s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			msleep(10);
+			if (i == (FileLength - 1))
+			{
+				himax_FlashMode(0);
+				himax_ManualMode(0);
+				checksumResult = himax_calculateChecksum(change_iref);//
+				//himax_ManualMode(0);
+				himax_lock_flash(1);
+
+				if (checksumResult) //Success
 				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
+					return 1;
 				}
-
-				cmd[0] = 0x01;cmd[1] = 0x05;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+				else //Fail
 				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				cmd[0] = 0x01;cmd[1] = 0x00;//cmd[2] = 0x02;
-				if ( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E("%s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				msleep(10);
-				if (i == (FileLength - 1))
-				{
-					himax_FlashMode(0);
-					himax_ManualMode(0);
-					checksumResult = himax_calculateChecksum(change_iref);//
-					//himax_ManualMode(0);
-					himax_lock_flash(1);
-
-					if (checksumResult) //Success
-					{
-						return 1;
-					}
-					else //Fail
-					{
-						E("%s: checksumResult fail!\n", __func__);
-						//return 0;
-					}
+					E("%s: checksumResult fail!\n", __func__);
+					//return 0;
 				}
 			}
 		}
 	}
-	return 0;
+}
+return 0;
 }
 
 static int himax_input_register(struct himax_ts_data *ts)
 {
-	int ret;
-	ts->input_dev = input_allocate_device();
-	if (ts->input_dev == NULL) {
-		ret = -ENOMEM;
-		E("%s: Failed to allocate input device\n", __func__);
-		return ret;
-	}
-	ts->input_dev->name = "himax-touchscreen";
+int ret;
+ts->input_dev = input_allocate_device();
+if (ts->input_dev == NULL) {
+	ret = -ENOMEM;
+	E("%s: Failed to allocate input device\n", __func__);
+	return ret;
+}
+ts->input_dev->name = "himax-touchscreen";
 
-	set_bit(EV_SYN, ts->input_dev->evbit);
-	set_bit(EV_ABS, ts->input_dev->evbit);
-	set_bit(EV_KEY, ts->input_dev->evbit);
+set_bit(EV_SYN, ts->input_dev->evbit);
+set_bit(EV_ABS, ts->input_dev->evbit);
+set_bit(EV_KEY, ts->input_dev->evbit);
 
-	set_bit(KEY_BACK, ts->input_dev->keybit);
-	set_bit(KEY_HOME, ts->input_dev->keybit);
-	set_bit(KEY_HOMEPAGE, ts->input_dev->keybit);
-	set_bit(KEY_MENU, ts->input_dev->keybit);
-	set_bit(KEY_SEARCH, ts->input_dev->keybit);
+set_bit(KEY_BACK, ts->input_dev->keybit);
+set_bit(KEY_HOME, ts->input_dev->keybit);
+set_bit(KEY_HOMEPAGE, ts->input_dev->keybit);
+set_bit(KEY_MENU, ts->input_dev->keybit);
+set_bit(KEY_SEARCH, ts->input_dev->keybit);
 #if defined(HX_SMART_WAKEUP)||defined(HX_PALM_REPORT)
-	set_bit(KEY_double_click, ts->input_dev->keybit);
-	set_bit(KEY_CUST_01, ts->input_dev->keybit);
-	set_bit(KEY_CUST_02, ts->input_dev->keybit);
-	set_bit(KEY_CUST_03, ts->input_dev->keybit);
-	set_bit(KEY_CUST_04, ts->input_dev->keybit);
-	set_bit(KEY_CUST_05, ts->input_dev->keybit);
-	set_bit(KEY_CUST_06, ts->input_dev->keybit);
-	set_bit(KEY_CUST_07, ts->input_dev->keybit);
-	set_bit(KEY_CUST_08, ts->input_dev->keybit);
-	set_bit(KEY_CUST_09, ts->input_dev->keybit);
-	set_bit(KEY_CUST_10, ts->input_dev->keybit);
-	set_bit(KEY_CUST_11, ts->input_dev->keybit);
-	set_bit(KEY_CUST_12, ts->input_dev->keybit);
-	set_bit(KEY_CUST_13, ts->input_dev->keybit);
-	set_bit(KEY_CUST_14, ts->input_dev->keybit);
-	set_bit(KEY_CUST_15, ts->input_dev->keybit);
+set_bit(KEY_double_click, ts->input_dev->keybit);
+set_bit(KEY_CUST_01, ts->input_dev->keybit);
+set_bit(KEY_CUST_02, ts->input_dev->keybit);
+set_bit(KEY_CUST_03, ts->input_dev->keybit);
+set_bit(KEY_CUST_04, ts->input_dev->keybit);
+set_bit(KEY_CUST_05, ts->input_dev->keybit);
+set_bit(KEY_CUST_06, ts->input_dev->keybit);
+set_bit(KEY_CUST_07, ts->input_dev->keybit);
+set_bit(KEY_CUST_08, ts->input_dev->keybit);
+set_bit(KEY_CUST_09, ts->input_dev->keybit);
+set_bit(KEY_CUST_10, ts->input_dev->keybit);
+set_bit(KEY_CUST_11, ts->input_dev->keybit);
+set_bit(KEY_CUST_12, ts->input_dev->keybit);
+set_bit(KEY_CUST_13, ts->input_dev->keybit);
+set_bit(KEY_CUST_14, ts->input_dev->keybit);
+set_bit(KEY_CUST_15, ts->input_dev->keybit);
 #endif	
-	set_bit(BTN_TOUCH, ts->input_dev->keybit);
+set_bit(BTN_TOUCH, ts->input_dev->keybit);
 
-	set_bit(KEY_MENU, ts->input_dev->keybit);
+set_bit(KEY_MENU, ts->input_dev->keybit);
 
-	set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
 
-	if (ts->protocol_type == PROTOCOL_TYPE_A) {
-		//ts->input_dev->mtsize = ts->nFinger_support;
-		input_set_abs_params(ts->input_dev, ABS_MT_TRACKING_ID,
-		0, 3, 0, 0);
-	} else {/* PROTOCOL_TYPE_B */
-		set_bit(MT_TOOL_FINGER, ts->input_dev->keybit);
-		input_mt_init_slots(ts->input_dev, ts->nFinger_support,0);
-	}
+if (ts->protocol_type == PROTOCOL_TYPE_A) {
+	//ts->input_dev->mtsize = ts->nFinger_support;
+	input_set_abs_params(ts->input_dev, ABS_MT_TRACKING_ID,
+	0, 3, 0, 0);
+} else {/* PROTOCOL_TYPE_B */
+	set_bit(MT_TOOL_FINGER, ts->input_dev->keybit);
+	input_mt_init_slots(ts->input_dev, ts->nFinger_support,0);
+}
 
-	I("input_set_abs_params: min_x %d, max_x %d, min_y %d, max_y %d\n",
-		ts->pdata->abs_x_min, ts->pdata->abs_x_max, ts->pdata->abs_y_min, ts->pdata->abs_y_max);
+I("input_set_abs_params: min_x %d, max_x %d, min_y %d, max_y %d\n",
+	ts->pdata->abs_x_min, ts->pdata->abs_x_max, ts->pdata->abs_y_min, ts->pdata->abs_y_max);
 
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X,ts->pdata->abs_x_min, ts->pdata->abs_x_max, ts->pdata->abs_x_fuzz, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y,ts->pdata->abs_y_min, ts->pdata->abs_y_max, ts->pdata->abs_y_fuzz, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR,ts->pdata->abs_pressure_min, ts->pdata->abs_pressure_max, ts->pdata->abs_pressure_fuzz, 0);
+input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X,ts->pdata->abs_x_min, ts->pdata->abs_x_max, ts->pdata->abs_x_fuzz, 0);
+input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y,ts->pdata->abs_y_min, ts->pdata->abs_y_max, ts->pdata->abs_y_fuzz, 0);
+input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR,ts->pdata->abs_pressure_min, ts->pdata->abs_pressure_max, ts->pdata->abs_pressure_fuzz, 0);
 //	input_set_abs_params(ts->input_dev, ABS_MT_PRESSURE,ts->pdata->abs_pressure_min, ts->pdata->abs_pressure_max, ts->pdata->abs_pressure_fuzz, 0);
 //	input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR,ts->pdata->abs_width_min, ts->pdata->abs_width_max, ts->pdata->abs_pressure_fuzz, 0);
 
 //	input_set_abs_params(ts->input_dev, ABS_MT_AMPLITUDE, 0, ((ts->pdata->abs_pressure_max << 16) | ts->pdata->abs_width_max), 0, 0);
 //	input_set_abs_params(ts->input_dev, ABS_MT_POSITION, 0, (BIT(31) | (ts->pdata->abs_x_max << 16) | ts->pdata->abs_y_max), 0, 0);
 
-	return input_register_device(ts->input_dev);
+return input_register_device(ts->input_dev);
 }
 
 static void calcDataSize(uint8_t finger_num)
 {
-	struct himax_ts_data *ts_data = private_ts;
-	ts_data->coord_data_size = 4 * finger_num;
-	ts_data->area_data_size = ((finger_num / 4) + (finger_num % 4 ? 1 : 0)) * 4;
-	ts_data->raw_data_frame_size = 128 - ts_data->coord_data_size - ts_data->area_data_size - 4 - 4 - 1;
-	ts_data->raw_data_nframes  = ((uint32_t)ts_data->x_channel * ts_data->y_channel +
-																					ts_data->x_channel + ts_data->y_channel) / ts_data->raw_data_frame_size +
-															(((uint32_t)ts_data->x_channel * ts_data->y_channel +
-		  																		ts_data->x_channel + ts_data->y_channel) % ts_data->raw_data_frame_size)? 1 : 0;
-	I("%s: coord_data_size: %d, area_data_size:%d, raw_data_frame_size:%d, raw_data_nframes:%d", __func__, ts_data->coord_data_size, ts_data->area_data_size, ts_data->raw_data_frame_size, ts_data->raw_data_nframes);
+struct himax_ts_data *ts_data = private_ts;
+ts_data->coord_data_size = 4 * finger_num;
+ts_data->area_data_size = ((finger_num / 4) + (finger_num % 4 ? 1 : 0)) * 4;
+ts_data->raw_data_frame_size = 128 - ts_data->coord_data_size - ts_data->area_data_size - 4 - 4 - 1;
+ts_data->raw_data_nframes  = ((uint32_t)ts_data->x_channel * ts_data->y_channel +
+																				ts_data->x_channel + ts_data->y_channel) / ts_data->raw_data_frame_size +
+														(((uint32_t)ts_data->x_channel * ts_data->y_channel +
+																			ts_data->x_channel + ts_data->y_channel) % ts_data->raw_data_frame_size)? 1 : 0;
+I("%s: coord_data_size: %d, area_data_size:%d, raw_data_frame_size:%d, raw_data_nframes:%d", __func__, ts_data->coord_data_size, ts_data->area_data_size, ts_data->raw_data_frame_size, ts_data->raw_data_nframes);
 }
 
 static void calculate_point_number(void)
 {
-	HX_TOUCH_INFO_POINT_CNT = HX_MAX_PT * 4 ;
+HX_TOUCH_INFO_POINT_CNT = HX_MAX_PT * 4 ;
 
-	if ( (HX_MAX_PT % 4) == 0)
-		HX_TOUCH_INFO_POINT_CNT += (HX_MAX_PT / 4) * 4 ;
-	else
-		HX_TOUCH_INFO_POINT_CNT += ((HX_MAX_PT / 4) +1) * 4 ;
+if ( (HX_MAX_PT % 4) == 0)
+	HX_TOUCH_INFO_POINT_CNT += (HX_MAX_PT / 4) * 4 ;
+else
+	HX_TOUCH_INFO_POINT_CNT += ((HX_MAX_PT / 4) +1) * 4 ;
 }
 #ifdef HX_LOADIN_CONFIG
 static int himax_config_reg_write(struct i2c_client *client, uint8_t StartAddr, uint8_t *data, uint8_t length, uint8_t toRetry)
 {
-	char cmd[12] = {0};
-	
-	cmd[0] = 0x8C;cmd[1] = 0x14;
-	if ((i2c_himax_master_write(client, &cmd[0],2,toRetry))<0)
-		return -1;
+char cmd[12] = {0};
 
-	cmd[0] = 0x8B;cmd[1] = 0x00;cmd[2] = StartAddr;	//Start addr
-	if ((i2c_himax_master_write(client, &cmd[0],3,toRetry))<0)
-		return -1;
+cmd[0] = 0x8C;cmd[1] = 0x14;
+if ((i2c_himax_master_write(client, &cmd[0],2,toRetry))<0)
+	return -1;
 
-	if ((i2c_himax_master_write(client, data,length,toRetry))<0)
-		return -1;
+cmd[0] = 0x8B;cmd[1] = 0x00;cmd[2] = StartAddr;	//Start addr
+if ((i2c_himax_master_write(client, &cmd[0],3,toRetry))<0)
+	return -1;
 
-	cmd[0] = 0x8C;cmd[1] = 0x00;
-	if ((i2c_himax_master_write(client, &cmd[0],2,toRetry))<0)
-		return -1;
-	
-	return 0;
+if ((i2c_himax_master_write(client, data,length,toRetry))<0)
+	return -1;
+
+cmd[0] = 0x8C;cmd[1] = 0x00;
+if ((i2c_himax_master_write(client, &cmd[0],2,toRetry))<0)
+	return -1;
+
+return 0;
 }
 #endif
 void himax_touch_information(void)
 {
-	char data[12] = {0};
-	
-	I("%s:IC_TYPE =%d\n", __func__,IC_TYPE);
-	
-	if(IC_TYPE == HX_85XX_ES_SERIES_PWON)
-		{
-	  		data[0] = 0x8C;
-	  		data[1] = 0x14;
-		  	i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	data[0] = 0x8B;
-		  	data[1] = 0x00;
-		  	data[2] = 0x70;
-		  	i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	i2c_himax_read(private_ts->client, 0x5A, data, 12, DEFAULT_RETRY_CNT);
-		  	HX_RX_NUM = data[0];				 // FE(70)
-		  	HX_TX_NUM = data[1];				 // FE(71)
-		  	HX_MAX_PT = (data[2] & 0xF0) >> 4; // FE(72)
+char data[12] = {0};
+
+I("%s:IC_TYPE =%d\n", __func__,IC_TYPE);
+
+if(IC_TYPE == HX_85XX_ES_SERIES_PWON)
+	{
+		data[0] = 0x8C;
+		data[1] = 0x14;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+		data[0] = 0x8B;
+		data[1] = 0x00;
+		data[2] = 0x70;
+		i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(10);
+		i2c_himax_read(private_ts->client, 0x5A, data, 12, DEFAULT_RETRY_CNT);
+		HX_RX_NUM = data[0];				 // FE(70)
+		HX_TX_NUM = data[1];				 // FE(71)
+		HX_MAX_PT = (data[2] & 0xF0) >> 4; // FE(72)
 #ifdef HX_EN_SEL_BUTTON
-		  	HX_BT_NUM = (data[2] & 0x0F); //FE(72)
+		HX_BT_NUM = (data[2] & 0x0F); //FE(72)
 #endif
-		  	if((data[4] & 0x04) == 0x04) {//FE(74)
-				HX_XY_REVERSE = true;
-			HX_Y_RES = data[6]*256 + data[7]; //FE(76),FE(77)
-			HX_X_RES = data[8]*256 + data[9]; //FE(78),FE(79)
-		  	} else {
-			HX_XY_REVERSE = false;
-			HX_X_RES = data[6]*256 + data[7]; //FE(76),FE(77)
-			HX_Y_RES = data[8]*256 + data[9]; //FE(78),FE(79)
-		  	}
-		  	data[0] = 0x8C;
-		  	data[1] = 0x00;
-		  	i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-		  	msleep(10);
+		if((data[4] & 0x04) == 0x04) {//FE(74)
+			HX_XY_REVERSE = true;
+		HX_Y_RES = data[6]*256 + data[7]; //FE(76),FE(77)
+		HX_X_RES = data[8]*256 + data[9]; //FE(78),FE(79)
+		} else {
+		HX_XY_REVERSE = false;
+		HX_X_RES = data[6]*256 + data[7]; //FE(76),FE(77)
+		HX_Y_RES = data[8]*256 + data[9]; //FE(78),FE(79)
+		}
+		data[0] = 0x8C;
+		data[1] = 0x00;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
 #ifdef HX_EN_MUT_BUTTON
-			data[0] = 0x8C;
-		  	data[1] = 0x14;
-		  	i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	data[0] = 0x8B;
-		  	data[1] = 0x00;
-		  	data[2] = 0x64;
-		  	i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	i2c_himax_read(private_ts->client, 0x5A, data, 4, DEFAULT_RETRY_CNT);
-		  	HX_BT_NUM = (data[0] & 0x03);
-		  	data[0] = 0x8C;
-		  	data[1] = 0x00;
-		  	i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-		  	msleep(10);
+		data[0] = 0x8C;
+		data[1] = 0x14;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+		data[0] = 0x8B;
+		data[1] = 0x00;
+		data[2] = 0x64;
+		i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(10);
+		i2c_himax_read(private_ts->client, 0x5A, data, 4, DEFAULT_RETRY_CNT);
+		HX_BT_NUM = (data[0] & 0x03);
+		data[0] = 0x8C;
+		data[1] = 0x00;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
 #endif
 #ifdef HX_TP_PROC_2T2R
-			data[0] = 0x8C;
-			data[1] = 0x14;
-			i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-			msleep(10);
-			
-			data[0] = 0x8B;
-			data[1] = 0x00;
-			data[2] = HX_2T2R_Addr;
-			i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
-			msleep(10);
-			
-			i2c_himax_read(private_ts->client, 0x5A, data, 10, DEFAULT_RETRY_CNT);
-			
-			HX_RX_NUM_2 = data[0];				 
-			HX_TX_NUM_2 = data[1];				 
-			
-			I("%s:Touch Panel Type=%d \n", __func__,data[2]);
-			if(data[2]==HX_2T2R_en_setting)//2T2R type panel
-				Is_2T2R = true;
-			else
-				Is_2T2R = false;
-			
-			data[0] = 0x8C;
-			data[1] = 0x00;
-			i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-			msleep(10);
-#endif
-		  	data[0] = 0x8C;
-		  	data[1] = 0x14;
-		  	i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	data[0] = 0x8B;
-		  	data[1] = 0x00;
-		  	data[2] = 0x02;
-		  	i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
-		  	msleep(10);
-		  	i2c_himax_read(private_ts->client, 0x5A, data, 10, DEFAULT_RETRY_CNT);
-		  	if((data[1] & 0x01) == 1) {//FE(02)
-				HX_INT_IS_EDGE = true;
-		  	} else {
-				HX_INT_IS_EDGE = false;
-		  	}
-		  	data[0] = 0x8C;
-			data[1] = 0x00;
-			i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
-			msleep(10);
-			I("%s:HX_RX_NUM =%d,HX_TX_NUM =%d,HX_MAX_PT=%d \n", __func__,HX_RX_NUM,HX_TX_NUM,HX_MAX_PT);
-
-			if (i2c_himax_read(private_ts->client, HX_VER_FW_CFG, data, 1, 3) < 0) {
-				E("%s: i2c access fail!\n", __func__);
-			}
-			private_ts->vendor_config_ver = data[0];
-			I("config_ver=%x.\n",private_ts->vendor_config_ver);
-		}
+		data[0] = 0x8C;
+		data[1] = 0x14;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+		
+		data[0] = 0x8B;
+		data[1] = 0x00;
+		data[2] = HX_2T2R_Addr;
+		i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(10);
+		
+		i2c_himax_read(private_ts->client, 0x5A, data, 10, DEFAULT_RETRY_CNT);
+		
+		HX_RX_NUM_2 = data[0];				 
+		HX_TX_NUM_2 = data[1];				 
+		
+		I("%s:Touch Panel Type=%d \n", __func__,data[2]);
+		if(data[2]==HX_2T2R_en_setting)//2T2R type panel
+			Is_2T2R = true;
 		else
-		{
-			HX_RX_NUM				= 0;
-			HX_TX_NUM				= 0;
-			HX_BT_NUM				= 0;
-			HX_X_RES				= 0;
-			HX_Y_RES				= 0;
-			HX_MAX_PT				= 0;
-			HX_XY_REVERSE			= false;
-			HX_INT_IS_EDGE			= false;
+			Is_2T2R = false;
+		
+		data[0] = 0x8C;
+		data[1] = 0x00;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+#endif
+		data[0] = 0x8C;
+		data[1] = 0x14;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+		data[0] = 0x8B;
+		data[1] = 0x00;
+		data[2] = 0x02;
+		i2c_himax_master_write(private_ts->client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(10);
+		i2c_himax_read(private_ts->client, 0x5A, data, 10, DEFAULT_RETRY_CNT);
+		if((data[1] & 0x01) == 1) {//FE(02)
+			HX_INT_IS_EDGE = true;
+		} else {
+			HX_INT_IS_EDGE = false;
 		}
+		data[0] = 0x8C;
+		data[1] = 0x00;
+		i2c_himax_master_write(private_ts->client, &data[0],2,DEFAULT_RETRY_CNT);
+		msleep(10);
+		I("%s:HX_RX_NUM =%d,HX_TX_NUM =%d,HX_MAX_PT=%d \n", __func__,HX_RX_NUM,HX_TX_NUM,HX_MAX_PT);
+
+		if (i2c_himax_read(private_ts->client, HX_VER_FW_CFG, data, 1, 3) < 0) {
+			E("%s: i2c access fail!\n", __func__);
+		}
+		private_ts->vendor_config_ver = data[0];
+		I("config_ver=%x.\n",private_ts->vendor_config_ver);
+	}
+	else
+	{
+		HX_RX_NUM				= 0;
+		HX_TX_NUM				= 0;
+		HX_BT_NUM				= 0;
+		HX_X_RES				= 0;
+		HX_Y_RES				= 0;
+		HX_MAX_PT				= 0;
+		HX_XY_REVERSE			= false;
+		HX_INT_IS_EDGE			= false;
+	}
 }
 static uint8_t himax_read_Sensor_ID(struct i2c_client *client)
 {	
-	uint8_t val_high[1], val_low[1], ID0=0, ID1=0;
-	uint8_t sensor_id;
-	char data[3];
-	
-	data[0] = 0x56; data[1] = 0x02; data[2] = 0x02;/*ID pin PULL High*/
-	i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
-	msleep(1);
+uint8_t val_high[1], val_low[1], ID0=0, ID1=0;
+uint8_t sensor_id;
+char data[3];
 
-	//read id pin high
-	i2c_himax_read(client, 0x57, val_high, 1, DEFAULT_RETRY_CNT);
+data[0] = 0x56; data[1] = 0x02; data[2] = 0x02;/*ID pin PULL High*/
+i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
+msleep(1);
 
-	data[0] = 0x56; data[1] = 0x01; data[2] = 0x01;/*ID pin PULL Low*/
-	i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
-	msleep(1);
+//read id pin high
+i2c_himax_read(client, 0x57, val_high, 1, DEFAULT_RETRY_CNT);
 
-	//read id pin low
-	i2c_himax_read(client, 0x57, val_low, 1, DEFAULT_RETRY_CNT);
+data[0] = 0x56; data[1] = 0x01; data[2] = 0x01;/*ID pin PULL Low*/
+i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
+msleep(1);
 
-	if((val_high[0] & 0x01) ==0)
-		ID0=0x02;/*GND*/
-	else if((val_low[0] & 0x01) ==0)
-		ID0=0x01;/*Floating*/
-	else
-		ID0=0x04;/*VCC*/
-	
-	if((val_high[0] & 0x02) ==0)
-		ID1=0x02;/*GND*/
-	else if((val_low[0] & 0x02) ==0)
-		ID1=0x01;/*Floating*/
-	else
-		ID1=0x04;/*VCC*/
-	if((ID0==0x04)&&(ID1!=0x04))
-		{
-			data[0] = 0x56; data[1] = 0x02; data[2] = 0x01;/*ID pin PULL High,Low*/
-			i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
-			msleep(1);
+//read id pin low
+i2c_himax_read(client, 0x57, val_low, 1, DEFAULT_RETRY_CNT);
 
-		}
-	else if((ID0!=0x04)&&(ID1==0x04))
-		{
-			data[0] = 0x56; data[1] = 0x01; data[2] = 0x02;/*ID pin PULL Low,High*/
-			i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
-			msleep(1);
+if((val_high[0] & 0x01) ==0)
+	ID0=0x02;/*GND*/
+else if((val_low[0] & 0x01) ==0)
+	ID0=0x01;/*Floating*/
+else
+	ID0=0x04;/*VCC*/
 
-		}
-	else if((ID0==0x04)&&(ID1==0x04))
-		{
-			data[0] = 0x56; data[1] = 0x02; data[2] = 0x02;/*ID pin PULL High,High*/
-			i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
-			msleep(1);
+if((val_high[0] & 0x02) ==0)
+	ID1=0x02;/*GND*/
+else if((val_low[0] & 0x02) ==0)
+	ID1=0x01;/*Floating*/
+else
+	ID1=0x04;/*VCC*/
+if((ID0==0x04)&&(ID1!=0x04))
+	{
+		data[0] = 0x56; data[1] = 0x02; data[2] = 0x01;/*ID pin PULL High,Low*/
+		i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(1);
 
-		}
-	sensor_id=(ID1<<4)|ID0;
+	}
+else if((ID0!=0x04)&&(ID1==0x04))
+	{
+		data[0] = 0x56; data[1] = 0x01; data[2] = 0x02;/*ID pin PULL Low,High*/
+		i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(1);
 
-	data[0] = 0xF3; data[1] = sensor_id;
-	i2c_himax_master_write(client, &data[0],2,DEFAULT_RETRY_CNT);/*Write to MCU*/
-	msleep(1);
+	}
+else if((ID0==0x04)&&(ID1==0x04))
+	{
+		data[0] = 0x56; data[1] = 0x02; data[2] = 0x02;/*ID pin PULL High,High*/
+		i2c_himax_master_write(client, &data[0],3,DEFAULT_RETRY_CNT);
+		msleep(1);
 
-	return sensor_id;
+	}
+sensor_id=(ID1<<4)|ID0;
+
+data[0] = 0xF3; data[1] = sensor_id;
+i2c_himax_master_write(client, &data[0],2,DEFAULT_RETRY_CNT);/*Write to MCU*/
+msleep(1);
+
+return sensor_id;
 
 }
 static void himax_power_on_initCMD(struct i2c_client *client)
 {
-	I("%s:\n", __func__);
-	//Sense on to update the information
-	i2c_himax_write_command(client, 0x83, DEFAULT_RETRY_CNT);
-	msleep(30);
+I("%s:\n", __func__);
+//Sense on to update the information
+i2c_himax_write_command(client, 0x83, DEFAULT_RETRY_CNT);
+msleep(30);
 
-	i2c_himax_write_command(client, 0x81, DEFAULT_RETRY_CNT);
-	msleep(50);
+i2c_himax_write_command(client, 0x81, DEFAULT_RETRY_CNT);
+msleep(50);
 
-	i2c_himax_write_command(client, 0x82, DEFAULT_RETRY_CNT);
-	msleep(50);
+i2c_himax_write_command(client, 0x82, DEFAULT_RETRY_CNT);
+msleep(50);
 
-	i2c_himax_write_command(client, 0x80, DEFAULT_RETRY_CNT);
-	msleep(50);
+i2c_himax_write_command(client, 0x80, DEFAULT_RETRY_CNT);
+msleep(50);
 
-	himax_touch_information();	
+himax_touch_information();	
 
-	i2c_himax_write_command(client, 0x83, DEFAULT_RETRY_CNT);
-	msleep(30);
+i2c_himax_write_command(client, 0x83, DEFAULT_RETRY_CNT);
+msleep(30);
 
-	i2c_himax_write_command(client, 0x81, DEFAULT_RETRY_CNT);
-	msleep(50);
+i2c_himax_write_command(client, 0x81, DEFAULT_RETRY_CNT);
+msleep(50);
 }
 
 #ifdef HX_AUTO_UPDATE_FW
 static int i_update_FW(void)
 {
-	unsigned char* ImageBuffer;
-	int fullFileLength; 
+unsigned char* ImageBuffer;
+int fullFileLength; 
 
-	if(private_ts->vendor_config_ver<FW_DTGS_VER){  /////////<C50///////////////////////////////
-		I("deng, himax FW version < C50\n");
-		ImageBuffer = i_CTPM_FW_C0X;
-		fullFileLength = sizeof(i_CTPM_FW_C0X);
-		
-		I("IMAGE FW_VER=%x,%x.\n",i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR],i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR]);
-		I("IMAGE CFG_VER=%x.\n",i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR]);
-		if (( private_ts->vendor_fw_ver_H < i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR] )
-			|| ( private_ts->vendor_fw_ver_L < i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR] )
-			|| ( private_ts->vendor_config_ver < i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR] )
-			|| ( himax_calculateChecksum(false) == 0 ))
-			{
-#ifdef HX_RST_PIN_FUNC
-				himax_HW_reset(false,true);
-#endif
-				if(fts_ctpm_fw_upgrade_with_fs(ImageBuffer,fullFileLength,true) == 0)
-					E("%s: TP upgrade error\n", __func__);
-				else
-					{
-						I("%s: TP upgrade OK\n", __func__);
-						private_ts->vendor_fw_ver_H = i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR];
-						private_ts->vendor_fw_ver_L = i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR];
-						private_ts->vendor_config_ver = i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR];
-					}
-#ifdef HX_RST_PIN_FUNC
-				himax_HW_reset(false,true);
-#endif
-				return 1;	
-			}
-		else
-			return 0;
-
-		
-	}
-	else{			//////////////////////> C50/////////////////////////////////////////////
-		I("deng, himax FW version > C50\n");
-		ImageBuffer = i_CTPM_FW_C5X;
-		fullFileLength = sizeof(i_CTPM_FW_C5X);
-		
-		I("IMAGE FW_VER=%x,%x.\n",i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR],i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR]);
-		I("IMAGE CFG_VER=%x.\n",i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR]);
-		if (( private_ts->vendor_fw_ver_H < i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR] )
-			|| ( private_ts->vendor_fw_ver_L < i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR] )
-			|| ( private_ts->vendor_config_ver < i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR] )
-			|| ( himax_calculateChecksum(false) == 0 ))
-			{
-#ifdef HX_RST_PIN_FUNC
-				himax_HW_reset(false,true);
-#endif
-				if(fts_ctpm_fw_upgrade_with_fs(ImageBuffer,fullFileLength,true) == 0)
-					E("%s: TP upgrade error\n", __func__);
-				else
-					{
-						I("%s: TP upgrade OK\n", __func__);
-						private_ts->vendor_fw_ver_H = i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR];
-						private_ts->vendor_fw_ver_L = i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR];
-						private_ts->vendor_config_ver = i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR];
-					}
-#ifdef HX_RST_PIN_FUNC
-				himax_HW_reset(false,true);
-#endif
-				return 1;	
-			}
-		else
-			return 0;
-
-		
-	}	
-}
-#endif
-
-#ifdef HX_AUTO_UPDATE_CONFIG
-int fts_ctpm_fw_upgrade_with_i_file_flash_cfg(struct himax_config *cfg)
-{
-	unsigned char* ImageBuffer= i_CTPM_FW;//NULL ;//
-	int fullFileLength = FLASH_SIZE;
+if(private_ts->vendor_config_ver<FW_DTGS_VER){  /////////<C50///////////////////////////////
+	I("deng, himax FW version < C50\n");
+	ImageBuffer = i_CTPM_FW_C0X;
+	fullFileLength = sizeof(i_CTPM_FW_C0X);
 	
-	int i, j, k;
-	uint8_t cmd[5], last_byte, prePage;
-	uint8_t tmp[5];
-	int FileLength;
-	int Polynomial = 0x82F63B78;
-	int CRC32 = 0xFFFFFFFF;
-	int BinDataWord = 0;
-	int current_index = 0;
-	uint8_t checksumResult = 0;
-
-	I(" %s: flash CONFIG only START!\n", __func__);
-
-#if 0
-	//=========Dump FW image from Flash========
-	setSysOperation(1);
-	setFlashCommand(0x0F);
-	setFlashDumpProgress(0);
-	setFlashDumpComplete(0);
-	setFlashDumpFail(0);
-	queue_work(private_ts->flash_wq, &private_ts->flash_work);
-	for(i=0 ; i<1024 ; i++)
-		{
-			if(getFlashDumpComplete())
-				{
-					ImageBuffer = flash_buffer;
-					fullFileLength = FLASH_SIZE;
-					I(" %s: Load FW from flash OK! cycle=%d fullFileLength=%x\n", __func__,i,fullFileLength);
-					break;
-				}
-			msleep(5);
-		}
-	if(i==400)
-	{
-		E(" %s: Load FW from flash time out fail!\n", __func__);
-		return 0;
-	}
-	//===================================
-#endif	
-	current_index = CFB_START_ADDR + CFB_INFO_LENGTH;		
-
-	//Update the Config Part from config array
-	for(i=1 ; i<sizeof(cfg->c1)/sizeof(cfg->c1[0]) ; i++) ImageBuffer[current_index++] = cfg->c1[i];
-	for(i=1 ; i<sizeof(cfg->c2)/sizeof(cfg->c2[0]) ; i++) ImageBuffer[current_index++] = cfg->c2[i];
-	for(i=1 ; i<sizeof(cfg->c3)/sizeof(cfg->c3[0]) ; i++) ImageBuffer[current_index++] = cfg->c3[i];
-	for(i=1 ; i<sizeof(cfg->c4)/sizeof(cfg->c4[0]) ; i++) ImageBuffer[current_index++] = cfg->c4[i];
-	for(i=1 ; i<sizeof(cfg->c5)/sizeof(cfg->c5[0]) ; i++) ImageBuffer[current_index++] = cfg->c5[i];
-	for(i=1 ; i<sizeof(cfg->c6)/sizeof(cfg->c6[0]) ; i++) ImageBuffer[current_index++] = cfg->c6[i];
-	for(i=1 ; i<sizeof(cfg->c7)/sizeof(cfg->c7[0]) ; i++) ImageBuffer[current_index++] = cfg->c7[i];
-	for(i=1 ; i<sizeof(cfg->c8)/sizeof(cfg->c8[0]) ; i++) ImageBuffer[current_index++] = cfg->c8[i];
-	for(i=1 ; i<sizeof(cfg->c9)/sizeof(cfg->c9[0]) ; i++) ImageBuffer[current_index++] = cfg->c9[i];
-	for(i=1 ; i<sizeof(cfg->c10)/sizeof(cfg->c10[0]) ; i++) ImageBuffer[current_index++] = cfg->c10[i];
-	for(i=1 ; i<sizeof(cfg->c11)/sizeof(cfg->c11[0]) ; i++) ImageBuffer[current_index++] = cfg->c11[i];
-	for(i=1 ; i<sizeof(cfg->c12)/sizeof(cfg->c12[0]) ; i++) ImageBuffer[current_index++] = cfg->c12[i];
-	for(i=1 ; i<sizeof(cfg->c13)/sizeof(cfg->c13[0]) ; i++) ImageBuffer[current_index++] = cfg->c13[i];
-	for(i=1 ; i<sizeof(cfg->c14)/sizeof(cfg->c14[0]) ; i++) ImageBuffer[current_index++] = cfg->c14[i];
-	for(i=1 ; i<sizeof(cfg->c15)/sizeof(cfg->c15[0]) ; i++) ImageBuffer[current_index++] = cfg->c15[i];
-	for(i=1 ; i<sizeof(cfg->c16)/sizeof(cfg->c16[0]) ; i++) ImageBuffer[current_index++] = cfg->c16[i];
-	for(i=1 ; i<sizeof(cfg->c17)/sizeof(cfg->c17[0]) ; i++) ImageBuffer[current_index++] = cfg->c17[i];
-	for(i=1 ; i<sizeof(cfg->c18)/sizeof(cfg->c18[0]) ; i++) ImageBuffer[current_index++] = cfg->c18[i];
-	for(i=1 ; i<sizeof(cfg->c19)/sizeof(cfg->c19[0]) ; i++) ImageBuffer[current_index++] = cfg->c19[i];
-	for(i=1 ; i<sizeof(cfg->c20)/sizeof(cfg->c20[0]) ; i++) ImageBuffer[current_index++] = cfg->c20[i];
-	for(i=1 ; i<sizeof(cfg->c21)/sizeof(cfg->c21[0]) ; i++) ImageBuffer[current_index++] = cfg->c21[i];
-	for(i=1 ; i<sizeof(cfg->c22)/sizeof(cfg->c22[0]) ; i++) ImageBuffer[current_index++] = cfg->c22[i];
-	for(i=1 ; i<sizeof(cfg->c23)/sizeof(cfg->c23[0]) ; i++) ImageBuffer[current_index++] = cfg->c23[i];
-	for(i=1 ; i<sizeof(cfg->c24)/sizeof(cfg->c24[0]) ; i++) ImageBuffer[current_index++] = cfg->c24[i];
-	for(i=1 ; i<sizeof(cfg->c25)/sizeof(cfg->c25[0]) ; i++) ImageBuffer[current_index++] = cfg->c25[i];
-	for(i=1 ; i<sizeof(cfg->c26)/sizeof(cfg->c26[0]) ; i++) ImageBuffer[current_index++] = cfg->c26[i];
-	for(i=1 ; i<sizeof(cfg->c27)/sizeof(cfg->c27[0]) ; i++) ImageBuffer[current_index++] = cfg->c27[i];
-	for(i=1 ; i<sizeof(cfg->c28)/sizeof(cfg->c28[0]) ; i++) ImageBuffer[current_index++] = cfg->c28[i];
-	for(i=1 ; i<sizeof(cfg->c29)/sizeof(cfg->c29[0]) ; i++) ImageBuffer[current_index++] = cfg->c29[i];
-	for(i=1 ; i<sizeof(cfg->c30)/sizeof(cfg->c30[0]) ; i++) ImageBuffer[current_index++] = cfg->c30[i];
-	for(i=1 ; i<sizeof(cfg->c31)/sizeof(cfg->c31[0]) ; i++) ImageBuffer[current_index++] = cfg->c31[i];
-	for(i=1 ; i<sizeof(cfg->c32)/sizeof(cfg->c32[0]) ; i++) ImageBuffer[current_index++] = cfg->c32[i];
-	for(i=1 ; i<sizeof(cfg->c33)/sizeof(cfg->c33[0]) ; i++) ImageBuffer[current_index++] = cfg->c33[i];
-	for(i=1 ; i<sizeof(cfg->c34)/sizeof(cfg->c34[0]) ; i++) ImageBuffer[current_index++] = cfg->c34[i];
-	for(i=1 ; i<sizeof(cfg->c35)/sizeof(cfg->c35[0]) ; i++) ImageBuffer[current_index++] = cfg->c35[i];
-	for(i=1 ; i<sizeof(cfg->c36)/sizeof(cfg->c36[0]) ; i++) ImageBuffer[current_index++] = cfg->c36[i];
-	for(i=1 ; i<sizeof(cfg->c37)/sizeof(cfg->c37[0]) ; i++) ImageBuffer[current_index++] = cfg->c37[i];
-	for(i=1 ; i<sizeof(cfg->c38)/sizeof(cfg->c38[0]) ; i++) ImageBuffer[current_index++] = cfg->c38[i];
-	for(i=1 ; i<sizeof(cfg->c39)/sizeof(cfg->c39[0]) ; i++) ImageBuffer[current_index++] = cfg->c39[i];
-	current_index=current_index+50;//dummy data
-	//I(" %s: current_index=%d\n", __func__,current_index);
-	for(i=1 ; i<sizeof(cfg->c40)/sizeof(cfg->c40[0]) ; i++) ImageBuffer[current_index++] = cfg->c40[i];
-	for(i=1 ; i<sizeof(cfg->c41)/sizeof(cfg->c41[0]) ; i++) ImageBuffer[current_index++] = cfg->c41[i];
-
-	//cal_checksum start//
-	FileLength = fullFileLength;		
-	FileLength = (FileLength + 3) / 4;
-	for (i = 0; i < FileLength; i++)
-	{
-		memcpy(&cmd[0], &ImageBuffer[4*i], 4);
-		if (i < (FileLength - 1))/*cal_checksum*/
-		{
-			for(k = 0; k < 4; k++)
-			{
-				BinDataWord |= cmd[k] << (k * 8);
-			}
-
-			CRC32 = BinDataWord ^ CRC32;
-			for(k = 0; k < 32; k++)
-			{
-				if((CRC32 % 2) != 0)
-				{
-					CRC32 = ((CRC32 >> 1) & 0x7FFFFFFF) ^ Polynomial;
-				}
-				else
-				{
-					CRC32 = ((CRC32 >> 1) & 0x7FFFFFFF);
-				}
-			}
-			BinDataWord = 0;
-		}
-	}
-	//cal_checksum end//
-	
-	//Try 3 Times
-	for (j = 0; j < 3; j++) 
-	{
-		FileLength = fullFileLength;
-		
-		if( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
-		{
-			E(" %s: i2c access fail!\n", __func__);
-			return 0;
-		}
-
-		msleep(120);
-	
-		himax_lock_flash(0);
-	
-		himax_ManualMode(1);
-		himax_FlashMode(1);
-	
-		FileLength = (FileLength + 3) / 4;
-		for (i = 0, prePage = 0; i < FileLength; i++)
-		{
-			last_byte = 0;
-
-			if(i<0x20)
-				continue;
-			else if((i>0xBF)&&(i<(FileLength-0x20)))
-				continue;
-			
-			cmd[0] = i & 0x1F;
-			if (cmd[0] == 0x1F || i == FileLength - 1)
-			{
-				last_byte = 1;
-			}
-			cmd[1] = (i >> 5) & 0x1F;
-			cmd[2] = (i >> 10) & 0x1F;
-
-			if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
-			{
-				E(" %s: i2c access fail!\n", __func__);
-				return 0;
-			}
-
-			//I(" %s: CMD 44 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
-			if (prePage != cmd[1] || i == 0x20) 
-			{
-				prePage = cmd[1];
-				//I(" %s: %d page erase\n",__func__,prePage);
-				tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-			
-				tmp[0] = 0x05;tmp[1] = 0x2D;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-				msleep(30);
-				tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-				
-				//I(" %s: CMD 44-47 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
-				
-				tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-			
-				tmp[0] = 0x01;tmp[1] = 0x0D;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-				tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-				
-				//I(" %s: CMD 44-45 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
-				//I(" %s: Erase Page num=%x\n", __func__,prePage);
-			}
-	
-			memcpy(&cmd[0], &ImageBuffer[4*i], 4);
-						
-			if (i == (FileLength - 1)) 
-			{
-				tmp[0]= (CRC32 & 0xFF);
-				tmp[1]= ((CRC32 >>8) & 0xFF);
-				tmp[2]= ((CRC32 >>16) & 0xFF);
-				tmp[3]= ((CRC32 >>24) & 0xFF);
-					
-				memcpy(&cmd[0], &tmp[0], 4);
-				I("%s last_byte = 1, CRC32= %x, =[0,1,2,3] = %x,%x,%x,%x \n",__func__, CRC32,tmp[0],tmp[1],tmp[2],tmp[3]);
-			}
-			
-			if( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0)
-			{
-				E(" %s: i2c access fail!\n", __func__);
-				return 0;
-			}
-			//I(" %s: CMD 48 \n", __func__);
-			cmd[0] = 0x01;cmd[1] = 0x0D;//cmd[2] = 0x02;
-			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-			{
-				E(" %s: i2c access fail!\n", __func__);
-				return 0;
-			}
-			
-			cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
-			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-			{
-				E(" %s: i2c access fail!\n", __func__);
-				return 0;
-			}
-			
-			if (last_byte == 1) 
-			{
-				cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-				
-				cmd[0] = 0x01;cmd[1] = 0x05;//cmd[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-	
-				cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-	
-				cmd[0] = 0x01;cmd[1] = 0x00;//cmd[2] = 0x02;
-				if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
-				{
-					E(" %s: i2c access fail!\n", __func__);
-					return 0;
-				}
-
-				msleep(10);
-				if (i == (FileLength - 1))
-				{
-					himax_FlashMode(0);
-					himax_ManualMode(0);
-					checksumResult = himax_calculateChecksum(true);//
-					//himax_ManualMode(0);
-					himax_lock_flash(1);
-
-					I(" %s: flash CONFIG only END!\n", __func__);
-					if (checksumResult) //Success
-					{
-						return 1;
-					}
-					else //Fail
-					{
-						E("%s: checksumResult fail!\n", __func__);
-						return 0;
-					}
-				}
-			}
-		}
-	}
-	return 0;
-}
-
-static int i_update_FWCFG(struct himax_config *cfg)
-{
-	I("%s: CHIP CONFG version=%x\n", __func__,private_ts->vendor_config_ver);
-	I("%s: LOAD CONFG version=%x\n", __func__,cfg->c40[1]);
-	
-	if ( private_ts->vendor_config_ver != cfg->c40[1] )
+	I("IMAGE FW_VER=%x,%x.\n",i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR],i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR]);
+	I("IMAGE CFG_VER=%x.\n",i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR]);
+	if (( private_ts->vendor_fw_ver_H < i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR] )
+		|| ( private_ts->vendor_fw_ver_L < i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR] )
+		|| ( private_ts->vendor_config_ver < i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR] )
+		|| ( himax_calculateChecksum(false) == 0 ))
 		{
 #ifdef HX_RST_PIN_FUNC
 			himax_HW_reset(false,true);
 #endif
-			if(fts_ctpm_fw_upgrade_with_i_file_flash_cfg(cfg) == 0)
+			if(fts_ctpm_fw_upgrade_with_fs(ImageBuffer,fullFileLength,true) == 0)
 				E("%s: TP upgrade error\n", __func__);
 			else
-				I("%s: TP upgrade OK\n", __func__);
+				{
+					I("%s: TP upgrade OK\n", __func__);
+					private_ts->vendor_fw_ver_H = i_CTPM_FW_C0X[FW_VER_MAJ_FLASH_ADDR];
+					private_ts->vendor_fw_ver_L = i_CTPM_FW_C0X[FW_VER_MIN_FLASH_ADDR];
+					private_ts->vendor_config_ver = i_CTPM_FW_C0X[FW_CFG_VER_FLASH_ADDR];
+				}
 #ifdef HX_RST_PIN_FUNC
 			himax_HW_reset(false,true);
 #endif
@@ -1476,6 +1099,383 @@ static int i_update_FWCFG(struct himax_config *cfg)
 		}
 	else
 		return 0;
+
+	
+}
+else{			//////////////////////> C50/////////////////////////////////////////////
+	I("deng, himax FW version > C50\n");
+	ImageBuffer = i_CTPM_FW_C5X;
+	fullFileLength = sizeof(i_CTPM_FW_C5X);
+	
+	I("IMAGE FW_VER=%x,%x.\n",i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR],i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR]);
+	I("IMAGE CFG_VER=%x.\n",i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR]);
+	if (( private_ts->vendor_fw_ver_H < i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR] )
+		|| ( private_ts->vendor_fw_ver_L < i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR] )
+		|| ( private_ts->vendor_config_ver < i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR] )
+		|| ( himax_calculateChecksum(false) == 0 ))
+		{
+#ifdef HX_RST_PIN_FUNC
+			himax_HW_reset(false,true);
+#endif
+			if(fts_ctpm_fw_upgrade_with_fs(ImageBuffer,fullFileLength,true) == 0)
+				E("%s: TP upgrade error\n", __func__);
+			else
+				{
+					I("%s: TP upgrade OK\n", __func__);
+					private_ts->vendor_fw_ver_H = i_CTPM_FW_C5X[FW_VER_MAJ_FLASH_ADDR];
+					private_ts->vendor_fw_ver_L = i_CTPM_FW_C5X[FW_VER_MIN_FLASH_ADDR];
+					private_ts->vendor_config_ver = i_CTPM_FW_C5X[FW_CFG_VER_FLASH_ADDR];
+				}
+#ifdef HX_RST_PIN_FUNC
+			himax_HW_reset(false,true);
+#endif
+			return 1;	
+		}
+	else
+		return 0;
+
+	
+}	
+}
+#endif
+
+#ifdef HX_AUTO_UPDATE_CONFIG
+int fts_ctpm_fw_upgrade_with_i_file_flash_cfg(struct himax_config *cfg)
+{
+unsigned char* ImageBuffer= i_CTPM_FW;//NULL ;//
+int fullFileLength = FLASH_SIZE;
+
+int i, j, k;
+uint8_t cmd[5], last_byte, prePage;
+uint8_t tmp[5];
+int FileLength;
+int Polynomial = 0x82F63B78;
+int CRC32 = 0xFFFFFFFF;
+int BinDataWord = 0;
+int current_index = 0;
+uint8_t checksumResult = 0;
+
+I(" %s: flash CONFIG only START!\n", __func__);
+
+#if 0
+//=========Dump FW image from Flash========
+setSysOperation(1);
+setFlashCommand(0x0F);
+setFlashDumpProgress(0);
+setFlashDumpComplete(0);
+setFlashDumpFail(0);
+queue_work(private_ts->flash_wq, &private_ts->flash_work);
+for(i=0 ; i<1024 ; i++)
+	{
+		if(getFlashDumpComplete())
+			{
+				ImageBuffer = flash_buffer;
+				fullFileLength = FLASH_SIZE;
+				I(" %s: Load FW from flash OK! cycle=%d fullFileLength=%x\n", __func__,i,fullFileLength);
+				break;
+			}
+		msleep(5);
+	}
+if(i==400)
+{
+	E(" %s: Load FW from flash time out fail!\n", __func__);
+	return 0;
+}
+//===================================
+#endif	
+current_index = CFB_START_ADDR + CFB_INFO_LENGTH;		
+
+//Update the Config Part from config array
+for(i=1 ; i<sizeof(cfg->c1)/sizeof(cfg->c1[0]) ; i++) ImageBuffer[current_index++] = cfg->c1[i];
+for(i=1 ; i<sizeof(cfg->c2)/sizeof(cfg->c2[0]) ; i++) ImageBuffer[current_index++] = cfg->c2[i];
+for(i=1 ; i<sizeof(cfg->c3)/sizeof(cfg->c3[0]) ; i++) ImageBuffer[current_index++] = cfg->c3[i];
+for(i=1 ; i<sizeof(cfg->c4)/sizeof(cfg->c4[0]) ; i++) ImageBuffer[current_index++] = cfg->c4[i];
+for(i=1 ; i<sizeof(cfg->c5)/sizeof(cfg->c5[0]) ; i++) ImageBuffer[current_index++] = cfg->c5[i];
+for(i=1 ; i<sizeof(cfg->c6)/sizeof(cfg->c6[0]) ; i++) ImageBuffer[current_index++] = cfg->c6[i];
+for(i=1 ; i<sizeof(cfg->c7)/sizeof(cfg->c7[0]) ; i++) ImageBuffer[current_index++] = cfg->c7[i];
+for(i=1 ; i<sizeof(cfg->c8)/sizeof(cfg->c8[0]) ; i++) ImageBuffer[current_index++] = cfg->c8[i];
+for(i=1 ; i<sizeof(cfg->c9)/sizeof(cfg->c9[0]) ; i++) ImageBuffer[current_index++] = cfg->c9[i];
+for(i=1 ; i<sizeof(cfg->c10)/sizeof(cfg->c10[0]) ; i++) ImageBuffer[current_index++] = cfg->c10[i];
+for(i=1 ; i<sizeof(cfg->c11)/sizeof(cfg->c11[0]) ; i++) ImageBuffer[current_index++] = cfg->c11[i];
+for(i=1 ; i<sizeof(cfg->c12)/sizeof(cfg->c12[0]) ; i++) ImageBuffer[current_index++] = cfg->c12[i];
+for(i=1 ; i<sizeof(cfg->c13)/sizeof(cfg->c13[0]) ; i++) ImageBuffer[current_index++] = cfg->c13[i];
+for(i=1 ; i<sizeof(cfg->c14)/sizeof(cfg->c14[0]) ; i++) ImageBuffer[current_index++] = cfg->c14[i];
+for(i=1 ; i<sizeof(cfg->c15)/sizeof(cfg->c15[0]) ; i++) ImageBuffer[current_index++] = cfg->c15[i];
+for(i=1 ; i<sizeof(cfg->c16)/sizeof(cfg->c16[0]) ; i++) ImageBuffer[current_index++] = cfg->c16[i];
+for(i=1 ; i<sizeof(cfg->c17)/sizeof(cfg->c17[0]) ; i++) ImageBuffer[current_index++] = cfg->c17[i];
+for(i=1 ; i<sizeof(cfg->c18)/sizeof(cfg->c18[0]) ; i++) ImageBuffer[current_index++] = cfg->c18[i];
+for(i=1 ; i<sizeof(cfg->c19)/sizeof(cfg->c19[0]) ; i++) ImageBuffer[current_index++] = cfg->c19[i];
+for(i=1 ; i<sizeof(cfg->c20)/sizeof(cfg->c20[0]) ; i++) ImageBuffer[current_index++] = cfg->c20[i];
+for(i=1 ; i<sizeof(cfg->c21)/sizeof(cfg->c21[0]) ; i++) ImageBuffer[current_index++] = cfg->c21[i];
+for(i=1 ; i<sizeof(cfg->c22)/sizeof(cfg->c22[0]) ; i++) ImageBuffer[current_index++] = cfg->c22[i];
+for(i=1 ; i<sizeof(cfg->c23)/sizeof(cfg->c23[0]) ; i++) ImageBuffer[current_index++] = cfg->c23[i];
+for(i=1 ; i<sizeof(cfg->c24)/sizeof(cfg->c24[0]) ; i++) ImageBuffer[current_index++] = cfg->c24[i];
+for(i=1 ; i<sizeof(cfg->c25)/sizeof(cfg->c25[0]) ; i++) ImageBuffer[current_index++] = cfg->c25[i];
+for(i=1 ; i<sizeof(cfg->c26)/sizeof(cfg->c26[0]) ; i++) ImageBuffer[current_index++] = cfg->c26[i];
+for(i=1 ; i<sizeof(cfg->c27)/sizeof(cfg->c27[0]) ; i++) ImageBuffer[current_index++] = cfg->c27[i];
+for(i=1 ; i<sizeof(cfg->c28)/sizeof(cfg->c28[0]) ; i++) ImageBuffer[current_index++] = cfg->c28[i];
+for(i=1 ; i<sizeof(cfg->c29)/sizeof(cfg->c29[0]) ; i++) ImageBuffer[current_index++] = cfg->c29[i];
+for(i=1 ; i<sizeof(cfg->c30)/sizeof(cfg->c30[0]) ; i++) ImageBuffer[current_index++] = cfg->c30[i];
+for(i=1 ; i<sizeof(cfg->c31)/sizeof(cfg->c31[0]) ; i++) ImageBuffer[current_index++] = cfg->c31[i];
+for(i=1 ; i<sizeof(cfg->c32)/sizeof(cfg->c32[0]) ; i++) ImageBuffer[current_index++] = cfg->c32[i];
+for(i=1 ; i<sizeof(cfg->c33)/sizeof(cfg->c33[0]) ; i++) ImageBuffer[current_index++] = cfg->c33[i];
+for(i=1 ; i<sizeof(cfg->c34)/sizeof(cfg->c34[0]) ; i++) ImageBuffer[current_index++] = cfg->c34[i];
+for(i=1 ; i<sizeof(cfg->c35)/sizeof(cfg->c35[0]) ; i++) ImageBuffer[current_index++] = cfg->c35[i];
+for(i=1 ; i<sizeof(cfg->c36)/sizeof(cfg->c36[0]) ; i++) ImageBuffer[current_index++] = cfg->c36[i];
+for(i=1 ; i<sizeof(cfg->c37)/sizeof(cfg->c37[0]) ; i++) ImageBuffer[current_index++] = cfg->c37[i];
+for(i=1 ; i<sizeof(cfg->c38)/sizeof(cfg->c38[0]) ; i++) ImageBuffer[current_index++] = cfg->c38[i];
+for(i=1 ; i<sizeof(cfg->c39)/sizeof(cfg->c39[0]) ; i++) ImageBuffer[current_index++] = cfg->c39[i];
+current_index=current_index+50;//dummy data
+//I(" %s: current_index=%d\n", __func__,current_index);
+for(i=1 ; i<sizeof(cfg->c40)/sizeof(cfg->c40[0]) ; i++) ImageBuffer[current_index++] = cfg->c40[i];
+for(i=1 ; i<sizeof(cfg->c41)/sizeof(cfg->c41[0]) ; i++) ImageBuffer[current_index++] = cfg->c41[i];
+
+//cal_checksum start//
+FileLength = fullFileLength;		
+FileLength = (FileLength + 3) / 4;
+for (i = 0; i < FileLength; i++)
+{
+	memcpy(&cmd[0], &ImageBuffer[4*i], 4);
+	if (i < (FileLength - 1))/*cal_checksum*/
+	{
+		for(k = 0; k < 4; k++)
+		{
+			BinDataWord |= cmd[k] << (k * 8);
+		}
+
+		CRC32 = BinDataWord ^ CRC32;
+		for(k = 0; k < 32; k++)
+		{
+			if((CRC32 % 2) != 0)
+			{
+				CRC32 = ((CRC32 >> 1) & 0x7FFFFFFF) ^ Polynomial;
+			}
+			else
+			{
+				CRC32 = ((CRC32 >> 1) & 0x7FFFFFFF);
+			}
+		}
+		BinDataWord = 0;
+	}
+}
+//cal_checksum end//
+
+//Try 3 Times
+for (j = 0; j < 3; j++) 
+{
+	FileLength = fullFileLength;
+	
+	if( i2c_himax_write(private_ts->client, 0x81 ,&cmd[0], 0, DEFAULT_RETRY_CNT) < 0)
+	{
+		E(" %s: i2c access fail!\n", __func__);
+		return 0;
+	}
+
+	msleep(120);
+
+	himax_lock_flash(0);
+
+	himax_ManualMode(1);
+	himax_FlashMode(1);
+
+	FileLength = (FileLength + 3) / 4;
+	for (i = 0, prePage = 0; i < FileLength; i++)
+	{
+		last_byte = 0;
+
+		if(i<0x20)
+			continue;
+		else if((i>0xBF)&&(i<(FileLength-0x20)))
+			continue;
+		
+		cmd[0] = i & 0x1F;
+		if (cmd[0] == 0x1F || i == FileLength - 1)
+		{
+			last_byte = 1;
+		}
+		cmd[1] = (i >> 5) & 0x1F;
+		cmd[2] = (i >> 10) & 0x1F;
+
+		if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
+		{
+			E(" %s: i2c access fail!\n", __func__);
+			return 0;
+		}
+
+		//I(" %s: CMD 44 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
+		if (prePage != cmd[1] || i == 0x20) 
+		{
+			prePage = cmd[1];
+			//I(" %s: %d page erase\n",__func__,prePage);
+			tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+		
+			tmp[0] = 0x05;tmp[1] = 0x2D;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+			msleep(30);
+			tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+			
+			//I(" %s: CMD 44-47 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
+			
+			tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+		
+			tmp[0] = 0x01;tmp[1] = 0x0D;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+			tmp[0] = 0x01;tmp[1] = 0x09;//tmp[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&tmp[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			if( i2c_himax_write(private_ts->client, 0x44 ,&cmd[0], 3, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+			
+			//I(" %s: CMD 44-45 [0,1,2]=[%x,%x,%x]\n", __func__,cmd[0],cmd[1],cmd[2]);
+			//I(" %s: Erase Page num=%x\n", __func__,prePage);
+		}
+
+		memcpy(&cmd[0], &ImageBuffer[4*i], 4);
+					
+		if (i == (FileLength - 1)) 
+		{
+			tmp[0]= (CRC32 & 0xFF);
+			tmp[1]= ((CRC32 >>8) & 0xFF);
+			tmp[2]= ((CRC32 >>16) & 0xFF);
+			tmp[3]= ((CRC32 >>24) & 0xFF);
+				
+			memcpy(&cmd[0], &tmp[0], 4);
+			I("%s last_byte = 1, CRC32= %x, =[0,1,2,3] = %x,%x,%x,%x \n",__func__, CRC32,tmp[0],tmp[1],tmp[2],tmp[3]);
+		}
+		
+		if( i2c_himax_write(private_ts->client, 0x45 ,&cmd[0], 4, DEFAULT_RETRY_CNT) < 0)
+		{
+			E(" %s: i2c access fail!\n", __func__);
+			return 0;
+		}
+		//I(" %s: CMD 48 \n", __func__);
+		cmd[0] = 0x01;cmd[1] = 0x0D;//cmd[2] = 0x02;
+		if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+		{
+			E(" %s: i2c access fail!\n", __func__);
+			return 0;
+		}
+		
+		cmd[0] = 0x01;cmd[1] = 0x09;//cmd[2] = 0x02;
+		if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+		{
+			E(" %s: i2c access fail!\n", __func__);
+			return 0;
+		}
+		
+		if (last_byte == 1) 
+		{
+			cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+			
+			cmd[0] = 0x01;cmd[1] = 0x05;//cmd[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			cmd[0] = 0x01;cmd[1] = 0x01;//cmd[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			cmd[0] = 0x01;cmd[1] = 0x00;//cmd[2] = 0x02;
+			if( i2c_himax_write(private_ts->client, 0x43 ,&cmd[0], 2, DEFAULT_RETRY_CNT) < 0)
+			{
+				E(" %s: i2c access fail!\n", __func__);
+				return 0;
+			}
+
+			msleep(10);
+			if (i == (FileLength - 1))
+			{
+				himax_FlashMode(0);
+				himax_ManualMode(0);
+				checksumResult = himax_calculateChecksum(true);//
+				//himax_ManualMode(0);
+				himax_lock_flash(1);
+
+				I(" %s: flash CONFIG only END!\n", __func__);
+				if (checksumResult) //Success
+				{
+					return 1;
+				}
+				else //Fail
+				{
+					E("%s: checksumResult fail!\n", __func__);
+					return 0;
+				}
+			}
+		}
+	}
+}
+return 0;
+}
+
+static int i_update_FWCFG(struct himax_config *cfg)
+{
+I("%s: CHIP CONFG version=%x\n", __func__,private_ts->vendor_config_ver);
+I("%s: LOAD CONFG version=%x\n", __func__,cfg->c40[1]);
+
+if ( private_ts->vendor_config_ver != cfg->c40[1] )
+	{
+#ifdef HX_RST_PIN_FUNC
+		himax_HW_reset(false,true);
+#endif
+		if(fts_ctpm_fw_upgrade_with_i_file_flash_cfg(cfg) == 0)
+			E("%s: TP upgrade error\n", __func__);
+		else
+			I("%s: TP upgrade OK\n", __func__);
+#ifdef HX_RST_PIN_FUNC
+		himax_HW_reset(false,true);
+#endif
+		return 1;	
+	}
+else
+	return 0;
 }
 
 #endif
@@ -1483,7 +1483,7 @@ static int i_update_FWCFG(struct himax_config *cfg)
 static int himax_loadSensorConfig(struct i2c_client *client, struct himax_i2c_platform_data *pdata)
 {
 #if defined(HX_LOADIN_CONFIG)||defined(HX_AUTO_UPDATE_CONFIG)
-	int rc= 0;
+int rc= 0;
 #endif
 #ifndef CONFIG_OF
 #if defined(HX_LOADIN_CONFIG)||defined(HX_AUTO_UPDATE_CONFIG)
@@ -7371,6 +7371,11 @@ static void __init himax852xes_init_async(void *unused, async_cookie_t cookie)
 static int __init himax852xes_init(void)
 {
 	I("Himax 852xES touch panel driver init\n");
+//#ifdef CONFIG_OF_TOUCH
+//	I("Himax 852xES CONFIG_OF_TOUCH is set\n");
+//#else
+//	I("Himax 852xES CONFIG_OF_TOUCH is NOT set\n");
+//#endif
 	async_schedule(himax852xes_init_async, NULL);
 	return 0;
 }
