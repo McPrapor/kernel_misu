@@ -3,7 +3,7 @@
 
 #include "mt6753.dtsi"
 #include "dt-bindings/lcm/hx8394f_hd720_dsi_vdo_truly_v36.dtsi"
-#include "cust.dtsi"
+/* see below #include "cust.dtsi" */
 
 / {
         bus {
@@ -112,6 +112,8 @@
                 vib_vol= <5>;
         };
 };
+
+#include "cust.dtsi"
 
 /* USB GPIO Kernal Standardization start */
 &pio {
