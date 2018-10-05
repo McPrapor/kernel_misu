@@ -1056,6 +1056,7 @@ static int load_std_firmware(int md_id, struct file *filp, struct ccci_image_inf
 				ret = -CCCI_ERR_LOAD_IMG_FILE_READ;
 				goto error;
 			} else if (ret == size_per_read) {
+CCCI_UTIL_ERR_MSG_WITH_ID(md_id, "DEBUG ret == size_per_read size=%d\n", ret);
 				read_size += ret;
 				iounmap(start);
 			} else {
