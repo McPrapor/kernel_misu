@@ -5,6 +5,11 @@ config MTK_SECURITY_SW_SUPPORT
 	  If yes, All security function in preloader/LK/kernel/android will
 	  be built into software images
 
+config MTK_SECURITY_SW_SUPPORT_LEGACY
+	bool "Legacy ASFv1 encrypted modem binary support"
+	default n
+	help
+
 config MTK_SEC_MODEM_NVRAM_ANTI_CLONE
 	bool "MTK_SEC_MODEM_NVRAM_ANTI_CLONE"
 	default n
