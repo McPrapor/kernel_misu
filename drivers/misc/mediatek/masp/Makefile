@@ -9,7 +9,6 @@ MASP_CORE_DRIVER_DIR := $(srctree)/drivers/misc/mediatek/masp
 
 #Kernel 3.18 always use asfv2
 asf_link := asfv2
-
 ############################################
 #[core_obj] include all the files under asf/core
 ################################################
