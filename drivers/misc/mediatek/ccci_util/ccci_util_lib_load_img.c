@@ -1151,9 +1151,11 @@ static int load_image(int md_id, struct ccci_image_info *img_inf, char post_fix[
 		img->tail_length = sec_tail_length;
 
 		/*step2:check if need to cipher */
-				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "masp_ccci_is_cipherfmt per check");
+				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "masp_ccci_is_cipherfmt pre check");
 #ifdef ENABLE_MD_IMG_SECURITY_FEATURE
 				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "masp_ccci_is_cipherfmt check");
+                                ret = masp_ccci_is_cipherfmt(fp_id, offset, &img_len);
+				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "masp_ccci_is_cipherfmt ret=%d!\n", ret);
 		if (masp_ccci_is_cipherfmt(fp_id, offset, &img_len)) {
 			CCCI_UTIL_INF_MSG_WITH_ID(md_id, "cipher image\n");
 			ret = load_cipher_firmware_v2(md_id, fp_id, img, offset, img_len);
