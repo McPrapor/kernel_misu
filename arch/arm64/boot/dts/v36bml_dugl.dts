@@ -6,6 +6,11 @@
 /* see below #include "cust.dtsi" */
 
 / {
+	reserved-memory {
+                reserve-memory-ccci_md1 {
+                        size = <0 0x7010000>;
+                };
+	};
         bus {
                 compatible = "simple-bus";
                 #address-cells = <1>;

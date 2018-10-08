@@ -1,3 +1,9 @@
+menuconfig V36BML_ECCCI_FIRMWARE_LEGACY
+        bool "v36bml_dugl firmware hack"
+        default n
+        help
+          HTC v36bml_dugl legacy firmware custom data offset
+
 menuconfig MTK_CCCI_DEVICES
 	bool "CCCI Devices"
 	default y

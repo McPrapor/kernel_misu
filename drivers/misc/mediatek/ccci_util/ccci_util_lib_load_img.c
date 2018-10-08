@@ -677,8 +677,15 @@ static int sec_lib_version_check(void)
 /*---------------------------------------------------------------------------------------------------*/
 static int signature_check_v2(int md_id, char *file_path, unsigned int *sec_tail_length)
 {
-	unsigned int bypass_sec_header_offset = 0;
-	unsigned int sec_total_len = 0;
+#ifdef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
+// yes its dirty hack but what can we do about such a rude legacy drop?
+        unsigned int bypass_sec_header_offset = 64;
+        unsigned int sec_total_len = 300;
+
+#else
+        unsigned int bypass_sec_header_offset = 0;
+        unsigned int sec_total_len = 0;
+#endif
 
 	if (masp_ccci_signfmt_verify_file(file_path, &bypass_sec_header_offset, &sec_total_len) == 0) {
 		/*signature lib check success */

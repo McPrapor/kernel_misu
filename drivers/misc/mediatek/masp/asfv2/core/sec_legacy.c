@@ -93,19 +93,11 @@ int sec_ccci_file_close(int fp_id)
 
 int masp_ccci_is_cipherfmt(int fp_id, unsigned int start_off, unsigned int *img_len)
 {
-#ifdef CONFIG_MTK_SECURITY_SW_SUPPORT_LEGACY
-	return 1;
-#else
 	return 0;
-#endif
 }
 
 int masp_ccci_decrypt_cipherfmt(int fp_id, unsigned int start_off, char *buf, unsigned int buf_len,
 				unsigned int *data_offset)
 {
-#ifdef CONFIG_MTK_SECURITY_SW_SUPPORT_LEGACY
-	return SEC_OK;
-#else
 	return 0;
-#endif
 }
