@@ -691,12 +691,13 @@ static int signature_check_v2(int md_id, char *file_path, unsigned int *sec_tail
                         CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check fail(0x%x, 0x%x!)!\n", bypass_sec_header_offset,
                                                   sec_total_len);
 //                        return -CCCI_ERR_LOAD_IMG_SIGN_FAIL;
-                }
-                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check success(0x%x, 0x%x)!\n", bypass_sec_header_offset,
-                                                 sec_total_len);
-                *sec_tail_length = sec_total_len - bypass_sec_header_offset;
-                /* Note here, offset is more than 2G is not hoped  */
-                return (int)bypass_sec_header_offset;
+                } else {
+	                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check success(0x%x, 0x%x)!\n", bypass_sec_header_offset,
+        	                                         sec_total_len);
+                	*sec_tail_length = sec_total_len - bypass_sec_header_offset;
+	                /* Note here, offset is more than 2G is not hoped  */
+        	        return (int)bypass_sec_header_offset;
+		}
         }
 #endif
 
