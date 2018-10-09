@@ -677,30 +677,6 @@ static int sec_lib_version_check(void)
 /*---------------------------------------------------------------------------------------------------*/
 static int signature_check_v2(int md_id, char *file_path, unsigned int *sec_tail_length)
 {
-#ifdef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
-// yes its dirty hack but what can we do about such a rude legacy drop?
-        unsigned int bypass_sec_header_offset = 64;
-        unsigned int sec_total_len = 300;
-
-        if (masp_ccci_signfmt_verify_file(file_path, &bypass_sec_header_offset, &sec_total_len) == 0) {
-                /*signature lib check success */
-                /*-- check return value */
-                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check ret value 0x%x, 0x%x!\n", bypass_sec_header_offset,
-                                          sec_total_len);
-                if (bypass_sec_header_offset > sec_total_len) {
-                        CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check fail(0x%x, 0x%x!)!\n", bypass_sec_header_offset,
-                                                  sec_total_len);
-//                        return -CCCI_ERR_LOAD_IMG_SIGN_FAIL;
-                } else {
-	                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "sign check success(0x%x, 0x%x)!\n", bypass_sec_header_offset,
-        	                                         sec_total_len);
-                	*sec_tail_length = sec_total_len - bypass_sec_header_offset;
-	                /* Note here, offset is more than 2G is not hoped  */
-        	        return (int)bypass_sec_header_offset;
-		}
-        }
-#endif
-
         bypass_sec_header_offset = 0;
         sec_total_len = 0;
 
@@ -1194,7 +1170,20 @@ static int load_image(int md_id, struct ccci_image_info *img_inf, char post_fix[
 			ret = load_std_firmware(md_id, filp, img);
 			if (ret < 0) {
 				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "load_firmware failed: ret=%d!\n", ret);
+#ifdef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
+				CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY firmware check offset: 64 data_sec_length: 300 sec_tail_length: 236 \n");
+                		img->offset = 64;
+		                img->tail_length = 236;
+				ret = load_std_firmware(md_id, filp, img);
+	                        if (ret < 0) {
+	                                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY load_firmware failed: ret=%d!\n", ret);
+					goto out;
+				} else {
+					CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY firmware check OK\n", ret);
+				}
+#else
 				goto out;
+#endif
 			}
 #ifdef ENABLE_MD_IMG_SECURITY_FEATURE
 		}
