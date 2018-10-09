@@ -677,8 +677,8 @@ static int sec_lib_version_check(void)
 /*---------------------------------------------------------------------------------------------------*/
 static int signature_check_v2(int md_id, char *file_path, unsigned int *sec_tail_length)
 {
-        bypass_sec_header_offset = 0;
-        sec_total_len = 0;
+        unsigned int bypass_sec_header_offset = 0;
+        unsigned int sec_total_len = 0;
 
 	if (masp_ccci_signfmt_verify_file(file_path, &bypass_sec_header_offset, &sec_total_len) == 0) {
 		/*signature lib check success */
@@ -1179,7 +1179,7 @@ static int load_image(int md_id, struct ccci_image_info *img_inf, char post_fix[
 	                                CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY load_firmware failed: ret=%d!\n", ret);
 					goto out;
 				} else {
-					CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY firmware check OK\n", ret);
+					CCCI_UTIL_INF_MSG_WITH_ID(md_id, "V36BML_LEGACY firmware check OK\n");
 				}
 #else
 				goto out;
