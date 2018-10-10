@@ -220,102 +220,62 @@ void ccci_power_off(void)
 
 int md_cd_power_on(struct ccci_modem *md)
 {
-	int ret = 0;
-	unsigned int reg_value;
-	struct md_cd_ctrl *md_ctrl = (struct md_cd_ctrl *)md->private_data;
+    int ret = 0;
+//    unsigned int reg_value;
+    struct md_cd_ctrl *md_ctrl = (struct md_cd_ctrl *)md->private_data;
 #if defined(FEATURE_RF_CLK_BUF)
 	struct pinctrl_state *RFIC0_01_mode;
 #endif
-
-	/* turn on VLTE */
+    // turn on VLTE
 #ifdef FEATURE_VLTE_SUPPORT
-#ifndef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-	struct pinctrl_state *vsram_output_high;
+    //mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,1);// add by zhaofei - 2015-03-25-09-55
+    //CCCI_INF_MSG(md->index, CORE, "md_cd_power_on:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,1)\n");// add by zhaofei - 2015-03-25-09-56
 
-	if (NULL != mdcldma_pinctrl) {
-		vsram_output_high = pinctrl_lookup_state(mdcldma_pinctrl, "vsram_output_high");
-		if (IS_ERR(vsram_output_high)) {
-			CCCI_INF_MSG(md->index, CORE, "cannot find vsram_output_high pintrl. ret=%ld\n",
-				     PTR_ERR(vsram_output_high));
-		}
-		pinctrl_select_state(mdcldma_pinctrl, vsram_output_high);
-	} else {
-		CCCI_INF_MSG(md->index, CORE, "mdcldma_pinctrl is NULL, some error happend.\n");
-	}
-	CCCI_INF_MSG(md->index, CORE, "md_cd_power_on:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,1)\n");
-
-	/* if(!(mt6325_upmu_get_swcid()==PMIC6325_E1_CID_CODE || */
-	/* mt6325_upmu_get_swcid()==PMIC6325_E2_CID_CODE)) */
-	{
-#endif
-		CCCI_INF_MSG(md->index, CORE, "md_cd_power_on:set VLTE on,bit0,1\n");
-		pmic_config_interface(0x04D6, 0x1, 0x1, 0);	/* bit[0] =>1'b1 */
-		udelay(200);
-		/*
-		 *[Notes] move into md cmos flow, for hardwareissue, so disable on denlai.
-		 * bring up need confirm with MD DE & SPM
-		 */
-		/* reg_value = ccci_read32(infra_ao_base,0x338); */
-		/* reg_value &= ~(0x40); //bit[6] =>1'b0 */
-		/* ccci_write32(infra_ao_base,0x338,reg_value); */
-		/* CCCI_INF_MSG(md->index, CORE, "md_cd_power_on: set infra_misc VLTE bit(0x1000_0338)=0x%x,
-		bit[6]=0x%x\n",ccci_read32(infra_ao_base,0x338),(ccci_read32(infra_ao_base,0x338)&0x40)); */
-	}
-#endif
-#ifndef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-	reg_value = ccci_read32(infra_ao_base, 0x338);
-	reg_value &= ~(0x3 << 2);	/* md1_srcclkena */
-	reg_value |= (0x1 << 2);
-	ccci_write32(infra_ao_base, 0x338, reg_value);
-	CCCI_INF_MSG(md->index, CORE, "md_cd_power_on: set md1_srcclkena bit(0x1000_0338)=0x%x\n",
-		     ccci_read32(infra_ao_base, 0x338));
+    //if(!(mt6325_upmu_get_swcid()==PMIC6325_E1_CID_CODE ||
+    //     mt6325_upmu_get_swcid()==PMIC6325_E2_CID_CODE))
+    {
+    CCCI_INF_MSG(md->index, CORE, "md_cd_power_on:set VLTE on,bit0,1\n");
+    pmic_config_interface(0x04D6, 0x1, 0x1, 0); //bit[0] =>1'b1 
+    udelay(200);
+    /*
+        *[Notes] move into md cmos flow, for hardwareissue, so disable on denlai.
+        * bring up need confirm with MD DE & SPM 
+        */
+    //reg_value = ccci_read32(infra_ao_base,0x338); 
+    //reg_value &= ~(0x40); //bit[6] =>1'b0
+    //ccci_write32(infra_ao_base,0x338,reg_value);
+    //CCCI_INF_MSG(md->index, CORE, "md_cd_power_on: set infra_misc VLTE bit(0x1000_0338)=0x%x, bit[6]=0x%x\n",ccci_read32(infra_ao_base,0x338),(ccci_read32(infra_ao_base,0x338)&0x40));
+    }
 #endif
 #ifdef FEATURE_RF_CLK_BUF
-	/* config RFICx as BSI */
-	mutex_lock(&clk_buf_ctrl_lock);	/* fixme,clkbuf, ->down(&clk_buf_ctrl_lock_2); */
-	CCCI_INF_MSG(md->index, TAG, "clock buffer, BSI ignore mode\n");
+    //config RFICx as BSI
+    mutex_lock(&clk_buf_ctrl_lock); // fixme,clkbuf, ->down(&clk_buf_ctrl_lock_2);
+    CCCI_INF_MSG(md->index, TAG, "clock buffer, BSI ignore mode\n");
 	if (NULL != mdcldma_pinctrl) {
 		RFIC0_01_mode = pinctrl_lookup_state(mdcldma_pinctrl, "RFIC0_01_mode");
 		pinctrl_select_state(mdcldma_pinctrl, RFIC0_01_mode);
 	}
 #endif
-	/* power on MD_INFRA and MODEM_TOP */
-	switch (md->index) {
-	case MD_SYS1:
-#ifdef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-        	CCCI_INF_MSG(md->index, TAG, "Call start md_power_on()\n");
-	        ret = md_power_on(SYS_MD1);
-        	CCCI_INF_MSG(md->index, TAG, "Call end md_power_on() ret=%d\n",ret);
-#else
-#if defined(CONFIG_MTK_CLKMGR)
-		CCCI_INF_MSG(md->index, TAG, "Call start md_power_on()\n");
-		ret = md_power_on(SYS_MD1);
-		CCCI_INF_MSG(md->index, TAG, "Call end md_power_on() ret=%d\n", ret);
-#else
-		CCCI_INF_MSG(md->index, TAG, "Call start clk_prepare_enable()\n");
-		ret = clk_prepare_enable(clk_scp_sys_md1_main);
-		CCCI_INF_MSG(md->index, TAG, "Call end clk_prepare_enable()ret=%d\n", ret);
-#endif
-#endif
-		kicker_pbm_by_md(MD1, true);
-		CCCI_INF_MSG(md->index, TAG, "Call end kicker_pbm_by_md(0,true)\n");
-		break;
-	}
-#ifdef FEATURE_RF_CLK_BUF
-	mutex_unlock(&clk_buf_ctrl_lock);	/* fixme,clkbuf, ->delete */
-#endif
+        // power on MD_INFRA and MODEM_TOP
+    switch(md->index)
+    {
+        case MD_SYS1:
+        CCCI_INF_MSG(md->index, TAG, "Call start md_power_on()\n");
+        ret = md_power_on(SYS_MD1);
+        CCCI_INF_MSG(md->index, TAG, "Call end md_power_on() ret=%d\n",ret);
 
-#ifdef FEATURE_INFORM_NFC_VSIM_CHANGE
-	/* notify NFC */
-	inform_nfc_vsim_change(md->index, 1, 0);
+        kicker_pbm_by_md(MD1,true);
+        CCCI_INF_MSG(md->index, TAG, "Call end kicker_pbm_by_md(0,true)\n");
+        break;
+    }
+#ifdef FEATURE_RF_CLK_BUF 
+        mutex_unlock(&clk_buf_ctrl_lock); // fixme,clkbuf, ->delete
 #endif
-#ifdef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-	if (ret)
-		return ret;
-#endif
-	/* disable MD WDT */
-	cldma_write32(md_ctrl->md_rgu_base, WDT_MD_MODE, WDT_MD_MODE_KEY);
-	return ret;
+        if(ret)
+                return ret;
+        // disable MD WDT
+        cldma_write32(md_ctrl->md_rgu_base, WDT_MD_MODE, WDT_MD_MODE_KEY);
+        return 0;
 }
 
 int md_cd_bootup_cleanup(struct ccci_modem *md, int success)
@@ -340,92 +300,51 @@ int md_cd_let_md_go(struct ccci_modem *md)
 
 int md_cd_power_off(struct ccci_modem *md, unsigned int timeout)
 {
-	int ret = 0;
-	unsigned int reg_value;
-#if defined(FEATURE_RF_CLK_BUF)
-	struct pinctrl_state *RFIC0_04_mode;
+    int ret = 0;
+//    unsigned int reg_value;
+#ifdef FEATURE_RF_CLK_BUF    
+    struct pinctrl_state *RFIC0_04_mode;
+    mutex_lock(&clk_buf_ctrl_lock);
 #endif
-#if defined(FEATURE_VLTE_SUPPORT)
-	struct pinctrl_state *vsram_output_low;
-#endif
-
-#ifdef FEATURE_INFORM_NFC_VSIM_CHANGE
-	/* notify NFC */
-	inform_nfc_vsim_change(md->index, 0, 0);
-#endif
-
+    // power off MD_INFRA and MODEM_TOP
+    switch(md->index)
+    {
+        case MD_SYS1:
+        ret = md_power_off(SYS_MD1, timeout);
+        kicker_pbm_by_md(MD1,false);
+        CCCI_INF_MSG(md->index, TAG, "Call end kicker_pbm_by_md(0,false)\n");
+        break;
+    }
 #ifdef FEATURE_RF_CLK_BUF
-	mutex_lock(&clk_buf_ctrl_lock);
-#endif
-	/* power off MD_INFRA and MODEM_TOP */
-	switch (md->index) {
-	case MD_SYS1:
-#ifdef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-	        ret = md_power_off(SYS_MD1, timeout);
-#else
-#if defined(CONFIG_MTK_CLKMGR)
-		ret = md_power_off(SYS_MD1, timeout);
-#else
-		clk_disable(clk_scp_sys_md1_main);
-#ifdef FEATURE_RF_CLK_BUF
-		mutex_unlock(&clk_buf_ctrl_lock);
-#endif
-		clk_unprepare(clk_scp_sys_md1_main);	/* cannot be called in mutex context */
-#ifdef FEATURE_RF_CLK_BUF
-		mutex_lock(&clk_buf_ctrl_lock);
-#endif
-#endif
-#endif
-		kicker_pbm_by_md(MD1, false);
-		CCCI_INF_MSG(md->index, TAG, "Call end kicker_pbm_by_md(0,false)\n");
-		break;
-	}
-#ifdef FEATURE_RF_CLK_BUF
-	/* config RFICx as AP SPM control */
-	CCCI_INF_MSG(md->index, TAG, "clock buffer, AP SPM control mode\n");
+    // config RFICx as AP SPM control
+    CCCI_INF_MSG(md->index, TAG, "clock buffer, AP SPM control mode\n");
 	RFIC0_04_mode = pinctrl_lookup_state(mdcldma_pinctrl, "RFIC0_04_mode");
 	pinctrl_select_state(mdcldma_pinctrl, RFIC0_04_mode);
-	mutex_unlock(&clk_buf_ctrl_lock);
+        mutex_unlock(&clk_buf_ctrl_lock);
 #endif
-	reg_value = ccci_read32(infra_ao_base, 0x338);
-	reg_value &= ~(0x3 << 2);	/* md1_srcclkena */
-	ccci_write32(infra_ao_base, 0x338, reg_value);
-	CCCI_INF_MSG(md->index, CORE, "md_cd_power_off: set md1_srcclkena bit(0x1000_0338)=0x%x\n",
-		     ccci_read32(infra_ao_base, 0x338));
-#ifdef FEATURE_VLTE_SUPPORT
-	/* Turn off VLTE */
-	/* if(!(mt6325_upmu_get_swcid()==PMIC6325_E1_CID_CODE || */
-	/* mt6325_upmu_get_swcid()==PMIC6325_E2_CID_CODE)) */
-	{
-		/*
-		 *[Notes] move into md cmos flow, for hardwareissue, so disable on denlai.
-		 * bring up need confirm with MD DE & SPM
-		 */
-		/* reg_value = ccci_read32(infra_ao_base,0x338); */
-		/* reg_value &= ~(0x40); //bit[6] =>1'b0 */
-		/* reg_value |= 0x40;//bit[6] =>1'b1 */
-		/* ccci_write32(infra_ao_base,0x338,reg_value); */
-		/* CCCI_INF_MSG(md->index, CORE, "md_cd_power_off: set SRCLKEN infra_misc(0x1000_0338)=0x%x,
-		bit[6]=0x%x\n", ccci_read32(infra_ao_base, 0x338), (ccci_read32(infra_ao_base,0x338)&0x40)); */
 
-		CCCI_INF_MSG(md->index, CORE, "md_cd_power_off:set VLTE on,bit0=0\n");
-		pmic_config_interface(0x04D6, 0x0, 0x1, 0);	/* bit[0] =>1'b0 */
-	}
-#ifndef CONFIG_ECCCI_V36BML_MODEM_LEGACY
-	if (NULL != mdcldma_pinctrl) {
-		vsram_output_low = pinctrl_lookup_state(mdcldma_pinctrl, "vsram_output_low");
-		if (IS_ERR(vsram_output_low)) {
-			CCCI_INF_MSG(md->index, CORE, "cannot find vsram_output_low pintrl. ret=%ld\n",
-				     PTR_ERR(vsram_output_low));
-		}
-		pinctrl_select_state(mdcldma_pinctrl, vsram_output_low);
-	} else {
-		CCCI_INF_MSG(md->index, CORE, "mdcldma_pinctrl is NULL, some error happend.\n");
-	}
-	CCCI_INF_MSG(md->index, CORE, "md_cd_power_off:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,0)\n");
+#ifdef FEATURE_VLTE_SUPPORT
+    // Turn off VLTE
+    //if(!(mt6325_upmu_get_swcid()==PMIC6325_E1_CID_CODE ||
+    //     mt6325_upmu_get_swcid()==PMIC6325_E2_CID_CODE))
+    {
+    /*
+        *[Notes] move into md cmos flow, for hardwareissue, so disable on denlai.
+        * bring up need confirm with MD DE & SPM 
+        */
+    //reg_value = ccci_read32(infra_ao_base,0x338); 
+    //reg_value &= ~(0x40); //bit[6] =>1'b0
+    //reg_value |= 0x40;//bit[6] =>1'b1
+    //ccci_write32(infra_ao_base,0x338,reg_value);
+    //CCCI_INF_MSG(md->index, CORE, "md_cd_power_off: set SRCLKEN infra_misc(0x1000_0338)=0x%x, bit[6]=0x%x\n",ccci_read32(infra_ao_base,0x338),(ccci_read32(infra_ao_base,0x338)&0x40));
+
+    CCCI_INF_MSG(md->index, CORE, "md_cd_power_off:set VLTE on,bit0=0\n");
+    pmic_config_interface(0x04D6, 0x0, 0x1, 0); //bit[0] =>1'b0
+    }
+    //mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,0);// add by zhaofei - 2015-03-25-09-55
+    //CCCI_INF_MSG(md->index, CORE, "md_cd_power_off:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,0)\n");// add by zhaofei - 2015-03-25-09-55
 #endif
-#endif
-	return ret;
+    return ret;
 }
 
 void cldma_dump_register(struct ccci_modem *md)
