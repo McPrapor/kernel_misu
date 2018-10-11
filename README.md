@@ -9,19 +9,18 @@ looks ok:
 + bma253 acceleration sensor
 + headphones detection, keys, sound
 + wifi
++ ccci (modem starts with legacy firmware and looks fine)
++ gps
++ kpd works fine
 
 todo:
 - ramconsole bad addresing
 - camera
 - fm radio?
-- gps?
 - lm3642?
 - gyro?
 - nfc? magentic?
-- keypad dts has wrong voldown reg
 - flashlight
 - battery meter tables
-- no iio
-- ril? sms?
 - hall_ak8789?
 - iio sensor hub
