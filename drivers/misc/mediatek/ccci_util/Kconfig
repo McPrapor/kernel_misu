@@ -1,9 +1,8 @@
-menuconfig ECCCI_V36BML_MODEM_LEGACY
-        bool "v36bml_dugl modem legacy hacks"
+menuconfig V36BML_ECCCI_FIRMWARE_LEGACY
+        bool "v36bml_dugl firmware hack"
         default n
         help
-          HTC v36bml_dugl legacy firmware custom data offsets 
-	  and modem power on/off routines
+          HTC v36bml_dugl legacy firmware custom data offset
 
 menuconfig MTK_CCCI_DEVICES
 	bool "CCCI Devices"
