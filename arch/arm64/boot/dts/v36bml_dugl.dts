@@ -954,7 +954,6 @@ to make keypad work without such a hack */
                         pins = <PINMUX_GPIO162__FUNC_MD_SIM2_SDAT>; */
                         slew-rate = <0>;
                         bias-pull-up = <00>;
-			input-enable;
                 };
 	};
 };
