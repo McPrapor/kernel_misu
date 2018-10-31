@@ -950,9 +950,9 @@ to make keypad work without such a hack */
 &pio {
 	ssw@3{
 	        pins_cmd5_dat {
-                        pins = <0xa201>; /* 162 01 or 165 02
+                        pins = <0xa202>; /* 162 01 or 165 02
                         pins = <PINMUX_GPIO162__FUNC_MD_SIM2_SDAT>; */
-                        slew-rate = <1>;
+                        slew-rate = <0>;
                         bias-pull-up = <00>;
                 };
 	};
