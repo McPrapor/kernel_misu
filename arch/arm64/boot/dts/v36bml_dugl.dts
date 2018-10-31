@@ -1021,9 +1021,9 @@ gpio165 GPIO_SIM1_SIO
 */
 
 &pio {
-        ssw_two_sims_bound_to_md1:ssw@3 {
+        two_sims_bound_to_md1:ssw@3 {
                 pins_cmd0_dat {
-                        pins = <0xa002>; /* 160 02
+                        pins = <0xa301>; /* 160 02 or 163 01
                         pins = <PINMUX_GPIO163__FUNC_MD_SIM1_SCLK>; */
                         slew-rate = <1>;
                 };
@@ -1044,7 +1044,7 @@ gpio165 GPIO_SIM1_SIO
                 };
 
                 pins_cmd3_dat {
-                        pins = <0xa302>; /* 163 02
+                        pins = <0xa001>; /* 163 02 or 160 01
                         pins = <PINMUX_GPIO160__FUNC_MD_SIM2_SCLK>; */
                         slew-rate = <1>;
                 };
@@ -1063,9 +1063,9 @@ gpio165 GPIO_SIM1_SIO
                 };
         };
 
-        ssw_sim1_md3_sim2_md1:ssw@4 {
+        sim1_md3_sim2_md1:ssw@4 {
                 pins_cmd0_dat {
-                        pins = <0xa003>; /* 160 03 or 163 04
+                        pins = <0xa304>; /* 160 03 or 163 04
                         pins = <PINMUX_GPIO163__FUNC_UIM0_CLK>; */
                 };
 
