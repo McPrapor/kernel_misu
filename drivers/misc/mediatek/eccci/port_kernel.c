@@ -927,7 +927,7 @@ void get_dtsi_eint_node(void)
 				if (node != NULL) {
 					eint_node_prop.ExistFlag |= (1 << i);
 					get_eint_attr_val(node, i);
-					printk("[port_kernel] get_dtsi_eint_node %s: node %d found\n", eint_node_prop.name[i], i);
+					printk("[port_kernel] get_dtsi_eint_node %s: node %d found\n", (char *)eint_node_prop.name[i], i);
 					/* CCCI_INF_MSG(-1, TAG, "%s: node %d found\n", eint_node_prop.name[i], i); */
 				} else {
 					printk("[port_kernel] get_dtsi_eint_node %s: node %d no found\n",
@@ -964,9 +964,9 @@ int get_eint_attr_DTSVal(char *name, unsigned int name_len, unsigned int type, c
 				sim_value = eint_node_prop.eint_value[type].value_sim[i];
 				*len = sizeof(sim_value);
 				memcpy(sim_info, &sim_value, *len);
-				printk("[port_kernel] get_eint_attr_DTSVal get_eint_value type name:%s,
-				   sizeof: %d, sim_info: %d, %d\n", eint_node_prop.eint_value[type].property,
-				   *len, *sim_info, eint_node_prop.eint_value[type].value_sim[i]);				/* CCCI_INF_MSG(-1, RPC, "get_eint_value type name:%s,
+				printk("[port_kernel] get_eint_attr_DTSVal get_eint_value type name:%s,sizeof: %d, sim_info: %d, %d\n", 
+				    eint_node_prop.eint_value[type].property, *len, *sim_info, eint_node_prop.eint_value[type].value_sim[i]);
+				/* CCCI_INF_MSG(-1, RPC, "get_eint_value type name:%s,
 				   sizeof: %d, sim_info: %d, %d\n", eint_node_prop.eint_value[type].property,
 				   *len, *sim_info, eint_node_prop.eint_value[type].value_sim[i]); */
 				return 0;
