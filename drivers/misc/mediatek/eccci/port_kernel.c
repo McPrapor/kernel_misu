@@ -927,7 +927,7 @@ void get_dtsi_eint_node(void)
 				if (node != NULL) {
 					eint_node_prop.ExistFlag |= (1 << i);
 					get_eint_attr_val(node, i);
-					printk("[port_kernel] get_dtsi_eint_node %s: node %d found\n", (char *)eint_node_prop.name[i], i);
+					printk("[port_kernel] get_dtsi_eint_node %s: node %d found\n", eint_node_prop.name[i], i);
 					/* CCCI_INF_MSG(-1, TAG, "%s: node %d found\n", eint_node_prop.name[i], i); */
 				} else {
 					printk("[port_kernel] get_dtsi_eint_node %s: node %d no found\n",
