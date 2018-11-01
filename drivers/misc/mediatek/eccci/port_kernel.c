@@ -82,7 +82,7 @@ int modem_dtr_set(int on, int low_latency)
 	struct ccci_modem *md = NULL;
 	struct c2k_ctrl_port_msg c2k_ctl_msg;
 	int ret = 0;
-
+	printk("[port_kernel] modem_dtr_set");
 	/* only md3 can usb bypass */
 	md = ccci_get_modem_by_id(MD_SYS3);
 
@@ -107,7 +107,7 @@ int modem_dcd_state(void)
 	struct c2k_ctrl_port_msg c2k_ctl_msg;
 	int dcd_state = 0;
 	int ret = 0;
-
+	printk("[port_kernel] modem_dcd_state");
 	/* only md3 can usb bypass */
 	md = ccci_get_modem_by_id(MD_SYS3);
 
@@ -130,6 +130,7 @@ int modem_dcd_state(void)
 
 static inline void append_runtime_feature(char **p_rt_data, struct ccci_runtime_feature *rt_feature, void *data)
 {
+	printk("[port_kernel] append_runtime_feature");
 	CCCI_DBG_MSG(-1, KERN, "append rt_data %p, feature %u len %u\n",
 		     *p_rt_data, rt_feature->feature_id, rt_feature->data_len);
 	memcpy(*p_rt_data, rt_feature, sizeof(struct ccci_runtime_feature));
@@ -148,6 +149,7 @@ static unsigned int get_booting_start_id(struct ccci_modem *md)
 	u32 booting_start_id;
 	int ret;
 
+		printk("[port_kernel] get_booting_start_id");
 	if (md->index == 0)
 		snprintf(md_logger_cfg_file, 32, "%s", MD1_LOGGER_FILE_PATH);
 	else
@@ -176,7 +178,7 @@ static unsigned int get_booting_start_id(struct ccci_modem *md)
 
 static void config_ap_side_feature(struct ccci_modem *md, struct md_query_ap_feature *ap_side_md_feature)
 {
-
+	printk("[port_kernel] config_ap_side_feature");
 	md->runtime_version = AP_MD_HS_V2;
 	ap_side_md_feature->feature_set[BOOT_INFO].support_mask = CCCI_FEATURE_MUST_SUPPORT;
 	ap_side_md_feature->feature_set[EXCEPTION_SHARE_MEMORY].support_mask = CCCI_FEATURE_MUST_SUPPORT;
@@ -245,7 +247,7 @@ static int prepare_runtime_data(struct ccci_modem *md, struct ccci_request *req)
 	struct ccci_runtime_boot_info boot_info;
 	unsigned int random_seed = 0;
 	struct timeval t;
-
+	printk("[port_kernel] prepare_runtime_data");
 	CCCI_NOTICE_MSG(md->index, KERN, "prepare_runtime_data  rt_data %p\n", rt_data);
 
 	memset(&md_feature_ap, 0, sizeof(struct md_query_ap_feature));
@@ -439,7 +441,7 @@ static void control_msg_handler(struct ccci_port *port, struct ccci_request *req
 	unsigned long flags;
 	struct c2k_ctrl_port_msg *c2k_ctl_msg = NULL;
 	char need_update_state = 0;
-
+	printk("[port_kernel] control_msg_handler");
 	CCCI_INF_MSG(md->index, KERN, "control message 0x%X,0x%X\n", ccci_h->data[1], ccci_h->reserved);
 	if (ccci_h->data[1] == MD_INIT_START_BOOT
 	    && ccci_h->reserved == MD_INIT_CHK_ID && md->boot_stage == MD_BOOT_STAGE_0) {
@@ -565,7 +567,7 @@ int ccci_notify_md_by_sys_msg(int md_id, unsigned int msg, unsigned int data)
 	int ret = 0;
 	struct ccci_modem *md;
 	int idx = 0;		/* get modem informaton (in Bach ,callback are registered in modem 0) */
-
+	printk("[port_kernel] ccci_notify_md_by_sys_msg");
 	md = ccci_get_modem_by_id(idx);
 
 	return ret = ccci_send_msg_to_md(md, CCCI_SYSTEM_TX, msg, data, 1);
@@ -573,6 +575,8 @@ int ccci_notify_md_by_sys_msg(int md_id, unsigned int msg, unsigned int data)
 
 int ccci_sysmsg_echo_test(int md_id, int data)
 {
+	
+		printk("[port_kernel] ccci_sysmsg_echo_test");
 	CCCI_DBG_MSG(md_id, KERN, "system message: Enter ccci_sysmsg_echo_test data= %08x", data);
 	ccci_notify_md_by_sys_msg(md_id, TEST_MSG_ID_AP2MD, data);
 	return 0;
@@ -581,6 +585,7 @@ EXPORT_SYMBOL(ccci_sysmsg_echo_test);
 
 int ccci_sysmsg_echo_test_l1core(int md_id, int data)
 {
+		printk("[port_kernel] ccci_sysmsg_echo_test_l1core");
 	CCCI_DBG_MSG(md_id, KERN, "system message: Enter ccci_sysmsg_echo_test_l1core data= %08x", data);
 	ccci_notify_md_by_sys_msg(md_id, TEST_MSG_ID_L1CORE_AP2MD, data);
 	return 0;
@@ -595,7 +600,7 @@ int register_ccci_sys_call_back(int md_id, unsigned int id, ccci_sys_cb_func_t f
 {
 	int ret = 0;
 	ccci_sys_cb_func_info_t *info_ptr;
-
+	printk("[port_kernel] register_ccci_sys_call_back");
 	if (md_id >= MAX_MD_NUM) {
 		CCCI_ERR_MSG(md_id, KERN, "register_sys_call_back fail: invalid md id\n");
 		return -EINVAL;
@@ -625,7 +630,7 @@ void exec_ccci_sys_call_back(int md_id, int cb_id, int data)
 	ccci_sys_cb_func_t func;
 	int id;
 	ccci_sys_cb_func_info_t *curr_table;
-
+	printk("[port_kernel] exec_ccci_sys_call_back");
 	if (md_id >= MAX_MD_NUM) {
 		CCCI_ERR_MSG(md_id, KERN, "exec_sys_cb fail: invalid md id\n");
 		return;
@@ -657,7 +662,7 @@ static void system_msg_handler(struct ccci_port *port, struct ccci_request *req)
 {
 	struct ccci_modem *md = port->modem;
 	struct ccci_header *ccci_h = (struct ccci_header *)req->skb->data;
-
+	printk("[port_kernel] system_msg_handler");
 	CCCI_DBG_MSG(md->index, KERN, "system message (%x %x %x %x)\n", ccci_h->data[0], ccci_h->data[1],
 		     ccci_h->channel, ccci_h->reserved);
 	switch (ccci_h->data[1]) {
@@ -697,6 +702,7 @@ static void system_msg_handler(struct ccci_port *port, struct ccci_request *req)
 
 static int get_md_gpio_val(unsigned int num)
 {
+		printk("[port_kernel] get_md_gpio_val");
 #if defined(FEATURE_GET_MD_GPIO_VAL)
 #if defined(CONFIG_MTK_LEGACY)
 	return mt_get_gpio_in(num);
@@ -714,7 +720,7 @@ static int get_md_adc_val(unsigned int num)
 #if defined(FEATURE_GET_MD_ADC_VAL)
 	int data[4] = { 0, 0, 0, 0 };
 	int val = 0;
-
+	printk("[port_kernel] get_md_adc_val");
 	ret = IMM_GetOneChannelValue(num, data, &val);
 	CCCI_DBG_MSG(0, RPC, "FEATURE_GET_MD_ADC_VAL,ret=%d, val=%d\n", ret, val);
 	if (ret == 0)
@@ -722,6 +728,7 @@ static int get_md_adc_val(unsigned int num)
 	else
 		return ret;
 #elif defined(FEATURE_GET_MD_PMIC_ADC_VAL)
+		printk("[port_kernel] get_md_adc_val");
 	ret = PMIC_IMM_GetOneChannelValue(num, 1, 0);
 	CCCI_DBG_MSG(0, RPC, "FEATURE_GET_MD_PMIC_ADC_VAL, %d\n", ret);
 	return ret;
@@ -733,6 +740,7 @@ static int get_md_adc_val(unsigned int num)
 
 static int get_td_eint_info(char *eint_name, unsigned int len)
 {
+		printk("[port_kernel] mget_td_eint_info");
 #if defined(FEATURE_GET_TD_EINT_NUM)
 	return get_td_eint_num(eint_name, len);
 #else
@@ -743,6 +751,7 @@ static int get_td_eint_info(char *eint_name, unsigned int len)
 static int get_md_adc_info(char *adc_name, unsigned int len)
 {
 	int ret = 0;
+		printk("[port_kernel] get_md_adc_info");
 #if defined(FEATURE_GET_MD_ADC_NUM)
 	ret = IMM_get_adc_channel_num(adc_name, len);
 	CCCI_DBG_MSG(0, RPC, "IMM_get_adc_channel_num, %d\n", ret);
@@ -762,7 +771,7 @@ static int get_md_gpio_info(char *gpio_name, unsigned int len)
 	int i = 0;
 	struct device_node *node = of_find_compatible_node(NULL, NULL, "mediatek,gpio_usage_mapping");
 	int gpio_id = -1;
-
+	printk("[port_kernel] get_md_gpio_info +1");
 	if (!node) {
 		CCCI_INF_MSG(0, RPC, "MD_USE_GPIO is not set in device tree,need to check?\n");
 		return gpio_id;
@@ -791,12 +800,14 @@ static int get_md_gpio_info(char *gpio_name, unsigned int len)
 	return gpio_id;
 
 #else
+		printk("[port_kernel] get_md_gpio_info -1");
 	return -1;
 #endif
 }
 
 static int get_dram_type_clk(int *clk, int *type)
 {
+		printk("[port_kernel] get_dram_type_clk");
 #if defined(FEATURE_GET_DRAM_TYPE_CLK)
 	return get_dram_info(clk, type);
 #else
@@ -849,8 +860,8 @@ static int get_eint_attr_val(struct device_node *node, int index)
 	int value;
 	int ret = 0, type;
 	int covert_AP_to_MD_unit = 1000; /*unit of AP eint is us, but unit of MD eint is ms. So need covertion here.*/
-        printk("get_eint_attr_val called:");
 
+	printk("[port_kernel] get_eint_attr_val");
 	for (type = 0; type < SIM_HOT_PLUG_EINT_MAX; type++) {
 		ret = of_property_read_u32_index(node, md_eint_struct[type].property,
 			md_eint_struct[type].index, &value);
@@ -903,24 +914,30 @@ void get_dtsi_eint_node(void)
 {
 	int i;
 	struct device_node *node;
-
+	printk("[port_kernel] get_dtsi_eint_node");
 	for (i = 0; i < MD_SIM_MAX; i++) {
 		if (eint_node_prop.name[i].node_name != NULL) {
+				printk("[port_kernel] get_dtsi_eint_node node_%d__ %d\n", i, (int)(strlen(eint_node_prop.name[i].node_name)));
 			/* CCCI_INF_MSG(-1, TAG, "node_%d__ %d\n", i,
 			   (int)(strlen(eint_node_prop.name[i].node_name))); */
 			if (strlen(eint_node_prop.name[i].node_name) > 0) {
+				printk("[port_kernel] get_dtsi_eint_node found %s: node %d\n", eint_node_prop.name[i].node_name, i);
 				/* CCCI_INF_MSG(-1, TAG, "found %s: node %d\n", eint_node_prop.name[i].node_name, i); */
 				node = of_find_node_by_name(NULL, eint_node_prop.name[i].node_name);
 				if (node != NULL) {
 					eint_node_prop.ExistFlag |= (1 << i);
 					get_eint_attr_val(node, i);
+					printk("[port_kernel] get_dtsi_eint_node %s: node %d found\n", eint_node_prop.name[i].node_name, i);
 					/* CCCI_INF_MSG(-1, TAG, "%s: node %d found\n", eint_node_prop.name[i], i); */
 				} else {
+					printk("[port_kernel] get_dtsi_eint_node %s: node %d no found\n",
+						     eint_node_prop.name[i].node_name, i);
 					CCCI_INF_MSG(-1, RPC, "%s: node %d no found\n",
 						     eint_node_prop.name[i].node_name, i);
 				}
 			}
 		} else {
+			printk("[port_kernel] get_dtsi_eint_node node %d is NULL\n", i);
 			CCCI_INF_MSG(-1, RPC, "node %d is NULL\n", i);
 			break;
 		}
@@ -931,20 +948,24 @@ int get_eint_attr_DTSVal(char *name, unsigned int name_len, unsigned int type, c
 {
 	int i, sim_value;
 	int *sim_info = (int *)result;
-
+	printk("[port_kernel] get_eint_attr_DTSVal");
 	if ((name == NULL) || (result == NULL) || (len == NULL))
 		return ERR_SIM_HOT_PLUG_NULL_POINTER;
 	/* CCCI_INF_MSG(-1, KERN, "get_eint_value: %s\n", name); */
+	printk("[port_kernel] get_eint_attr_DTSVal get_eint_value: %s\n", name);
 	if (type >= SIM_HOT_PLUG_EINT_MAX)
 		return ERR_SIM_HOT_PLUG_QUERY_TYPE;
 
 	/* CCCI_INF_MSG(-1, RPC, "get_eint_value:%s, %d\n", name, eint_node_prop.ExistFlag); */
+	printk("[port_kernel] get_eint_attr_DTSVal get_eint_value:%s, %d\n", name, eint_node_prop.ExistFlag);
 	for (i = 0; i < MD_SIM_MAX; i++) {
 		if (eint_node_prop.ExistFlag & (1 << i)) {
 			if (!(strncmp(name, eint_node_prop.name[i].node_name, name_len))) {
 				sim_value = eint_node_prop.eint_value[type].value_sim[i];
 				*len = sizeof(sim_value);
 				memcpy(sim_info, &sim_value, *len);
+				printk("[port_kernel] get_eint_attr_DTSVal get_eint_value type name:%s,sizeof: %d, sim_info: %d, %d\n", 
+				    eint_node_prop.eint_value[type].property, *len, *sim_info, eint_node_prop.eint_value[type].value_sim[i]);
 				/* CCCI_INF_MSG(-1, RPC, "get_eint_value type name:%s,
 				   sizeof: %d, sim_info: %d, %d\n", eint_node_prop.eint_value[type].property,
 				   *len, *sim_info, eint_node_prop.eint_value[type].value_sim[i]); */
@@ -958,12 +979,16 @@ int get_eint_attr_DTSVal(char *name, unsigned int name_len, unsigned int type, c
 
 static int get_eint_attr(char *name, unsigned int name_len, unsigned int type, char *result, unsigned int *len)
 {
+
 #ifdef FEATURE_GET_MD_EINT_ATTR_DTS
+	printk("[port_kernel] get_eint_attr FEATURE_GET_MD_EINT_ATTR_DTS");
 	return get_eint_attr_DTSVal(name, name_len, type, result, len);
 #else
 #if defined(FEATURE_GET_MD_EINT_ATTR)
+	printk("[port_kernel] get_eint_attr FEATURE_GET_MD_EINT_ATTR");
 	return get_eint_attribute(name, name_len, type, result, len);
 #else
+	printk("[port_kernel] get_eint_attr -1");
 	return -1;
 #endif
 #endif
@@ -973,7 +998,7 @@ static void ccci_rpc_get_gpio_adc(struct ccci_rpc_gpio_adc_intput *input, struct
 {
 	int num;
 	unsigned int val, i;
-
+	printk("[port_kernel] ccci_rpc_get_gpio_adc");
 	CCCI_INF_MSG(0, KERN, "IPC_RPC_GET_GPIO_ADC_OP reqMask=%x\n", input->reqMask);
 	if ((input->reqMask & (RPC_REQ_GPIO_PIN | RPC_REQ_GPIO_VALUE)) == (RPC_REQ_GPIO_PIN | RPC_REQ_GPIO_VALUE)) {
 		for (i = 0; i < GPIO_MAX_COUNT; i++) {
