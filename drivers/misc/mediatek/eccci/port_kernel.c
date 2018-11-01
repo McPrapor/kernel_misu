@@ -849,10 +849,13 @@ static int get_eint_attr_val(struct device_node *node, int index)
 	int value;
 	int ret = 0, type;
 	int covert_AP_to_MD_unit = 1000; /*unit of AP eint is us, but unit of MD eint is ms. So need covertion here.*/
+        printk("get_eint_attr_val called:");
 
 	for (type = 0; type < SIM_HOT_PLUG_EINT_MAX; type++) {
 		ret = of_property_read_u32_index(node, md_eint_struct[type].property,
 			md_eint_struct[type].index, &value);
+				CCCI_INF_MSG(-1, RPC, "%s: --- %d_%d\n", md_eint_struct[type].property,
+				   md_eint_struct[type].index, md_eint_struct[type].value_sim[index]); 
 		if (!ret) {
 			/* special case: polarity's position == sensitivity's start[ */
 			if (type == SIM_HOT_PLUG_EINT_POLARITY) {
@@ -874,18 +877,18 @@ static int get_eint_attr_val(struct device_node *node, int index)
 					CCCI_ERR_MSG(-1, RPC, "invalid value, please check dtsi!\n");
 					break;
 				}
-				/* CCCI_INF_MSG(-1, RPC, "%s:  --- %d_%d_%d\n", md_eint_struct[type].property,
+				 CCCI_INF_MSG(-1, RPC, "%s:  --- %d_%d_%d\n", md_eint_struct[type].property,
 				   md_eint_struct[type].index,
 				   md_eint_struct[SIM_HOT_PLUG_EINT_POLARITY].value_sim[index],
-				   md_eint_struct[SIM_HOT_PLUG_EINT_SENSITIVITY].value_sim[index]); */
+				   md_eint_struct[SIM_HOT_PLUG_EINT_SENSITIVITY].value_sim[index]); 
 				type++;
 			} else if (type == SIM_HOT_PLUG_EINT_DEBOUNCETIME) {
 				/*debounce time should divide by 1000 due to different unit in AP and MD.*/
 				md_eint_struct[type].value_sim[index] = value/covert_AP_to_MD_unit;
 			} else {
 				md_eint_struct[type].value_sim[index] = value;
-				/* CCCI_INF_MSG(-1, RPC, "%s: --- %d_%d\n", md_eint_struct[type].property,
-				   md_eint_struct[type].index, md_eint_struct[type].value_sim[index]); */
+				CCCI_INF_MSG(-1, RPC, "%s: --- %d_%d\n", md_eint_struct[type].property,
+				   md_eint_struct[type].index, md_eint_struct[type].value_sim[index]); 
 			}
 		} else {
 			md_eint_struct[type].value_sim[index] = ERR_SIM_HOT_PLUG_QUERY_TYPE;
