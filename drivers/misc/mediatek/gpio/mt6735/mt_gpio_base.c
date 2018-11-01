@@ -251,9 +251,8 @@ int mt_set_gpio_pull_select_base(unsigned long pin, unsigned long select)
 	/* unsigned long flags; */
 
 	unsigned long bit = 0;
-#ifdef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY	
-	u32 mask = (1L << 4) - 1;
-#endif
+//	u32 mask = (1L << 4) - 1;
+
 	if (pin >= MAX_GPIO_PIN)
 		return -ERINVAL;
 
