@@ -946,26 +946,6 @@ to make keypad work without such a hack */
                                 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
                                 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 >;
 };
-/* SIM card pins */
-&eintc {
-MD1_SIM1_HOT_PLUG_EINT@0 {
-        compatible = "mediatek, MD1_SIM1_HOT_PLUG_EINT-eint";
-        interrupts = <0 8>;
-        debounce = <0 100000>;
-        dedicated = <0 0>;
-        src_pin = <0 142515272>;
-        sockettype=<0 1>;
-};
-
-MD1_SIM2_HOT_PLUG_EINT@1 {
-        compatible = "mediatek, MD1_SIM2_HOT_PLUG_EINT-eint";
-        interrupts = <1 8>;
-        debounce = <1 100000>;
-        dedicated = <1 0>;
-        src_pin = <1 142515272>;
-        sockettype=<1 1>;
-};
-/* end sim card pins */
 
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
