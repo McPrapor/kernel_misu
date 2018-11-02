@@ -19,8 +19,7 @@
 #include <mt-plat/mt_gpio.h>
 #endif
 
-//#define SSW_DBG(format, args...)    pr_debug("[ccci/ssw]" format, ##args)
-#define SSW_DBG(x...) printk("[ccci/ssw] " x)
+#define SSW_DBG(format, args...)    pr_debug("[ccci/ssw]" format, ##args)
 /*------------------------Error Code---------------------------------------*/
 #define SSW_SUCCESS (0)
 #define SSW_INVALID_PARA		(-1)
