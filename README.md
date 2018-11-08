@@ -1,13 +1,14 @@
 # HTC Desire 628 dual sim - AEX 5.x (Oreo 8.1.0)
----
-Kernel 3.18.99 for Android Oreo 8.1.0 AOSP/AEX ROMs.
 
-# About Device
+Kernel 3.18.99 for Android Oreo 8.1.0 AOSP/AEX ROMs. MiSU.
+
 ---
+# About Device
 
 HTC Desire 628 dual sim(htc_v36bml_dugl)
 ![HTC Desire 628 dual sim](https://www.htc.com/managed-assets/shared/desktop/smartphones/htc-desire-628-dual-sim/pdp/Desire-628-DS-PDP-Desktop-Buy-Now.png "HTC Desire 628 dual sim")
 
+---
 ### Specifications
 
 Component Type | Details
@@ -47,11 +48,11 @@ Front Camera | 5MP, Int. 5MP
  * cm36686 alsps sensor
  * fm radio
  * lm3642 
- 
-## Broken/Bugs
--------------
  * ramconsole bad addresing
  * camera
+
+## Broken/Bugs
+-------------
  * flashlight
  * battery meter tables
  * himax 852xes touchpad wake on double touch
