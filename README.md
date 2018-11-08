@@ -1,5 +1,4 @@
 # HTC Desire 628 dual sim - AEX 5.x (Oreo 8.1.0)
-==============
 
 Kernel 3.18.99 for Android Oreo 8.1.0 AOSP/AEX ROMs.
 
