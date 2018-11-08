@@ -25,11 +25,9 @@ Rear Camera | 13MP, Int.13MP
 Front Camera | 5MP, Int. 5MP
 
 ---
-
 # Build Information
 
 ## Works
--------------
  * hx8394f_hd720_dsi_vdo_truly_v36 lcm
  * himax 852xes touchpad
  * bq24158 charger
@@ -41,8 +39,8 @@ Front Camera | 5MP, Int. 5MP
  * gps
  * kpd works fine
 
-## Testing...
 -------------
+## Testing...
  * hall_ak8789
  * iio sensor hub
  * bma253 acceleration sensor 
@@ -52,8 +50,10 @@ Front Camera | 5MP, Int. 5MP
  * ramconsole bad addresing
  * camera
 
-## Broken/Bugs
 -------------
+## Broken/Bugs
  * flashlight
  * battery meter tables
  * himax 852xes touchpad wake on double touch
+
+-------------
