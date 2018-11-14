@@ -950,30 +950,30 @@ Auddrv_OF_ParseGPIO pin_i2s1clk=80, pin_i2s1dat=78, pin_i2s1mclk=9, pin_i2s1ws=7
 	};
 	AUD_pins_extamp2_high: audexam2phigh {
 		pins_cmd_dat {
-/*			pins = <PINMUX_GPIO128__FUNC_GPIO128>; */
-			pins = <PINMUX_GPIO21__FUNC_GPIO21>; 
+			pins = <PINMUX_GPIO128__FUNC_GPIO128>; 
 				slew-rate = <1>;
 				output-high;
 		};
 	};
 	AUD_pins_extamp2_low: audexamp2low {
 		pins_cmd_dat {
-/*			pins = <PINMUX_GPIO128__FUNC_GPIO128>; */
-			pins = <PINMUX_GPIO21__FUNC_GPIO21>; 
+			pins = <PINMUX_GPIO128__FUNC_GPIO128>; 
 				slew-rate = <1>;
 				output-low;
 		};
 	};
 	AUD_pins_rcvspk_high: audrcvspkhigh {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO120__FUNC_GPIO120>;
+/*			pins = <PINMUX_GPIO120__FUNC_GPIO120>; */
+			pins = <PINMUX_GPIO21__FUNC_GPIO21>; 
 				slew-rate = <1>;
 				output-high;
 		};
 	};
 	AUD_pins_rcvspk_low: audrcvspklow {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO120__FUNC_GPIO120>;
+/*			pins = <PINMUX_GPIO120__FUNC_GPIO120>; */
+			pins = <PINMUX_GPIO21__FUNC_GPIO21>; 
 				slew-rate = <1>;
 				output-low;
 		};
