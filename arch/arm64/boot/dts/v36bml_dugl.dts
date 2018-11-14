@@ -937,16 +937,18 @@ Auddrv_OF_ParseGPIO pin_i2s1clk=80, pin_i2s1dat=78, pin_i2s1mclk=9, pin_i2s1ws=7
 	AUD_pins_extamp_high: audexamphigh {
 		pins_cmd_dat {
 /*			pins = <PINMUX_GPIO129__FUNC_GPIO129>; */
-			pins = <PINMUX_GPIO21__FUNC_MD_EINT1>;
+			pins = <PINMUX_GPIO21__FUNC_GPIO21>;
 				slew-rate = <1>;
+				bias-pull-up = <1>;
 				output-high;
 		};
 	};
 	AUD_pins_extamp_low: audexamplow {
 		pins_cmd_dat {
 /*			pins = <PINMUX_GPIO129__FUNC_GPIO129>; */
-			pins = <PINMUX_GPIO21__FUNC_MD_EINT1>;
+			pins = <PINMUX_GPIO21__FUNC_GPIO21>;
 				slew-rate = <1>;
+				bias-pull-up = <1>;
 				output-low;
 		};
 	};
