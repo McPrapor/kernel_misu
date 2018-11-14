@@ -884,6 +884,7 @@ Auddrv_OF_ParseGPIO pin_i2s1clk=80, pin_i2s1dat=78, pin_i2s1mclk=9, pin_i2s1ws=7
 	pinctrl-8 = <&AUD_pins_extamp2_low>;
 	pinctrl-9 = <&AUD_pins_rcvspk_high>;
 	pinctrl-10 = <&AUD_pins_rcvspk_low>;
+        extspkamp-gpio = <20 0>;
 	status = "okay";
 };
 &pio {
