@@ -255,6 +255,7 @@ int AudDrv_GPIO_EXTAMP_Select(int bEnable)
 {
 	int retval = 0;
 
+	pr_err("AudDrv_GPIO_EXTAMP_Select called\n");
 	if (bEnable == 1) {
 		if (aud_gpios[GPIO_EXTAMP_HIGH].gpio_prepare) {
 			retval =
