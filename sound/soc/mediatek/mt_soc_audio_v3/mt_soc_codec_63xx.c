@@ -1941,6 +1941,23 @@ static void Ext_Speaker_Amp_Change(bool enable)
 		pr_debug("Ext_Speaker_Amp_Change OFF-\n");
 	}
 #endif
+
+#ifdef CONFIG_MTK_SPEAKER
+        if (enable) {
+                pr_debug("Ext_Speaker_Amp_Change ON+\n");
+		AudDrv_GPIO_EXTAMP_Select(true);
+		AudDrv_GPIO_EXTAMP2_Select(true);
+		msleep(SPK_WARM_UP_TIME);
+		pr_debug("Ext_Speaker_Amp_Change ON-\n");
+	} else {
+		pr_debug("Ext_Speaker_Amp_Change OFF+\n");
+		AudDrv_GPIO_EXTAMP_Select(false);
+		AudDrv_GPIO_EXTAMP2_Select(false);
+		udelay(500);
+		pr_debug("Ext_Speaker_Amp_Change OFF-\n");
+
+	}
+#endif
 }
 
 #else /*CONFIG_OF*/
