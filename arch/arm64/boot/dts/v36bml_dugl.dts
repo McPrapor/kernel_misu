@@ -865,7 +865,9 @@ cust_alsps@0 {
 */
 
 &audgpio {
-        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
+/*        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
+*/
+        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow";
         pinctrl-0 = <&AUD_pins_default>;
         pinctrl-1 = <&AUD_pins_pmicclk_mode0>;
         pinctrl-2 = <&AUD_pins_pmicclk_mode1>;
@@ -873,11 +875,11 @@ cust_alsps@0 {
         pinctrl-4 = <&AUD_pins_i2s1_mode1>;
         pinctrl-5 = <&AUD_pins_extamp_high>;
         pinctrl-6 = <&AUD_pins_extamp_low>;
-        pinctrl-7 = <&AUD_pins_extamp2_high>;
+/*        pinctrl-7 = <&AUD_pins_extamp2_high>;
         pinctrl-8 = <&AUD_pins_extamp2_low>;
         pinctrl-9 = <&AUD_pins_rcvspk_high>;
         pinctrl-10 = <&AUD_pins_rcvspk_low>;
-        extspkamp-gpio = <21 0>;
+*/        extspkamp-gpio = <21 0>;
         status = "okay";
 };
 &pio {
@@ -943,17 +945,20 @@ cust_alsps@0 {
                                 output-low;
                 };
         };
+/*
         AUD_pins_extamp2_high: audexam2phigh {
                 pins_cmd_dat {
-                        pins = <PINMUX_GPIO128__FUNC_GPIO128>;
+                        pins = <PINMUX_GPIO21__FUNC_GPIO21>;
                                 slew-rate = <1>;
+                                bias-pull-down = <1>;
                                 output-high;
                 };
         };
         AUD_pins_extamp2_low: audexamp2low {
                 pins_cmd_dat {
-                        pins = <PINMUX_GPIO128__FUNC_GPIO128>;
+                        pins = <PINMUX_GPIO21__FUNC_GPIO21>;
                                 slew-rate = <1>;
+                                bias-pull-down = <1>;
                                 output-low;
                 };
         };
@@ -971,6 +976,7 @@ cust_alsps@0 {
                                 output-low;
                 };
         };
+*/
 };
 /* AUDIO end */
 
