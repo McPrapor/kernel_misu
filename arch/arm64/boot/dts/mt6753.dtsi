@@ -1720,7 +1720,7 @@ initrd=0x44000000,0x300000 loglevel=8 androidboot.hardware=mt6735";
 			interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_LOW>;
 		};
 
-		audgpio:mt_soc_dl1_pcm@11220000 {
+		audiogpio:mt_soc_dl1_pcm@11220000 {
 			compatible = "mediatek,mt-soc-dl1-pcm";
 			reg = <0x11220000 0x1000>;
 			interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_LOW>;

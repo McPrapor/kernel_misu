@@ -864,124 +864,116 @@ cust_alsps@0 {
 };
 */
 
-/* AUDIO */
-/* From old kernel debug:
-Auddrv_OF_ParseGPIO pin_audclk=143, pin_audmiso=144, pin_audmosi=145 
-Auddrv_OF_ParseGPIO pin_vowclk=148, pin_extspkamp=21 
-Auddrv_OF_ParseGPIO pin_i2s1clk=80, pin_i2s1dat=78, pin_i2s1mclk=9, pin_i2s1ws=79
-*/
-/* AUDIO GPIO standardization */
 &audgpio {
-	pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
-	pinctrl-0 = <&AUD_pins_default>;
-	pinctrl-1 = <&AUD_pins_pmicclk_mode0>;
-	pinctrl-2 = <&AUD_pins_pmicclk_mode1>;
-	pinctrl-3 = <&AUD_pins_i2s1_mode0>;
-	pinctrl-4 = <&AUD_pins_i2s1_mode1>;
-	pinctrl-5 = <&AUD_pins_extamp_high>;
-	pinctrl-6 = <&AUD_pins_extamp_low>;
-	pinctrl-7 = <&AUD_pins_extamp2_high>;
-	pinctrl-8 = <&AUD_pins_extamp2_low>;
-	pinctrl-9 = <&AUD_pins_rcvspk_high>;
-	pinctrl-10 = <&AUD_pins_rcvspk_low>;
-        extspkamp-gpio = <20 0>;
-	status = "okay";
+        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
+        pinctrl-0 = <&AUD_pins_default>;
+        pinctrl-1 = <&AUD_pins_pmicclk_mode0>;
+        pinctrl-2 = <&AUD_pins_pmicclk_mode1>;
+        pinctrl-3 = <&AUD_pins_i2s1_mode0>;
+        pinctrl-4 = <&AUD_pins_i2s1_mode1>;
+        pinctrl-5 = <&AUD_pins_extamp_high>;
+        pinctrl-6 = <&AUD_pins_extamp_low>;
+        pinctrl-7 = <&AUD_pins_extamp2_high>;
+        pinctrl-8 = <&AUD_pins_extamp2_low>;
+        pinctrl-9 = <&AUD_pins_rcvspk_high>;
+        pinctrl-10 = <&AUD_pins_rcvspk_low>;
+        extspkamp-gpio = <21 0>;
+        status = "okay";
 };
 &pio {
-	AUD_pins_default: audiodefault {
-	};
-	AUD_pins_pmicclk_mode0: pmicclkmode0 {
-		pins_cmd0_dat {
-			pins = <PINMUX_GPIO143__FUNC_GPIO143>;
-		};
-		pins_cmd1_dat {
-			pins = <PINMUX_GPIO144__FUNC_GPIO144>;
-		};
-		pins_cmd2_dat {
-			pins = <PINMUX_GPIO145__FUNC_GPIO145>;
-		};
-	};
-	AUD_pins_pmicclk_mode1: pmicclkmode1 {
-		pins_cmd0_dat {
-			pins = <PINMUX_GPIO143__FUNC_AUD_CLK_MOSI>;
-		};
-		pins_cmd1_dat {
-			pins = <PINMUX_GPIO144__FUNC_AUD_DAT_MISO>;
-		};
-		pins_cmd2_dat {
-			pins = <PINMUX_GPIO145__FUNC_AUD_DAT_MOSI>;
-		};
-	};
-	AUD_pins_i2s1_mode0: audi2s1mode0 {
-		pins_cmd0_dat {
-			pins = <PINMUX_GPIO78__FUNC_GPIO78>;
-		};
-		pins_cmd1_dat {
-			pins = <PINMUX_GPIO79__FUNC_GPIO79>;
-		};
-		pins_cmd2_dat {
-			pins = <PINMUX_GPIO80__FUNC_GPIO80>;
-		};
-	};
-	AUD_pins_i2s1_mode1: audi2s1mode1 {
-		pins_cmd0_dat {
-			pins = <PINMUX_GPIO78__FUNC_I2S0_DI>;
-		};
-		pins_cmd1_dat {
-			pins = <PINMUX_GPIO79__FUNC_I2S0_LRCK>;
-		};
-		pins_cmd2_dat {
-			pins = <PINMUX_GPIO80__FUNC_I2S0_BCK>;
-		};
-	};
-	AUD_pins_extamp_high: audexamphigh {
-		pins_cmd_dat {
-/*			pins = <PINMUX_GPIO129__FUNC_GPIO129>; */
-			pins = <PINMUX_GPIO21__FUNC_GPIO21>;
-				slew-rate = <1>;
-				bias-pull-down = <1>;
-				output-high;
-		};
-	};
-	AUD_pins_extamp_low: audexamplow {
-		pins_cmd_dat {
-/*			pins = <PINMUX_GPIO129__FUNC_GPIO129>; */
-			pins = <PINMUX_GPIO21__FUNC_GPIO21>;
-				slew-rate = <1>;
-				bias-pull-down = <1>;
-				output-low;
-		};
-	};
-	AUD_pins_extamp2_high: audexam2phigh {
-		pins_cmd_dat {
-			pins = <PINMUX_GPIO128__FUNC_GPIO128>; 
-				slew-rate = <1>;
-				output-high;
-		};
-	};
-	AUD_pins_extamp2_low: audexamp2low {
-		pins_cmd_dat {
-			pins = <PINMUX_GPIO128__FUNC_GPIO128>; 
-				slew-rate = <1>;
-				output-low;
-		};
-	};
-	AUD_pins_rcvspk_high: audrcvspkhigh {
-		pins_cmd_dat {
-			pins = <PINMUX_GPIO120__FUNC_GPIO120>;
-				slew-rate = <1>;
-				output-high;
-		};
-	};
-	AUD_pins_rcvspk_low: audrcvspklow {
-		pins_cmd_dat {
-			pins = <PINMUX_GPIO120__FUNC_GPIO120>; 
-				slew-rate = <1>;
-				output-low;
-		};
-	};
+        AUD_pins_default: audiodefault {
+        };
+        AUD_pins_pmicclk_mode0: pmicclkmode0 {
+                pins_cmd0_dat {
+                        pins = <PINMUX_GPIO143__FUNC_GPIO143>;
+                };
+                pins_cmd1_dat {
+                        pins = <PINMUX_GPIO144__FUNC_GPIO144>;
+                };
+                pins_cmd2_dat {
+                        pins = <PINMUX_GPIO145__FUNC_GPIO145>;
+                };
+        };
+        AUD_pins_pmicclk_mode1: pmicclkmode1 {
+                pins_cmd0_dat {
+                        pins = <PINMUX_GPIO143__FUNC_AUD_CLK_MOSI>;
+                };
+                pins_cmd1_dat {
+                        pins = <PINMUX_GPIO144__FUNC_AUD_DAT_MISO>;
+                };
+                pins_cmd2_dat {
+                        pins = <PINMUX_GPIO145__FUNC_AUD_DAT_MOSI>;
+                };
+        };
+        AUD_pins_i2s1_mode0: audi2s1mode0 {
+                pins_cmd0_dat {
+                        pins = <PINMUX_GPIO78__FUNC_GPIO78>;
+                };
+                pins_cmd1_dat {
+                        pins = <PINMUX_GPIO79__FUNC_GPIO79>;
+                };
+                pins_cmd2_dat {
+                        pins = <PINMUX_GPIO80__FUNC_GPIO80>;
+                };
+        };
+        AUD_pins_i2s1_mode1: audi2s1mode1 {
+                pins_cmd0_dat {
+                        pins = <PINMUX_GPIO78__FUNC_I2S0_DI>;
+                };
+                pins_cmd1_dat {
+                        pins = <PINMUX_GPIO79__FUNC_I2S0_LRCK>;
+                };
+                pins_cmd2_dat {
+                        pins = <PINMUX_GPIO80__FUNC_I2S0_BCK>;
+                };
+        };
+        AUD_pins_extamp_high: audexamphigh {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO21__FUNC_GPIO21>;
+                                slew-rate = <1>;
+                                bias-pull-down = <1>;
+                                output-high;
+                };
+        };
+        AUD_pins_extamp_low: audexamplow {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO21__FUNC_GPIO21>;
+                                slew-rate = <1>;
+                                bias-pull-down = <1>;
+                                output-low;
+                };
+        };
+        AUD_pins_extamp2_high: audexam2phigh {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO128__FUNC_GPIO128>;
+                                slew-rate = <1>;
+                                output-high;
+                };
+        };
+        AUD_pins_extamp2_low: audexamp2low {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO128__FUNC_GPIO128>;
+                                slew-rate = <1>;
+                                output-low;
+                };
+        };
+        AUD_pins_rcvspk_high: audrcvspkhigh {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO120__FUNC_GPIO120>;
+                                slew-rate = <1>;
+                                output-high;
+                };
+        };
+        AUD_pins_rcvspk_low: audrcvspklow {
+                pins_cmd_dat {
+                        pins = <PINMUX_GPIO120__FUNC_GPIO120>;
+                                slew-rate = <1>;
+                                output-low;
+                };
+        };
 };
 /* AUDIO end */
+
 /* in fact we can just return the deafult codegen.dws which i broken
 to make keypad work without such a hack */
 &keypad {

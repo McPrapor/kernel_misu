@@ -1865,7 +1865,6 @@ do { \
 #define NULL_PIN_DEFINITION    (-1)
 static void Ext_Speaker_Amp_Change(bool enable)
 {
-	pr_err("Ext_Speaker_Amp_Change called\n");
 #define SPK_WARM_UP_TIME        (25)	/* unit is ms */
 #ifndef CONFIG_FPGA_EARLY_PORTING
 #if defined(CONFIG_MTK_LEGACY)
@@ -1939,23 +1938,6 @@ static void Ext_Speaker_Amp_Change(bool enable)
 		udelay(500);
 #endif
 		pr_debug("Ext_Speaker_Amp_Change OFF-\n");
-	}
-#endif
-
-#ifdef CONFIG_MTK_SPEAKER
-        if (enable) {
-                pr_debug("Ext_Speaker_Amp_Change ON+\n");
-		AudDrv_GPIO_EXTAMP_Select(true);
-		AudDrv_GPIO_EXTAMP2_Select(true);
-		msleep(SPK_WARM_UP_TIME);
-		pr_debug("Ext_Speaker_Amp_Change ON-\n");
-	} else {
-		pr_debug("Ext_Speaker_Amp_Change OFF+\n");
-		AudDrv_GPIO_EXTAMP_Select(false);
-		AudDrv_GPIO_EXTAMP2_Select(false);
-		udelay(500);
-		pr_debug("Ext_Speaker_Amp_Change OFF-\n");
-
 	}
 #endif
 }
@@ -2068,7 +2050,7 @@ static int Ext_Speaker_Amp_Get(struct snd_kcontrol *kcontrol, struct snd_ctl_ele
 
 static int Ext_Speaker_Amp_Set(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
-	pr_err("Ext_Speaker_Amp_set called");
+
 	pr_debug("%s() gain = %ld\n ", __func__, ucontrol->value.integer.value[0]);
 	if (ucontrol->value.integer.value[0]) {
 		Ext_Speaker_Amp_Change(true);
