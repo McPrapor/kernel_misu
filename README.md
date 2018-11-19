@@ -49,6 +49,7 @@ Front Camera | 5MP, Int. 5MP
  * lm3642 
  * ramconsole bad addresing
  * camera
+ * ts3a225e audio switcher
 
 -------------
 ## Broken/Bugs
