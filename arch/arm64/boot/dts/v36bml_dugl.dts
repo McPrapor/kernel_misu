@@ -21,11 +21,6 @@
                         compatible = "mediatek,MTKFB";
                         reg = <0x7F000000 0x1000000>;
                 };
-		ts3a225e@3b {
-			compatible = "mediatek,audio_switch", "mediatek,ts3a225e";
-			reg = <0x3b>;
-			status = "ok";
-		};
                 nxp_tfa9895_amp@35 {
                         compatible = "nxp,tfa9895-amp";
                         reg = <0x35>;
@@ -607,6 +602,13 @@
             bias-disable;
         };
     };
+};
+&i2c3 {
+	ts3a225e:ts3a225e@3b {
+		compatible = "mediatek,ts3a225e", "mediatek,audio_switch";
+		reg = <0x3b>;
+		status = "okay";
+	};
 };
 &accdet {
 		compatible = "mediatek,mt6735-accdet", "mediatek,mt6735m-accdet", "mediatek,mt6753-accdet";
