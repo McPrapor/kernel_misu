@@ -21,8 +21,10 @@
                         compatible = "mediatek,MTKFB";
                         reg = <0x7F000000 0x1000000>;
                 };
-		ts3a225e:mediatek,audio_switch {
+		ts3a225e@3b {
 			compatible = "mediatek,audio_switch", "mediatek,ts3a225e";
+			reg = <0x3b>;
+			status = "ok";
 		};
                 nxp_tfa9895_amp@35 {
                         compatible = "nxp,tfa9895-amp";
