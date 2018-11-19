@@ -21,20 +21,21 @@
                         compatible = "mediatek,MTKFB";
                         reg = <0x7F000000 0x1000000>;
                 };
-                        nxp_tfa9895_amp@35 {
-                                compatible = "nxp,tfa9895-amp";
-                                reg = <0x35>;
-                        };
-
-                        nxp_tfa9895l_amp@34 {
-                                compatible = "nxp,tfa9895l-amp";
-                                reg = <0x34>;
-                        };
-
-                        tpa6130_hs_amp@60 {
-                                compatible = "tpa,tpa6130-hs-amp";
-                                reg = <0x60>;
-                        };
+		ts3a225e:mediatek,audio_switch {
+			compatible = "mediatek,audio_switch";
+		};
+                nxp_tfa9895_amp@35 {
+                        compatible = "nxp,tfa9895-amp";
+                        reg = <0x35>;
+                };
+                nxp_tfa9895l_amp@34 {
+                        compatible = "nxp,tfa9895l-amp";
+                        reg = <0x34>;
+                };
+                tpa6130_hs_amp@60 {
+                        compatible = "tpa,tpa6130-hs-amp";
+                        reg = <0x60>;
+                };
         };
         touch_fw_update: touch_fw_update {
                 compatible = "htc,touch_fwu";
