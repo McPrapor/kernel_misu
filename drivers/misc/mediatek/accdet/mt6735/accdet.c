@@ -11,11 +11,23 @@
 #include <linux/of.h>
 #include <linux/of_irq.h>
 
+#ifdef CONFIG_V36BML_ACCDET
+//HTC_AUD_START
+#include "accdet_htc.h"
+//HTC_AUD_END
+#endif
+
 #define DEBUG_THREAD 1
 
 /*----------------------------------------------------------------------
 static variable defination
 ----------------------------------------------------------------------*/
+
+#ifdef CONFIG_V36BML_ACCDET
+//HTC_AUD_START
+static struct htc_headset_info *hi;
+//HTC_AUD_END
+#endif
 
 #define REGISTER_VALUE(x)   (x - 1)
 static int button_press_debounce = 0x400;
@@ -535,6 +547,11 @@ static void accdet_eint_work_callback(struct work_struct *work)
 /*EINT_PIN_PLUG_OUT*/
 /*Disable ACCDET*/
 		ACCDET_DEBUG("[Accdet]ACC EINT func :plug-out, cur_eint_state = %d\n", cur_eint_state);
+#ifdef CONFIG_V36BML_ACCDET
+                //HTC_AUD_START
+                if(hi) hi->hs_35mm_type = HTC_HEADSET_UNPLUG;
+                //HTC_AUD_END
+#endif
 		mutex_lock(&accdet_eint_irq_sync_mutex);
 		eint_accdet_sync_flag = 0;
 		mutex_unlock(&accdet_eint_irq_sync_mutex);
@@ -1204,10 +1221,21 @@ static void accdet_work_callback(struct work_struct *work)
 #endif
 #endif
 	mutex_lock(&accdet_eint_irq_sync_mutex);
-	if (1 == eint_accdet_sync_flag)
+	if (1 == eint_accdet_sync_flag) {
 		switch_set_state((struct switch_dev *)&accdet_data, cable_type);
-	else
+#ifdef CONFIG_V36BML_ACCDET
+                //HTC_AUD_START
+                if(hi) hi->hs_35mm_type = cable_type;
+                //HTC_AUD_END
+#endif
+	} else {
 		ACCDET_DEBUG("[Accdet] Headset has plugged out don't set accdet state\n");
+#ifdef CONFIG_V36BML_ACCDET
+                //HTC_AUD_START
+                if(hi) hi->hs_35mm_type = HTC_HEADSET_UNPLUG;
+                //HTC_AUD_END
+#endif
+	}
 	mutex_unlock(&accdet_eint_irq_sync_mutex);
 	ACCDET_DEBUG(" [accdet] set state in cable_type  status\n");
 
@@ -1571,6 +1599,290 @@ void accdet_eint_int_handler(void)
 		ACCDET_DEBUG("[accdet_int_handler] don't finished\n");
 }
 
+#ifdef CONFIG_V36BML_ACCDET
+//HTC_AUD_START
+int switch_send_event(unsigned int bit, int on)
+{
+        unsigned long state;
+
+        mutex_lock(&hi->mutex_lock);
+        state = switch_get_state(&hi->sdev_h2w);
+        state &= ~(bit);
+
+        if (on)
+                state |= bit;
+
+        switch_set_state(&hi->sdev_h2w, state);
+        mutex_unlock(&hi->mutex_lock);
+        return 0;
+}
+
+static void set_35mm_hw_state(int state)
+{
+        ACCDET_DEBUG();
+        /* For MTK,
+         * we do not implement the mic_bias and key state
+         * */
+}
+static ssize_t headset_state_show(struct device *dev,
+                struct device_attribute *attr, char *buf)
+{
+        int length = 0;
+        char *state = NULL;
+
+        ACCDET_DEBUG("%s \n", __func__);
+        if (!hi) {
+                ACCDET_DEBUG("%s: hi is NULL\n", __func__);
+                state = "error";
+                length = snprintf(buf, PAGE_SIZE, "%s\n", state);
+                return length;
+        }
+
+        switch (hi->hs_35mm_type) {
+        case HTC_HEADSET_UNPLUG:
+                state = "headset_unplug";
+                break;
+        case HTC_HEADSET_NO_MIC:
+                state = "headset_no_mic";
+                break;
+        case HTC_HEADSET_MIC:
+                state = "headset_mic";
+                break;
+        case HTC_HEADSET_METRICO:
+                state = "headset_metrico";
+                break;
+        case HTC_HEADSET_UNKNOWN_MIC:
+                state = "headset_unknown_mic";
+                break;
+        case HTC_HEADSET_TV_OUT:
+                state = "headset_tv_out";
+        case HTC_HEADSET_UNSTABLE:
+                state = "headset_unstable";
+                break;
+/*      case HEADSET_ONEWIRE:
+                if (hi->one_wire_mode == 1 && hs_mgr_notifier.hs_1wire_report_type)
+                        hs_mgr_notifier.hs_1wire_report_type(&state);
+                else
+                state = "headset_mic_1wire";
+                break;*/
+        case HTC_HEADSET_INDICATOR:
+                state = "headset_indicator";
+                break;
+        case HTC_HEADSET_UART:
+                state = "headset_uart";
+                break;
+        default:
+                state = "error_state";
+        }
+
+        length = snprintf(buf, PAGE_SIZE, "%s\n", state);
+
+        return length;
+}
+
+static ssize_t headset_state_store(struct device *dev,
+                struct device_attribute *attr, const char *buf, size_t count)
+{
+        ACCDET_DEBUG("%s \n", __func__);
+        return 0;
+}
+
+static DEVICE_HEADSET_ATTR(state, 0644, headset_state_show,
+                           headset_state_store);
+
+static ssize_t headset_simulate_show(struct device *dev,
+                struct device_attribute *attr, char *buf)
+{
+        ACCDET_DEBUG("%s \n", __func__);
+        return snprintf(buf, PAGE_SIZE, "Command is not supported\n");
+}
+
+static ssize_t headset_simulate_store(struct device *dev,
+                struct device_attribute *attr, const char *buf, size_t count)
+{
+        int type = NO_DEVICE;
+
+        ACCDET_DEBUG("%s \n", __func__);
+        if (!hi) {
+                ACCDET_DEBUG("%s: hi is NULL\n", __func__);
+                return -1;
+        }
+
+        switch_set_state((struct switch_dev *)&accdet_data, type);
+        if (strncmp(buf, "headset_unplug", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_unplug");
+                hi->hs_35mm_type = HTC_HEADSET_UNPLUG;
+                set_35mm_hw_state(0);
+                return count;
+        }
+        set_35mm_hw_state(1);
+
+        if (strncmp(buf, "headset_no_mic", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_no_mic");
+                hi->hs_35mm_type = HTC_HEADSET_NO_MIC;
+                type= HEADSET_NO_MIC;
+        } else if (strncmp(buf, "headset_mic", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_mic");
+                hi->hs_35mm_type = HTC_HEADSET_MIC;
+                type= HEADSET_MIC;
+        } else if (strncmp(buf, "headset_metrico", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_metrico");
+                //AUD_TODO, implement metrico
+                hi->hs_35mm_type = HTC_HEADSET_METRICO;
+                type= HEADSET_NO_MIC;
+        } else if (strncmp(buf, "headset_unknown_mic", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_unknown_mic");
+                hi->hs_35mm_type = HTC_HEADSET_UNKNOWN_MIC;
+                type= HEADSET_NO_MIC;
+        } else if (strncmp(buf, "headset_tv_out", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_tv_out");
+                //AUD_TODO, implement headset_tv_out
+                hi->hs_35mm_type = HTC_HEADSET_TV_OUT;
+                type = HEADSET_NO_MIC;
+#if defined(CONFIG_FB_MSM_TVOUT) && defined(CONFIG_ARCH_MSM8X60)
+                //tvout_enable_detection(1);
+#endif
+        } else if (strncmp(buf, "headset_indicator", count - 1) == 0) {
+                ACCDET_DEBUG("Headset simulation: headset_indicator");
+                //AUD_TDOO, implement headset_indicator
+                hi->hs_35mm_type = HTC_HEADSET_INDICATOR;
+        } else {
+                ACCDET_DEBUG("Invalid parameter");
+                hi->hs_35mm_type = HTC_HEADSET_UNPLUG;
+                return count;
+        }
+        switch_set_state((struct switch_dev *)&accdet_data, type);
+        return count;
+}
+
+static DEVICE_HEADSET_ATTR(simulate, 0644, headset_simulate_show,
+                           headset_simulate_store);
+
+static ssize_t headset_mfg_show(struct device *dev,
+                struct device_attribute *attr, char *buf)
+{
+        int length = 0;
+        char *state = NULL;
+
+        ACCDET_DEBUG("[accdet] %s\n", __func__);
+        if (!hi) {
+                ACCDET_DEBUG("[accdet] %s: hi is NULL\n", __func__);
+                state = "hi is NULL";
+                length = snprintf(buf, PAGE_SIZE, "%s\n", state);
+                return length;
+        }
+
+        if (hi->hs_mfg_mode) {
+                state = "it is MFG rom";
+        } else {
+                state = "it is not MFG rom";
+        }
+
+        length = snprintf(buf, PAGE_SIZE, "%s\n", state);
+        return length;
+}
+
+static ssize_t headset_mfg_store(struct device *dev,
+                struct device_attribute *attr, const char *buf, size_t count)
+{
+        int type = NO_DEVICE;
+
+        ACCDET_DEBUG("[accdet] %s: buf %s\n", __func__, buf);
+        if (!hi) {
+                ACCDET_DEBUG("[accdet] %s: hi is NULL\n", __func__);
+                return -1;
+        }
+
+        if (strncmp(buf, "headset_mfg_mode", count - 1) == 0) {
+                ACCDET_DEBUG("[accdet] %s: headset_mfg_mode = 1", __func__);
+                hi->hs_mfg_mode = true;
+        } else {
+                hi->hs_mfg_mode = false;
+                ACCDET_DEBUG("Invalid parameter");
+        }
+        return count;
+}
+
+static DEVICE_HEADSET_ATTR(mfg, 0644, headset_mfg_show,
+                           headset_mfg_store);
+
+static int register_attributes(void)
+{
+        int ret = 0;
+
+        ACCDET_DEBUG("[accdet] %s ++\n", __func__);
+        if (!hi) {
+                ACCDET_DEBUG("[accdet] %s: hi is NULL\n", __func__);
+                return -1;
+        }
+
+        hi->htc_accessory_class = class_create(THIS_MODULE, "htc_accessory");
+        if (IS_ERR(hi->htc_accessory_class)) {
+                ret = PTR_ERR(hi->htc_accessory_class);
+                hi->htc_accessory_class = NULL;
+                printk(KERN_ERR "[accdet] %s: err_create_class\n", __func__);
+                goto err_create_class;
+        }
+
+        /* Register headset attributes */
+        hi->headset_dev = device_create(hi->htc_accessory_class,
+                                        NULL, 0, "%s", "headset");
+        if (unlikely(IS_ERR(hi->headset_dev))) {
+                ret = PTR_ERR(hi->headset_dev);
+                hi->headset_dev = NULL;
+                printk(KERN_ERR "[accdet] %s: err_create_headset_device\n", __func__);
+                goto err_create_headset_device;
+        }
+
+        ret = device_create_file(hi->headset_dev, &dev_attr_headset_state);
+        if (ret) {
+                printk(KERN_ERR "[accdet] %s: err_create_headset_state_device_file\n", __func__);
+                goto err_create_headset_state_device_file;
+        }
+
+        ret = device_create_file(hi->headset_dev, &dev_attr_headset_simulate);
+        if (ret) {
+                printk(KERN_ERR "[accdet] %s: err_create_headset_simulate_device_mfg\n", __func__);
+                goto err_create_headset_mfg_device_file;
+        }
+        ACCDET_DEBUG("[accdet] %s --\n", __func__);
+        return 0;
+err_create_headset_mfg_device_file:
+        device_remove_file(hi->headset_dev, &dev_attr_headset_simulate);
+
+err_create_headset_simulate_device_file:
+        device_remove_file(hi->headset_dev, &dev_attr_headset_state);
+
+err_create_headset_state_device_file:
+        device_unregister(hi->headset_dev);
+
+err_create_headset_device:
+        class_destroy(hi->htc_accessory_class);
+
+err_create_class:
+
+        printk(KERN_ERR "[accdet] %s: create error %d \n", __func__, ret);
+        return ret;
+}
+
+static void unregister_attributes(void)
+{
+        ACCDET_DEBUG("[accdet] %s ++\n", __func__);
+        if (hi) {
+
+                device_remove_file(hi->headset_dev, &dev_attr_headset_mfg);
+                device_remove_file(hi->headset_dev, &dev_attr_headset_simulate);
+                device_remove_file(hi->headset_dev, &dev_attr_headset_state);
+                device_unregister(hi->headset_dev);
+                class_destroy(hi->htc_accessory_class);
+        } else {
+                ACCDET_DEBUG("[accdet] %s: hi is NULL\n", __func__);
+        }
+        ACCDET_DEBUG("[accdet] %s --\n", __func__);
+}
+//HTC_AUD_END
+#endif
+
 int mt_accdet_probe(struct platform_device *dev)
 {
 	int ret = 0;
@@ -1711,7 +2023,24 @@ int mt_accdet_probe(struct platform_device *dev)
     hook_test_entry = proc_create(COMIP_SWITCH_HOOK_TEST_FILE, 0666, NULL, &hook_test_fops);
 #endif
 	// add by baibo@yulong 20150313 hookswitch test in factory mode end
-
+#ifdef CONFIG_V36BML_ACCDET
+        //HTC_AUD_START
+        if (!hi) {
+                hi = kzalloc(sizeof(struct htc_headset_info), GFP_KERNEL);
+                if (!hi) {
+                        printk(KERN_ERR "[Accdet] %s: alloc hi failed\n", __func__);
+                } else {
+                        // Initial structure value
+                        hi->hs_35mm_type = HTC_HEADSET_UNPLUG;
+                        hi->hs_mfg_mode = false;
+                        mutex_init(&hi->mutex_lock);
+                }
+        }
+        ret = register_attributes();
+        if (ret)
+        printk(KERN_ERR "[Accdet] %s: register_attributes error\n", __func__);
+        //HTC_AUD_END
+#endif
 	ACCDET_INFO("[Accdet]accdet_probe done!\n");
 	return 0;
 }
@@ -1739,6 +2068,15 @@ void mt_accdet_remove(void)
 	cdev_del(accdet_cdev);
 	unregister_chrdev_region(accdet_devno, 1);
 	input_unregister_device(kpd_accdet_dev);
+#ifdef CONFIG_V36BML_ACCDET
+        //HTC_AUD_START
+        unregister_attributes();
+        if (hi) {
+            kfree(hi);
+            hi = NULL;
+        }
+        //HTC_AUD_END
+#endif
 	ACCDET_DEBUG("[Accdet]accdet_remove Done!\n");
 }
 
