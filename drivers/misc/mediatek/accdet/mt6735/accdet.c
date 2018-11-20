@@ -1785,7 +1785,7 @@ static ssize_t headset_mfg_show(struct device *dev,
 static ssize_t headset_mfg_store(struct device *dev,
                 struct device_attribute *attr, const char *buf, size_t count)
 {
-        int type = NO_DEVICE;
+//        int type = NO_DEVICE;
 
         ACCDET_DEBUG("[accdet] %s: buf %s\n", __func__, buf);
         if (!hi) {
@@ -1842,11 +1842,93 @@ static int register_attributes(void)
 
         ret = device_create_file(hi->headset_dev, &dev_attr_headset_simulate);
         if (ret) {
+                printk(KERN_ERR "[accdet] %s: err_create_headset_simulate_device_file\n", __func__);
+                goto err_create_headset_simulate_device_file;
+        }
+
+        ret = device_create_file(hi->headset_dev, &dev_attr_headset_mfg);
+        if (ret) {
                 printk(KERN_ERR "[accdet] %s: err_create_headset_simulate_device_mfg\n", __func__);
                 goto err_create_headset_mfg_device_file;
         }
+
+        /*ret = device_create_file(hi->headset_dev, &dev_attr_headset_1wire_state);
+        if (ret)
+                goto err_create_headset_state_device_file;*/
+#if 0
+        /* Register TTY attributes */
+        hi->tty_dev = device_create(hi->htc_accessory_class,
+                                    NULL, 0, "%s", "tty");
+        if (unlikely(IS_ERR(hi->tty_dev))) {
+                ret = PTR_ERR(hi->tty_dev);
+                hi->tty_dev = NULL;
+                printk(KERN_ERR "%s: err_create_tty_device\n", __func__);
+                goto err_create_tty_device;
+        }
+
+        ret = device_create_file(hi->tty_dev, &dev_attr_tty);
+        if (ret) {
+                printk(KERN_ERR "%s: err_create_tty_device_file\n", __func__);
+                goto err_create_tty_device_file;
+        }
+
+        /* Register FM attributes */
+        hi->fm_dev = device_create(hi->htc_accessory_class,
+                                   NULL, 0, "%s", "fm");
+        if (unlikely(IS_ERR(hi->fm_dev))) {
+                ret = PTR_ERR(hi->fm_dev);
+                hi->fm_dev = NULL;
+                printk(KERN_ERR "%s: err_create_fm_device\n", __func__);
+                goto err_create_fm_device;
+        }
+
+        ret = device_create_file(hi->fm_dev, &dev_attr_fm);
+        if (ret) {
+                printk(KERN_ERR "%s: err_create_fm_device_file\n", __func__);
+                goto err_create_fm_device_file;
+        }
+
+        /* Register debug attributes */
+        hi->debug_dev = device_create(hi->htc_accessory_class,
+                                      NULL, 0, "%s", "debug");
+        if (unlikely(IS_ERR(hi->debug_dev))) {
+                ret = PTR_ERR(hi->debug_dev);
+                hi->debug_dev = NULL;
+                printk(KERN_ERR "%s: err_create_debug_device\n", __func__);
+                goto err_create_debug_device;
+        }
+
+        /* register the attributes */
+        ret = device_create_file(hi->debug_dev, &dev_attr_debug);
+        if (ret) {
+                printk(KERN_ERR "%s: err_create_debug_device_file\n", __func__);
+                goto err_create_debug_device_file;
+        }
+
+        /*ret = device_create_file(hi->debug_dev, &dev_attr_headset_onewire);
+        if (ret) {
+                printk(KERN_ERR "%s: err_create_tty_device_file\n", __func__);
+                goto err_create_debug_device_file;
+        }*/
+#endif
         ACCDET_DEBUG("[accdet] %s --\n", __func__);
         return 0;
+#if 0
+err_create_debug_device_file:
+        device_unregister(hi->debug_dev);
+
+err_create_debug_device:
+        device_remove_file(hi->fm_dev, &dev_attr_fm);
+
+err_create_fm_device_file:
+        device_unregister(hi->fm_dev);
+
+err_create_fm_device:
+        device_remove_file(hi->tty_dev, &dev_attr_tty);
+
+err_create_tty_device_file:
+        device_unregister(hi->tty_dev);
+#endif
 err_create_headset_mfg_device_file:
         device_remove_file(hi->headset_dev, &dev_attr_headset_simulate);
 
@@ -1869,7 +1951,14 @@ static void unregister_attributes(void)
 {
         ACCDET_DEBUG("[accdet] %s ++\n", __func__);
         if (hi) {
-
+#if 0
+                device_remove_file(hi->debug_dev, &dev_attr_debug);
+                device_unregister(hi->debug_dev);
+                device_remove_file(hi->fm_dev, &dev_attr_fm);
+                device_unregister(hi->fm_dev);
+                device_remove_file(hi->tty_dev, &dev_attr_tty);
+                device_unregister(hi->tty_dev);
+#endif
                 device_remove_file(hi->headset_dev, &dev_attr_headset_mfg);
                 device_remove_file(hi->headset_dev, &dev_attr_headset_simulate);
                 device_remove_file(hi->headset_dev, &dev_attr_headset_state);
