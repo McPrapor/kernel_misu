@@ -49,19 +49,19 @@ static int ts3a225e_i2c_probe(struct i2c_client *client, const struct i2c_device
 {
 	unsigned char devicve_id[1] = "0";
 
-	pr_warn("ts3a225e_i2c_probe\n");
+	pr_err("ts3a225e_i2c_probe\n");
 
 	ts3a225e_i2c_client = client;
 
 	ts3a225e_read_byte(0x01, &devicve_id[0]);
-	pr_warn("ts3a225e_i2c_probe ID=%x\n", devicve_id[0]);
+	pr_err("ts3a225e_i2c_probe ID=%x\n", devicve_id[0]);
 
 	return 0;
 }
 
 static int ts3a225e_i2c_remove(struct i2c_client *client)
 {
-	pr_warn("TS3A225E_i2c_remove\n");
+	pr_err("TS3A225E_i2c_remove\n");
 
 	ts3a225e_i2c_client = NULL;
 
@@ -70,14 +70,14 @@ static int ts3a225e_i2c_remove(struct i2c_client *client)
 
 static int ts3a225e_i2c_suspend(struct i2c_client *client, pm_message_t msg)
 {
-	pr_debug("TS3A225E_i2c_suspend\n");
+	pr_err("TS3A225E_i2c_suspend\n");
 
 	return 0;
 }
 
 static int ts3a225e_i2c_resume(struct i2c_client *client)
 {
-	pr_debug("TS3A225E_i2c_resume\n");
+	pr_err("TS3A225E_i2c_resume\n");
 
 	return 0;
 }
@@ -107,6 +107,7 @@ int ts3a225e_read_byte(unsigned char cmd, unsigned char *returnData)
 	char readData = 0;
 	int ret = 0;
 
+	pr_err("TS3A225E_read_byte\n");
 	mutex_lock(&ts3a225e_i2c_access);
 
 	/*new_client->addr = ((new_client->addr) & I2C_MASK_FLAG) | I2C_WR_FLAG;*/
@@ -129,6 +130,7 @@ int ts3a225e_read_byte(unsigned char cmd, unsigned char *returnData)
 	/*new_client->addr = new_client->addr & I2C_MASK_FLAG;*/
 	ts3a225e_i2c_client->ext_flag = 0;
 
+	pr_err("TS3A225E_read_byte byte %s\n", readData);
 	mutex_unlock(&ts3a225e_i2c_access);
 	return 1;
 }
@@ -163,7 +165,7 @@ int ts3a225e_write_byte(unsigned char cmd, unsigned char writeData)
 /*----------------------------------------------------------------------------*/
 static int ts3a225e_probe(struct platform_device *pdev)
 {
-	pr_warn("ts3a225e_probe\n");
+	pr_err("ts3a225e_probe\n");
 
 	if (i2c_add_driver(&ts3a225e_i2c_driver)) {
 		pr_err("ts3a225e add driver error\n");
@@ -176,7 +178,7 @@ static int ts3a225e_probe(struct platform_device *pdev)
 /*----------------------------------------------------------------------------*/
 static int ts3a225e_remove(struct platform_device *pdev)
 {
-	pr_warn("ts3a225e remove\n");
+	pr_err("ts3a225e remove\n");
 
 	i2c_del_driver(&ts3a225e_i2c_driver);
 
@@ -201,7 +203,7 @@ static struct platform_driver ts3a225e_audio_switch_driver = {
 /*----------------------------------------------------------------------------*/
 static int __init ts3a225e_init(void)
 {
-	pr_warn("ts3a225e_init\n");
+	pr_err("ts3a225e_init\n");
 
 	/*i2c_register_board_info(3, &i2c_TS3A225E, 1);*/
 
@@ -216,7 +218,7 @@ static int __init ts3a225e_init(void)
 /*----------------------------------------------------------------------------*/
 static void __exit ts3a225e_exit(void)
 {
-	pr_warn("ts3a225e_exit\n");
+	pr_err("ts3a225e_exit\n");
 }
 
 /*----------------------------------------------------------------------------*/

@@ -85,3 +85,9 @@ config TS3A225E_ACCDET
 	  say Y or M here.
 
 	  If unsure, say N.
+
+config V36BML_ACCDET
+	bool "HTC v36bml accdet"
+	---help---
+
+          HTC v36bml accdet
