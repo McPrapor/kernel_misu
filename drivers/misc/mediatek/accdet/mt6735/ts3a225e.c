@@ -130,7 +130,7 @@ int ts3a225e_read_byte(unsigned char cmd, unsigned char *returnData)
 	/*new_client->addr = new_client->addr & I2C_MASK_FLAG;*/
 	ts3a225e_i2c_client->ext_flag = 0;
 
-	pr_err("TS3A225E_read_byte byte %s\n", readData);
+	pr_err("TS3A225E_read_byte byte %x\n", readData);
 	mutex_unlock(&ts3a225e_i2c_access);
 	return 1;
 }
