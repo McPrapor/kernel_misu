@@ -584,6 +584,11 @@
 };
 
 /* headphones */
+/ {
+  audio_switch@0 {
+   compatible = "mediatek,audio_switch";
+  };
+};
 &eintc {
 	ACCDET@6{
 	    compatible = "mediatek, ACCDET-eint";
@@ -605,7 +610,7 @@
 };
 &i2c3 {
 	ts3a225e:ts3a225e@3b {
-		compatible = "mediatek,ts3a225e", "mediatek,audio_switch";
+		compatible = "mediatek,ts3a225e";
 		reg = <0x3b>;
 		status = "okay";
 	};
