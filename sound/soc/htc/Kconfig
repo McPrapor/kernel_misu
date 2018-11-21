@@ -1,0 +1,9 @@
+#
+# HTC MISC Driver Kconfig
+#
+
+config HTC_VIRTUAL_DEV
+	default n
+	tristate "Audio Virtual Device Control"
+	help
+	  Say Y if you are using specific GPIO for AUdio device Control.

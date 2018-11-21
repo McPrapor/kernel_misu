@@ -46,6 +46,13 @@
  *                E X T E R N A L   R E F E R E N C E S
  *****************************************************************************/
 
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+#include "../../htc/htc_vdev.h"
+//#include <linux/htc_devices_dtb.h>
+#include "../../htc/htc_acoustic_alsa.h"
+#include "AudDrv_Gpio.h"
+#endif
+
 #include <linux/dma-mapping.h>
 #include "AudDrv_Common.h"
 #include "AudDrv_Def.h"
@@ -80,9 +87,19 @@ static bool mPrepareDone;
 static struct device *mDev;
 
 static const char const *I2S0dl1_HD_output[] = {"Off", "On"};
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+static const char *Audio_Speaker_Value[] = {"Off", "On"};
+static const char *Audio_Receiver_Value[] = {"Off", "On"};
+static bool mSpeakerEnable = false;
+static bool mReceiverEnable = false;
+#endif
 
 static const struct soc_enum Audio_I2S0dl1_Enum[] = {
 	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(I2S0dl1_HD_output), I2S0dl1_HD_output),
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+    SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(Audio_Speaker_Value), Audio_Speaker_Value),
+    SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(Audio_Receiver_Value), Audio_Receiver_Value),
+#endif
 };
 
 
@@ -114,9 +131,143 @@ static int Audio_I2S0dl1_hdoutput_Set(struct snd_kcontrol *kcontrol,
 }
 
 
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+static int Audio_Speaker_Switch_Get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+	printk("%s() = %d\n", __func__, mSpeakerEnable);
+	ucontrol->value.integer.value[0] = (int) mSpeakerEnable;
+
+	return 0;
+}
+
+
+static int Audio_Speaker_Switch_Set(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+	int useSram;
+	printk("%s() %d\n", __func__, (int) ucontrol->value.integer.value[0]);
+	if (ucontrol->value.enumerated.item[0] > ARRAY_SIZE(Audio_Speaker_Value))
+	{
+		printk("return -EINVAL\n");
+		return -EINVAL;
+	}
+	useSram = ucontrol->value.integer.value[0];
+	if (useSram)
+	{
+		mSpeakerEnable = true;
+		htc_acoustic_spk_amp_ctrl(SPK_AMP_RIGHT, 1, 0);
+		htc_acoustic_spk_amp_ctrl(SPK_AMP_LEFT, 1, 0);
+	}
+	else
+	{
+		mSpeakerEnable = false;
+		htc_acoustic_spk_amp_ctrl(SPK_AMP_RIGHT, 0, 0);
+		htc_acoustic_spk_amp_ctrl(SPK_AMP_LEFT, 0, 0);
+	}
+	return 0;
+}
+
+static int Audio_Receiver_Switch_Get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+	printk("%s() Audio_Receiver_Switch_Get = %d\n", __func__, mReceiverEnable);
+	ucontrol->value.integer.value[0] = (int)mReceiverEnable;
+
+	return 0;
+}
+
+static int Audio_Receiver_Switch_Set(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+	unsigned int rec_spk_gpio = -1;
+#ifdef COFIG_MTK_LEGACY
+	unsigned long local_select_gpio = 0;
+#endif
+	printk("%s () %d\n", __func__, (int) ucontrol->value.integer.value[0]);
+        if (ucontrol->value.enumerated.item[0] > ARRAY_SIZE(Audio_Receiver_Value))
+        {
+                printk("return -EINVAL\n");
+                return -EINVAL;
+        }
+#ifdef COFIG_MTK_LEGACY
+	rec_spk_gpio = 21;
+	local_select_gpio = (rec_spk_gpio | 0x80000000);
+	printk("[AUD] rec_spk_gpio is %d\n", rec_spk_gpio);
+	mt_set_gpio_mode(local_select_gpio, GPIO_MODE_00);
+	mt_set_gpio_dir(local_select_gpio, GPIO_DIR_OUT);
+#else
+	printk("[AUD] rec_spk_gpio is %d\n", rec_spk_gpio);
+#endif
+        if (ucontrol->value.integer.value[0])
+        {
+#if 0
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+		setRecSpkSel(true);
+#endif
+#endif
+#ifdef COFIG_MTK_LEGACY
+		mt_set_gpio_out(local_select_gpio, GPIO_OUT_ONE);
+#else
+                AudDrv_GPIO_EXTAMP_Select(true);
+                AudDrv_GPIO_EXTAMP2_Select(true);
+#endif
+                mReceiverEnable = true;
+        }
+        else
+        {
+#if 0
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+		setRecSpkSel(false);
+#endif
+#endif
+#ifdef COFIG_MTK_LEGACY
+		mt_set_gpio_out(local_select_gpio, GPIO_OUT_ZERO);
+#else
+                AudDrv_GPIO_EXTAMP_Select(false);
+                AudDrv_GPIO_EXTAMP2_Select(false);
+#endif
+                mReceiverEnable = false;
+        }
+        return 0;
+}
+
+static int Audio_CLK_DUMP_Get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+    printk("%s()\n", __func__);
+    Afe_Set_Reg(AFE_DAC_CON0, 0x0, 0x1);
+    udelay(100);
+    Afe_Set_Reg(AFE_DAC_CON0, 0x1, 0x1);
+#if 0
+    Afe_Log_Print();
+    msleep(20);
+    BUG();
+#endif
+    return 0;
+}
+
+static int Audio_CLK_DUMP_Set(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
+{
+    printk("%s()\n", __func__);
+
+    Afe_Set_Reg(AFE_DAC_CON0, 0x0, 0x1);
+    udelay(100);
+    Afe_Set_Reg(AFE_DAC_CON0, 0x1, 0x1);
+#if 0
+    Afe_Log_Print();
+    msleep(20);
+    BUG();
+#endif
+    return 0;
+}
+#endif
+
 static const struct snd_kcontrol_new Audio_snd_I2S0dl1_controls[] = {
 	SOC_ENUM_EXT("Audio_I2S0dl1_hd_Switch", Audio_I2S0dl1_Enum[0],
 		Audio_I2S0dl1_hdoutput_Get, Audio_I2S0dl1_hdoutput_Set),
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_START
+    SOC_ENUM_EXT("Audio_Speaker_Switch", Audio_I2S0dl1_Enum[1], Audio_Speaker_Switch_Get, Audio_Speaker_Switch_Set),
+    SOC_ENUM_EXT("Audio_Receiver_Switch", Audio_I2S0dl1_Enum[2], Audio_Receiver_Switch_Get, Audio_Receiver_Switch_Set),
+//HTC_AUD_END
+    SOC_ENUM_EXT("Audio_CLK_Dump", Audio_I2S0dl1_Enum[1], Audio_CLK_DUMP_Get, Audio_CLK_DUMP_Set),
+#endif
 };
 
 static struct snd_pcm_hardware mtk_I2S0dl1_hardware = {

@@ -123,6 +123,12 @@ static int Audio_i2s0_SideGen_Set(struct snd_kcontrol *kcontrol,
 			      Soc_Aud_InterConnectionInput_I14, Soc_Aud_InterConnectionOutput_O00);
 		SetConnection(Soc_Aud_InterCon_Connection,
 			      Soc_Aud_InterConnectionInput_I14, Soc_Aud_InterConnectionOutput_O01);
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD    For ext modem connect to I2S
+        SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O00);
+        SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O01);
+//HTC_AUD_END
+#endif
 	} else if (mi2s0_sidegen_control == 5) {
 		samplerate = 8000;
 		/* here start digital part */
@@ -130,6 +136,12 @@ static int Audio_i2s0_SideGen_Set(struct snd_kcontrol *kcontrol,
 			      Soc_Aud_InterConnectionInput_I14, Soc_Aud_InterConnectionOutput_O00);
 		SetConnection(Soc_Aud_InterCon_Connection,
 			      Soc_Aud_InterConnectionInput_I14, Soc_Aud_InterConnectionOutput_O01);
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD    For ext modem connect to I2S
+        SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O00);
+        SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O01);
+//HTC_AUD_END
+#endif
 	}
 
 	if (mi2s0_sidegen_control) {
@@ -236,6 +248,13 @@ static int Audio_i2s0_SideGen_Set(struct snd_kcontrol *kcontrol,
 				      Soc_Aud_InterConnectionOutput_O00);
 			SetConnection(Soc_Aud_InterCon_DisConnect, Soc_Aud_InterConnectionInput_I14,
 				      Soc_Aud_InterConnectionOutput_O01);
+
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD    For ext modem disconnect to I2S
+            SetConnection(Soc_Aud_InterCon_DisConnect, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O00);
+            SetConnection(Soc_Aud_InterCon_DisConnect, Soc_Aud_InterConnectionInput_I09, Soc_Aud_InterConnectionOutput_O01);
+//HTC_AUD_END
+#endif
 			EnableAfe(false);
 		}
 		DisableALLbySampleRate(samplerate);

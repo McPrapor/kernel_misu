@@ -59,6 +59,9 @@ source "sound/soc/mediatek/Kconfig"
 # Supported codecs
 source "sound/soc/codecs/Kconfig"
 
+# HTC 
+source "sound/soc/htc/Kconfig"
+
 # generic frame-work
 source "sound/soc/generic/Kconfig"
 

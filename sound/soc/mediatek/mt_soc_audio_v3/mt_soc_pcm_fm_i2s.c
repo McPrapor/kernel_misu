@@ -71,6 +71,12 @@ static int mtk_afe_fm_i2s_probe(struct snd_soc_platform *platform);
 static uint32 mfm_i2s_Volume = 0x10000;
 static bool mPrepareDone;
 
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD   For FM Speaker Mode
+static bool mFmI2sSpkMode = false;
+//HTC_AUD_END
+#endif
+
 static int Audio_fm_i2s_Volume_Get(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
@@ -100,6 +106,15 @@ static const struct soc_enum wcn_stub_audio_ctr_Enum[] = {
 	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(wcn_stub_audio_ctr), wcn_stub_audio_ctr),
 };
 
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD   For FM Speaker Mode
+static const char *Audio_FM_I2s_Connection_Str[] = {"Off", "On"};
+static const struct soc_enum audio_fm_connection[] = {
+    SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(Audio_FM_I2s_Connection_Str), Audio_FM_I2s_Connection_Str),
+};
+//HTC_AUD_END
+#endif
+
 /* static int mAudio_Wcn_Cmb = CMB_STUB_AIF_3;//temp mark for early porting */
 static int Audio_Wcn_Cmb_Get(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
@@ -121,6 +136,60 @@ static int Audio_Wcn_Cmb_Set(struct snd_kcontrol *kcontrol,
 #endif
 	return 0;
 }
+
+
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD   For FM Speaker Mode
+static int Audio_FM_I2S_Connection_Get(struct snd_kcontrol *kcontrol,
+                                  struct snd_ctl_elem_value *ucontrol)
+{
+        printk("%s() \n", __func__);
+	ucontrol->value.integer.value[0] = mFmI2sSpkMode;
+
+	return 0;
+}
+
+static int Audio_FM_I2S_Connection_Set(struct snd_kcontrol *kcontrol,
+                                  struct snd_ctl_elem_value *ucontrol)
+{
+	int uValue;
+
+        printk("%s() %d\n", __func__, (int) ucontrol->value.integer.value[0]);
+
+        if (ucontrol->value.enumerated.item[0] > ARRAY_SIZE(Audio_FM_I2s_Connection_Str))
+        {
+                printk("return -EINVAL\n");
+                return -EINVAL;
+        }
+
+        uValue = ucontrol->value.integer.value[0];
+
+        if (uValue)
+        {
+                mFmI2sSpkMode = true;
+#ifdef CONFIG_AMP_TFA9895
+		SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I10, Soc_Aud_InterConnectionOutput_O00);
+		SetConnection(Soc_Aud_InterCon_Connection, Soc_Aud_InterConnectionInput_I11, Soc_Aud_InterConnectionOutput_O01);
+#endif
+        }
+        else
+        {
+                mFmI2sSpkMode = false;
+#ifdef CONFIG_AMP_TFA9895
+		SetConnection(Soc_Aud_InterCon_DisConnect, Soc_Aud_InterConnectionInput_I10, Soc_Aud_InterConnectionOutput_O00);
+		SetConnection(Soc_Aud_InterCon_DisConnect, Soc_Aud_InterConnectionInput_I11, Soc_Aud_InterConnectionOutput_O01);
+#endif
+        }
+
+	return 0;
+}
+
+static const struct snd_kcontrol_new Audio_snd_fm_i2s[] =
+{
+    SOC_ENUM_EXT("Audio_FM_I2S_Connection", audio_fm_connection[0], Audio_FM_I2S_Connection_Get, Audio_FM_I2S_Connection_Set),
+};
+//HTC_AUD_END
+#endif
 
 static const struct snd_kcontrol_new Audio_snd_fm_i2s_controls[] = {
 	SOC_SINGLE_EXT("Audio FM I2S Volume", SND_SOC_NOPM, 0, 0x80000, 0,
@@ -418,6 +487,12 @@ static int mtk_afe_fm_i2s_probe(struct snd_soc_platform *platform)
 	pr_warn("mtk_afe_fm_i2s_probe\n");
 	snd_soc_add_platform_controls(platform, Audio_snd_fm_i2s_controls,
 				      ARRAY_SIZE(Audio_snd_fm_i2s_controls));
+#ifdef CONFIG_HTC_VIRTUAL_DEV
+//HTC_AUD_ADD   For FM Speaker Mode
+	snd_soc_add_platform_controls(platform, Audio_snd_fm_i2s,
+                                  ARRAY_SIZE(Audio_snd_fm_i2s));
+//HTC_AUD_END
+#endif
 	return 0;
 }
 
