@@ -49,7 +49,7 @@ Front Camera | 5MP, Int. 5MP
  * lm3642 
  * ramconsole bad addresing
  * camera
- * ts3a225e audio switcher
+ * htc_acoustic(tfa9895)
 
 -------------
 ## Broken/Bugs
