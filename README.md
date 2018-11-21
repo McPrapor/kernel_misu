@@ -28,8 +28,8 @@ Front Camera | 5MP, Int. 5MP
 # Build Information
 
 ## Works
- * hx8394f_hd720_dsi_vdo_truly_v36 lcm(no dt2w)
- * himax 852xes touchpad
+ * hx8394f_hd720_dsi_vdo_truly_v36 lcm
+ * himax 852xes touchpad(no dt2w)
  * bq24158 charger
  * tps65132 pmic
  * mt6311 pmic
