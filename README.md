@@ -38,6 +38,7 @@ Front Camera | 5MP, Int. 5MP
  * ccci (modem starts with legacy firmware and looks fine)
  * gps
  * kpd works fine
+ * htc_acoustic(tfa9895)
 
 -------------
 ## Testing...
@@ -49,7 +50,6 @@ Front Camera | 5MP, Int. 5MP
  * lm3642 
  * ramconsole bad addresing
  * camera
- * htc_acoustic(tfa9895)
 
 -------------
 ## Broken/Bugs
