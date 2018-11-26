@@ -824,7 +824,6 @@ als_ps@0 {
 };
 /*
 
-/*
 &i2c2{
                         alsps@60 {
                                 compatible = "mediatek,alsps";
@@ -835,7 +834,6 @@ als_ps@0 {
                                 pinctrl-1 = <&alsps_pin_cfg>;
                         };
 };
-*/
 &pio {
                         alsps_pin_cfg: alspspincfg {
                                 pins_cmd_dat {
