@@ -773,7 +773,6 @@
 
 /* cm3886 proximity alsps */
 /* see sensor hub */
-/*
 &i2c2 {
 			/delete-node/ alsps@60;
                         cm36686@60 {
@@ -801,6 +800,7 @@
                                 pinctrl-1 = <&alsps_pin_cfg>;
                         };
 };
+/*
 /{
 als_ps@0 {
                         compatible = "mediatek,als_ps";
