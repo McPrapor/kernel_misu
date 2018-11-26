@@ -773,6 +773,7 @@
 
 /* cm3886 proximity alsps */
 /* see sensor hub */
+/*
 &i2c2 {
 			/delete-node/ alsps@60;
                         cm36686@60 {
@@ -821,8 +822,8 @@ als_ps@0 {
                         alsps_pin_default: alspsdefaultcfg {
                         };
 };
-
 /*
+
 &pio {
                         alsps_pin_cfg: alspspincfg {
                                 pins_cmd_dat {
@@ -835,7 +836,7 @@ als_ps@0 {
                         alsps_pin_default: alspsdefaultcfg {
                         };
 };
-*/
+
 /*
 &i2c2{
                         alsps@60 {
@@ -848,15 +849,15 @@ als_ps@0 {
                         };
 };
 */
-/*/ {
-als_ps@0 {
+/ {
+	als_ps@0 {
                         compatible = "mediatek,als_ps";
                         pinctrl-names = "pin_default", "pin_cfg";
                         pinctrl-0 = <&alsps_pin_default>;
                         pinctrl-1 = <&alsps_pin_cfg>;
                         status = "okay";
 	};
-cust_alsps@0 {
+	cust_alsps@0 {
                 compatible = "mediatek,cm36686";
                 i2c_num = <0x2>;
                 i2c_addr = <0x60 0x0 0x0 0x0>;
@@ -870,9 +871,8 @@ cust_alsps@0 {
                 ps_threshold_low = <0x28>;
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
+	};
 };
-};
-*/
 
 &audgpio {
 /*        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
