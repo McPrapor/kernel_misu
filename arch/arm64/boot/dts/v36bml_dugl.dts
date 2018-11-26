@@ -822,7 +822,6 @@ als_ps@0 {
                         alsps_pin_default: alspsdefaultcfg {
                         };
 };
-/*
 
 &i2c2{
                         alsps@60 {
@@ -834,6 +833,8 @@ als_ps@0 {
                                 pinctrl-1 = <&alsps_pin_cfg>;
                         };
 };
+*/
+/* cm36686-new driver */
 &pio {
                         alsps_pin_cfg: alspspincfg {
                                 pins_cmd_dat {
