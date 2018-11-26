@@ -824,6 +824,18 @@ als_ps@0 {
 };
 /*
 
+/*
+&i2c2{
+                        alsps@60 {
+                                compatible = "mediatek,alsps";
+                                reg = <0x60>;
+                                status = "okay";
+                                pinctrl-names = "pin_default", "pin_cfg";
+                                pinctrl-0 = <&alsps_pin_default>;
+                                pinctrl-1 = <&alsps_pin_cfg>;
+                        };
+};
+*/
 &pio {
                         alsps_pin_cfg: alspspincfg {
                                 pins_cmd_dat {
@@ -837,18 +849,6 @@ als_ps@0 {
                         };
 };
 
-/*
-&i2c2{
-                        alsps@60 {
-                                compatible = "mediatek,alsps";
-                                reg = <0x60>;
-                                status = "okay";
-                                pinctrl-names = "pin_default", "pin_cfg";
-                                pinctrl-0 = <&alsps_pin_default>;
-                                pinctrl-1 = <&alsps_pin_cfg>;
-                        };
-};
-*/
 / {
 	als_ps@0 {
                         compatible = "mediatek,als_ps";
