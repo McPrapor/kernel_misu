@@ -857,17 +857,21 @@ als_ps@0 {
                                 compatible = "mediatek, ALS-eint";
                                 interrupts = <0x41 0x8>;
                                 debounce = <0x41 0x0>;		
-                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
                         pinctrl-0 = <&alsps_pin_default>;
                         pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
 	};
 };
 
 &i2c2{
 	alsps@60 {
-                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
                         pinctrl-0 = <&alsps_pin_default>;
                         pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
 	};
 };
 / {
@@ -880,9 +884,11 @@ als_ps@0 {
 	};
 	als_ps@0 {
                         compatible = "mediatek,als_ps";
-                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
                         pinctrl-0 = <&alsps_pin_default>;
                         pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
                         status = "okay";
 	};
 	cust_alsps@0 {
@@ -899,9 +905,11 @@ als_ps@0 {
                 ps_threshold_low = <0x28>;
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
-                        pinctrl-names = "pin_default", "pin_cfg";
-                        pinctrl-0 = <&alsps_pin_default>;
-                        pinctrl-1 = <&alsps_pin_cfg>;
+                pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
+                pinctrl-0 = <&alsps_pin_default>;
+                pinctrl-1 = <&alsps_pin_cfg>;
+                pinctrl-2 = <&alsps_pin_default>;
+                pinctrl-3 = <&alsps_pin_cfg>;
 	};
 };
 
