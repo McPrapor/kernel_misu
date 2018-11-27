@@ -857,9 +857,19 @@ als_ps@0 {
                                 compatible = "mediatek, ALS-eint";
                                 interrupts = <0x41 0x8>;
                                 debounce = <0x41 0x0>;		
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
 	};
 };
 
+&i2c2{
+	alsps@60 {
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+	};
+};
 / {
 	soc {
 		als {
