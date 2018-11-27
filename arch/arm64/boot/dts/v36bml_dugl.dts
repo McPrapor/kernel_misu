@@ -733,6 +733,7 @@
                                 debounce = <0x50 0x0>;
                         };
 /* bma253 accelometer */
+/*
 
 &i2c2 {
 	bma253: g_sensor_bma253@18 {
@@ -748,8 +749,9 @@
                 g_sensor_bma253,negate_z = <0x0>;
         };
 };
-
+*/
 /* ak8789 */
+/*
 / {
         hall_ak8789 {
                 compatible = "hall_sensor,ak8789";
@@ -770,7 +772,7 @@
                                 interrupts = <0x3 0x8>;
                                 debounce = <0x3 0x0>;
                         };
-
+*/
 /* cm3886 proximity alsps */
 /* see sensor hub */
 /*
@@ -850,7 +852,22 @@ als_ps@0 {
                         };
 };
 
+&eintc {
+	ALS@65 {
+                                compatible = "mediatek, ALS-eint";
+                                interrupts = <0x41 0x8>;
+                                debounce = <0x41 0x0>;		
+	};
+};
+
 / {
+	soc {
+		als {
+                                interrupts = <0x41 0x8>;
+                                debounce = <0x41 0x0>;		
+
+		};
+	};
 	als_ps@0 {
                         compatible = "mediatek,als_ps";
                         pinctrl-names = "pin_default", "pin_cfg";
