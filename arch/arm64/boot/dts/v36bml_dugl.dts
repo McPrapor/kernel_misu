@@ -889,6 +889,9 @@ als_ps@0 {
                 ps_threshold_low = <0x28>;
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
+                        pinctrl-names = "pin_default", "pin_cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
 	};
 };
 
