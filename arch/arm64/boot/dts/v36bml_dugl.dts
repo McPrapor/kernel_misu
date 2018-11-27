@@ -910,6 +910,9 @@ als_ps@0 {
                 pinctrl-1 = <&alsps_pin_cfg>;
                 pinctrl-2 = <&alsps_pin_default>;
                 pinctrl-3 = <&alsps_pin_cfg>;
+		interrupt-parent = <&eintc>;
+                interrupts = <0x41 0x8>;
+                debounce = <0x41 0x0>;		
 	};
 };
 
