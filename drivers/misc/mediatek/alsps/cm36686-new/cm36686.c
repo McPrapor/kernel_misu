@@ -432,12 +432,12 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 		invalid = 1;
 		APS_DBG("ALS debug get_ps_value PS ps_suspend");
 	} else if (1 == atomic_read(&obj->ps_deb_on)) {
-		APS_DBG("ALS debug get_ps_value PS ps_deb_on");
 #ifdef CONFIG_64BIT
 		unsigned long endt = atomic64_read(&obj->ps_deb_end);
 #else
 		unsigned long endt = atomic_read(&obj->ps_deb_end);
 #endif
+		APS_DBG("ALS debug get_ps_value PS ps_deb_on");
 		if (time_after(jiffies, endt))
 			atomic_set(&obj->ps_deb_on, 0);
 
