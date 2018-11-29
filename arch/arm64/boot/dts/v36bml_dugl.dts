@@ -1059,8 +1059,8 @@ to make keypad work without such a hack */
 /*
 		als_value = <0x0 0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0 0x0 0x0 0x0 0x0 0x0>; 
 */
-                ps_threshold_high = <34>;
-                ps_threshold_low = <28>; 
+                ps_threshold_high = <32>;
+                ps_threshold_low = <22>; 
 /* old driver
 		ps_threshold_high = <0x5f>;
                 ps_threshold_low = <0x15>;
