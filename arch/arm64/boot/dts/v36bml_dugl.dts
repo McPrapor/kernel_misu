@@ -838,83 +838,6 @@ als_ps@0 {
                         };
 };
 */
-/* cm36686-new driver */
-&pio {
-                        alsps_pin_cfg: alspspincfg {
-                                pins_cmd_dat {
-                                        pins = <0x400>;
-                                        slew-rate = <0x0>;
-                                        bias-pull-up = <0x0>;
-                                };
-                        };
-
-                        alsps_pin_default: alspsdefaultcfg {
-                        };
-};
-
-&eintc {
-	ALS@65 {
-                                compatible = "mediatek, ALS-eint";
-                                interrupts = <0x41 0x8>;
-                                debounce = <0x41 0x0>;		
-                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
-                        pinctrl-0 = <&alsps_pin_default>;
-                        pinctrl-1 = <&alsps_pin_cfg>;
-                        pinctrl-2 = <&alsps_pin_default>;
-                        pinctrl-3 = <&alsps_pin_cfg>;
-	};
-};
-
-&i2c2{
-	alsps@60 {
-                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
-                        pinctrl-0 = <&alsps_pin_default>;
-                        pinctrl-1 = <&alsps_pin_cfg>;
-                        pinctrl-2 = <&alsps_pin_default>;
-                        pinctrl-3 = <&alsps_pin_cfg>;
-	};
-};
-/ {
-	soc {
-		als {
-                                interrupts = <0x41 0x8>;
-                                debounce = <0x41 0x0>;		
-
-		};
-	};
-	als_ps@0 {
-                        compatible = "mediatek,als_ps";
-                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
-                        pinctrl-0 = <&alsps_pin_default>;
-                        pinctrl-1 = <&alsps_pin_cfg>;
-                        pinctrl-2 = <&alsps_pin_default>;
-                        pinctrl-3 = <&alsps_pin_cfg>;
-                        status = "okay";
-	};
-	cust_alsps@0 {
-                compatible = "mediatek,cm36686";
-                i2c_num = <0x2>;
-                i2c_addr = <0x60 0x0 0x0 0x0>;
-                polling_mode_ps = <0x0>;
-                polling_mode_als = <0x1>;
-                power_id = <0xffff>;
-                power_vol = <0x0>;
-                als_level = <0x0 0x101 0x27d 0x403 0x8f9 0x15d4 0x1a4a 0x2c25 0x4fe1 0x64a8 0x7992 0xb1f0 0xe251 0xe251 0xe251>;
-                als_value = <0x0 0x84 0x130 0x1f6 0x3ec 0x7d3 0xbbe 0x138e 0x1f44 0x2710 0x2ee0 0x3e80 0x4e20 0x4e20 0x4e20 0x4e20>;
-                ps_threshold_high = <0x46>;
-                ps_threshold_low = <0x28>;
-                is_batch_supported_ps = <0x1>;
-                is_batch_supported_als = <0x1>;
-                pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
-                pinctrl-0 = <&alsps_pin_default>;
-                pinctrl-1 = <&alsps_pin_cfg>;
-                pinctrl-2 = <&alsps_pin_default>;
-                pinctrl-3 = <&alsps_pin_cfg>;
-		interrupt-parent = <&eintc>;
-                interrupts = <0x41 0x8>;
-                debounce = <0x41 0x0>;		
-	};
-};
 
 &audgpio {
 /*        pinctrl-names = "default", "audpmicclk-mode0", "audpmicclk-mode1", "audi2s1-mode0", "audi2s1-mode1", "extamp-pullhigh", "extamp-pulllow", "extamp2-pullhigh", "extamp2-pulllow", "rcvspk-pullhigh", "rcvspk-pulllow";
@@ -1061,7 +984,87 @@ to make keypad work without such a hack */
 	};
 };
 /* end sim card pins */
+/* cm36686-new driver */
+&pio {
+                        alsps_pin_cfg: alspspincfg {
+                                pins_cmd_dat {
+                                        pins = <0x400>;
+                                        slew-rate = <0x0>;
+                                        bias-pull-up = <0x0>;
+                                };
+                        };
 
+                        alsps_pin_default: alspsdefaultcfg {
+                        };
+};
+
+&eintc {
+	ALS@65 {
+                                compatible = "mediatek, ALS-eint";
+                                interrupts = <0x41 0x8>;
+                                debounce = <0x41 0x0>;		
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
+	};
+};
+
+&i2c2{
+	alsps@60 {
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
+	};
+};
+/ {
+	soc {
+		als {
+                                interrupts = <0x41 0x8>;
+                                debounce = <0x41 0x0>;		
+
+		};
+	};
+	als_ps@0 {
+                        compatible = "mediatek,als_ps";
+                        pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
+                        pinctrl-0 = <&alsps_pin_default>;
+                        pinctrl-1 = <&alsps_pin_cfg>;
+                        pinctrl-2 = <&alsps_pin_default>;
+                        pinctrl-3 = <&alsps_pin_cfg>;
+                        status = "okay";
+	};
+	cust_alsps@0 {
+                compatible = "mediatek,cm36686";
+                i2c_num = <0x2>;
+                i2c_addr = <0x60 0x0 0x0 0x0>;
+                polling_mode_ps = <0x0>;
+                polling_mode_als = <0x1>;
+                power_id = <0xffff>;
+                power_vol = <0x0>;
+/*                als_level = <0x0 0x101 0x27d 0x403 0x8f9 0x15d4 0x1a4a 0x2c25 0x4fe1 0x64a8 0x7992 0xb1f0 0xe251 0xe251 0xe251>;*/
+		als_level =   <0x0 0x3 0x3 0xa 0x10 0x10 0x4e 0x9e 0x9e 0x422 0x633 0x633 0xb29 0xf4c 0xf4c>;
+                als_value = <0x0 0x84 0x130 0x1f6 0x3ec 0x7d3 0xbbe 0x138e 0x1f44 0x2710 0x2ee0 0x3e80 0x4e20 0x4e20 0x4e20 0x4e20>;
+/*                ps_threshold_high = <0x46>;
+                ps_threshold_low = <0x28>; */
+		ps_threshold_high = <0x5f>;
+                ps_threshold_low = <0x15>;
+                is_batch_supported_ps = <0x1>;
+                is_batch_supported_als = <0x1>;
+                pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
+                pinctrl-0 = <&alsps_pin_default>;
+                pinctrl-1 = <&alsps_pin_cfg>;
+                pinctrl-2 = <&alsps_pin_default>;
+                pinctrl-3 = <&alsps_pin_cfg>;
+		interrupt-parent = <&eintc>;
+                interrupts = <0x41 0x8>;
+                debounce = <0x41 0x0>;		
+	};
+};
+/* end cm36686-new driver */
 /* END OF THE */
 #include "v36bml_touchpad.dtsi"
 /* #include "v36bml/cust.dtsi" */
