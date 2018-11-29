@@ -1059,8 +1059,6 @@ to make keypad work without such a hack */
 		ps_threshold_high = <0x5f>;
                 ps_threshold_low = <0x15>;
 */
-		ps_threshold_high	=  <70>;
-		ps_threshold_low	=  <40>;
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
                 pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
