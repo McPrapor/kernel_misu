@@ -427,6 +427,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
 		val = 1;	/*far away */
 
+	APS_DBG("PS:  %05d => %05d [M]\n", ps, val);
 	if (atomic_read(&obj->ps_suspend)) {
 		invalid = 1;
 	} else if (1 == atomic_read(&obj->ps_deb_on)) {
