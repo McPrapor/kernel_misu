@@ -427,10 +427,12 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
 		val = 1;	/*far away */
 
-	APS_DBG("PS:  %05d => %05d [M]\n", ps, val);
+	APS_DBG("ALS debug get_ps_value PS:  %05d => %05d [M]\n", ps, val);
 	if (atomic_read(&obj->ps_suspend)) {
 		invalid = 1;
+		APS_DBG("ALS debug get_ps_value PS ps_suspend");
 	} else if (1 == atomic_read(&obj->ps_deb_on)) {
+		APS_DBG("ALS debug get_ps_value PS ps_deb_on");
 #ifdef CONFIG_64BIT
 		unsigned long endt = atomic64_read(&obj->ps_deb_end);
 #else
@@ -444,6 +446,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	}
 
 	if (!invalid) {
+		APS_DBG("ALS debug get_ps_value PS if !invalid");
 		if (unlikely(atomic_read(&obj->trace) & CMC_TRC_CVT_PS)) {
 			if (mask)
 				APS_DBG("PS:  %05d => %05d [M]\n", ps, val);
@@ -459,6 +462,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 		}
 
 	} else {
+		APS_DBG("ALS debug get_ps_value PS if invalid");
 		if (unlikely(atomic_read(&obj->trace) & CMC_TRC_CVT_PS))
 			APS_DBG("PS:  %05d => %05d (-1)\n", ps, val);
 		return -1;
