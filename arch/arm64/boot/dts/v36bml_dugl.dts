@@ -1053,8 +1053,8 @@ to make keypad work without such a hack */
 		als_value = <0x0 0x3 0xa 0x10 0x4e 0x9e 0x422 0x633 0xb29 0xf4c 0x0 0x0 0x0 0x0 0x0 0x0>;
 /*                ps_threshold_high = <0x46>;
                 ps_threshold_low = <0x28>; */
-		ps_threshold_high = <0x5f>;
-                ps_threshold_low = <0x15>;
+		ps_threshold_high = <0x15>;
+                ps_threshold_low = <0x5f>;
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
                 pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
