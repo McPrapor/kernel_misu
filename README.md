@@ -38,7 +38,9 @@ Front Camera | 5MP, Int. 5MP
  * ccci (modem starts with legacy firmware and looks fine)
  * gps
  * kpd works fine
- * htc_acoustic(tfa9895)
+ * htc_acoustic
+ * lcd-brightness
+ * notification leds
 
 -------------
 ## Testing...
@@ -53,8 +55,6 @@ Front Camera | 5MP, Int. 5MP
  * iio sensor hub
  * bma253 acceleration sensor 
  * cm36686 alsps sensor
- * lcd-brightness
- * notification leds
  * flashlight
  * battery meter tables
  * himax 852xes touchpad wake on double touch
