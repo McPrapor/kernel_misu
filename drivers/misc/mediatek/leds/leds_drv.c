@@ -63,7 +63,7 @@ static int debug_enable_led = 1;
 /* #define pr_fmt(fmt) "[LED_DRV]"fmt */
 #define LEDS_DRV_DEBUG(format, args...) do { \
 	if (debug_enable_led) {	\
-		pr_debug(format, ##args);\
+		pr_debug("[LED_DRV]"format, ##args);\
 	} \
 } while (0)
 
