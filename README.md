@@ -42,17 +42,19 @@ Front Camera | 5MP, Int. 5MP
 
 -------------
 ## Testing...
- * hall_ak8789
- * iio sensor hub
- * bma253 acceleration sensor 
- * cm36686 alsps sensor
  * fm radio
- * lm3642 
- * ramconsole bad addresing
+ * lm3642
  * camera
 
 -------------
 ## Broken/Bugs
+ * ramconsole bad addresing
+ * hall_ak8789
+ * iio sensor hub
+ * bma253 acceleration sensor 
+ * cm36686 alsps sensor
+ * lcd-brightness
+ * notification leds
  * flashlight
  * battery meter tables
  * himax 852xes touchpad wake on double touch
