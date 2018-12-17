@@ -99,7 +99,7 @@ struct cust_mt65xx_led *pled_dtsi = NULL;
 static int debug_enable_led_hal = 1;
 #define LEDS_DEBUG(format, args...) do { \
 	if (debug_enable_led_hal) {	\
-		pr_debug("[LED]"format, ##args);\
+		printk("[LED]"format, ##args);\
 	} \
 } while (0)
 
