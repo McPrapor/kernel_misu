@@ -66,15 +66,15 @@
         irq_nfc: irq_nfc { };
 */
         led@0 {
-               compatible = "mediatek,red";
-               led_mode = <0x0>;
-               data = <0x1>;
+               compatible = "mediatek,amber";
+               led_mode = <0x3>;
+               data = <0x2>;
                pwm_config = <0x0 0x0 0x0 0x0 0x0>;
         };
 
         led@1 {
                compatible = "mediatek,green";
-               led_mode = <0x0>;
+               led_mode = <0x3>;
                data = <0x1>;
                pwm_config = <0x0 0x0 0x0 0x0 0x0>;
         };
@@ -109,7 +109,7 @@
 
         led@6 {
                compatible = "mediatek,lcd-backlight";
-               led_mode = <0x5>;
+               led_mode = <0x4>;
                data = <0x1>;
                pwm_config = <0x0 0x0 0x0 0x0 0x0>;
         };

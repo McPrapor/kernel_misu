@@ -79,7 +79,11 @@ static int button_flag_isink3;
 struct wake_lock leds_suspend_lock;
 
 char *leds_name[MT65XX_LED_TYPE_TOTAL] = {
+#ifndef CONFIG_A51B_LED
 	"red",
+#else
+	"amber",
+#endif
 	"green",
 	"blue",
 	"jogball-backlight",
