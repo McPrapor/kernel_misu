@@ -30,15 +30,14 @@
 #define SW_CALIBRATION
 
 /*----------------------------------------------------------------------------*/
-#ifdef CONFIG_BMA250_V36BML_SWAP_XYZ
+#ifdef CONFIG_BMA250_V36BML_SWAP_XY
 #define BMA250_AXIS_X          1
 #define BMA250_AXIS_Y          0
-#define BMA250_AXIS_Z          2
 #else
 #define BMA250_AXIS_X          0
 #define BMA250_AXIS_Y          1
-#define BMA250_AXIS_Z          2
 #endif
+#define BMA250_AXIS_Z          2
 #define BMA250_AXES_NUM        3
 #define BMA250_DATA_LEN        6
 #define BMA250_DEV_NAME        "BMA250"
@@ -308,7 +307,7 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
-#ifndef CONFIG_BMA250_V36BML_SWAP_XYZ
+#ifndef CONFIG_BMA250_V36BML_SWAP_XY
 				data[i] = -data[i];		
 #endif
 			}
