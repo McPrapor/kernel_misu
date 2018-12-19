@@ -307,14 +307,14 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
-#ifdef CONFIG_BMA250_V36BML_SWAP_XY
-				if ( i == BMA250_AXIS_Z )
-					data[i] = -data[i];
-#else
+#ifndef CONFIG_BMA250_V36BML_SWAP_XY
 				data[i] = -data[i];		
 #endif
 			}
 		}	
+#ifdef CONFIG_BMA250_V36BML_SWAP_XY
+		data[BMA250_AXIS_Z] = -data[BMA250_AXIS_Z];
+#endif
 		if(1)//(atomic_read(&priv->trace) & ADX_TRC_RAWDATA)
 		{
 			GSE_LOG("[%08X %08X %08X] => [%5d %5d %5d] after\n", data[BMA250_AXIS_X], data[BMA250_AXIS_Y], data[BMA250_AXIS_Z],
