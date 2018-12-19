@@ -669,6 +669,7 @@ static ssize_t cm36686_show_ps(struct device_driver *ddri, char *buf)
 	}
 
 	res = cm36686_read_ps(cm36686_obj->client, &cm36686_obj->ps);
+	APS_ERR("ALSPS cm36686 read res %d\n", (int)res);
 	if (res)
 		return snprintf(buf, PAGE_SIZE, "ERROR: %d\n", (int)res);
 	else
