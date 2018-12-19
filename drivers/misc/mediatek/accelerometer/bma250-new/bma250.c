@@ -83,10 +83,12 @@ static int bma250_resume(struct i2c_client *client);
 #ifdef CAL_MODE
 s16 acc_data_b[3];
 //static int match_sensor_flag = 0;
+/*
 extern int yl_params_kernel_write(char *buf, size_t count, int ver);
 extern int yl_params_kernel_read(char *buf, size_t count, int ver);
 extern int read_acc_ps_cal_data_from_flash(unsigned int offset, char* output, int counts);
 extern int write_acc_ps_cal_data_to_flash(unsigned int offset, char* input, int counts);
+*/
 #endif
 // add by wangyufei@yulong.com modify for gsensor calibration begin 20150416 
 
