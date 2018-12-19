@@ -409,12 +409,19 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 	APS_LOG("CM36686_REG_ALS_PS read_ps databuf %5d %5d %x %x", databuf[0], databuf[1], databuf[0], databuf[1]);
 
 	APS_LOG("QWE CM36686_REG_ALS_PS read_ps databuf %d, obj->ps_cali %d", *data, obj->ps_cali);
-#ifndef CONFIG_CM36686_V36BML_DIS_CALI
+//#ifndef CONFIG_CM36686_V36BML_DIS_CALI
+/*
 	if (*data < obj->ps_cali)
 		*data = 0;
 	else
 		*data = *data - obj->ps_cali;
-#endif
+*/
+//#endif
+	if (*data < 12)
+		*data = 0;
+	else
+		*data = *data - 12;
+	APS_LOG("QWE CM36686_REG_ALS_PS read_ps data %d", *data);
 	return 0;
 READ_PS_EXIT_ERR:
 	return res;
