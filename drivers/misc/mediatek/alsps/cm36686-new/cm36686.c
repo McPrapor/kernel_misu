@@ -406,6 +406,7 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 	}
 
 	*data = ((databuf[1] << 8) | databuf[0]);
+	APS_LOG("CM36686_REG_ALS_PS read_ps databuf %5d", databuf[0]);
 
 	if (*data < obj->ps_cali)
 		*data = 0;
