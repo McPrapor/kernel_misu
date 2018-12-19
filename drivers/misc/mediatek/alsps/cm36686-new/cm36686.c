@@ -17,14 +17,14 @@
 #include <linux/irq.h>
 #include <linux/gpio.h>
 #include <linux/miscdevice.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <linux/delay.h>
 #include <linux/input.h>
 #include <linux/workqueue.h>
 #include <linux/kobject.h>
 #include <linux/platform_device.h>
-#include <asm/atomic.h>
-#include <asm/io.h>
+#include <linux/atomic.h>
+#include <linux/io.h>
 #include "cust_alsps.h"
 #include "cm36686.h"
 #include <linux/sched.h>
@@ -54,8 +54,8 @@
 static int cm36686_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id);
 static int cm36686_i2c_remove(struct i2c_client *client);
 static int cm36686_i2c_detect(struct i2c_client *client, struct i2c_board_info *info);
-static int cm36686_i2c_suspend(struct i2c_client *client, pm_message_t msg);
-static int cm36686_i2c_resume(struct i2c_client *client);
+static int cm36686_i2c_suspend(struct device *dev);
+static int cm36686_i2c_resume(struct device *dev);
 
 /*----------------------------------------------------------------------------*/
 static const struct i2c_device_id cm36686_i2c_id[] = { {CM36686_DEV_NAME, 0}, {} };
@@ -131,18 +131,23 @@ static const struct of_device_id alsps_of_match[] = {
 	{},
 };
 #endif
-
+#ifdef CONFIG_PM_SLEEP
+static const struct dev_pm_ops CM36686_pm_ops = {
+	SET_SYSTEM_SLEEP_PM_OPS(cm36686_i2c_suspend, cm36686_i2c_resume)
+};
+#endif
 static struct i2c_driver cm36686_i2c_driver = {
 	.probe = cm36686_i2c_probe,
 	.remove = cm36686_i2c_remove,
 	.detect = cm36686_i2c_detect,
-	.suspend = cm36686_i2c_suspend,
-	.resume = cm36686_i2c_resume,
 	.id_table = cm36686_i2c_id,
 	.driver = {
-		   .name = CM36686_DEV_NAME,
+		.name = CM36686_DEV_NAME,
+#ifdef CONFIG_PM_SLEEP
+		.pm   = &CM36686_pm_ops,
+#endif
 #ifdef CONFIG_OF
-		   .of_match_table = alsps_of_match,
+		 .of_match_table = alsps_of_match,
 #endif
 		   },
 };
@@ -173,12 +178,12 @@ static struct alsps_init_info cm36686_init_info = {
 /*----------------------------------------------------------------------------*/
 static DEFINE_MUTEX(cm36686_mutex);
 /*----------------------------------------------------------------------------*/
-typedef enum {
+enum CMC_BIT {
 	CMC_BIT_ALS = 1,
 	CMC_BIT_PS = 2,
-} CMC_BIT;
+};
 /*-----------------------------CMC for debugging-------------------------------*/
-typedef enum {
+enum CMC_TRC {
 	CMC_TRC_ALS_DATA = 0x0001,
 	CMC_TRC_PS_DATA = 0x0002,
 	CMC_TRC_EINT = 0x0004,
@@ -188,26 +193,46 @@ typedef enum {
 	CMC_TRC_CVT_PS = 0x0040,
 	CMC_TRC_CVT_AAL = 0x0080,
 	CMC_TRC_DEBUG = 0x8000,
-} CMC_TRC;
+};
 /*-----------------------------------------------------------------------------*/
 
-int CM36686_i2c_master_operate(struct i2c_client *client, const char *buf, int count, int i2c_flag)
+int CM36686_i2c_master_operate(struct i2c_client *client, char *buf, int count, int i2c_flag)
 {
 	int res = 0;
+#ifndef CONFIG_MTK_I2C_EXTENSION
+	struct i2c_msg msg[2];
+#endif
 
 	mutex_lock(&cm36686_mutex);
 	switch (i2c_flag) {
 	case I2C_FLAG_WRITE:
+#ifdef CONFIG_MTK_I2C_EXTENSION
 		client->addr &= I2C_MASK_FLAG;
 		res = i2c_master_send(client, buf, count);
 		client->addr &= I2C_MASK_FLAG;
+#else
+		res = i2c_master_send(client, buf, count);
+#endif
 		break;
 	case I2C_FLAG_READ:
+#ifdef CONFIG_MTK_I2C_EXTENSION
 		client->addr &= I2C_MASK_FLAG;
 		client->addr |= I2C_WR_FLAG;
 		client->addr |= I2C_RS_FLAG;
 		res = i2c_master_send(client, buf, count);
 		client->addr &= I2C_MASK_FLAG;
+#else
+		msg[0].addr = client->addr;
+		msg[0].flags = 0;
+		msg[0].len = 1;
+		msg[0].buf = buf;
+
+		msg[1].addr = client->addr;
+		msg[1].flags = I2C_M_RD;
+		msg[1].len = (count >> 8);
+		msg[1].buf = buf;
+		res = i2c_transfer(client->adapter, msg, ARRAY_SIZE(msg));
+#endif
 		break;
 	default:
 		APS_LOG("CM36686_i2c_master_operate i2c_flag command not support!\n");
@@ -422,42 +447,34 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 
 	val = intr_flag;	/* value between high/low threshold should sync. with hw status. */
 
-	if (ps > atomic_read(&obj->ps_thd_val_high)){
+	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
-		APS_DBG("ALS debug get_ps_value PS:  val = 0 CLOSE");
-	}
-	else if (ps < atomic_read(&obj->ps_thd_val_low)){
-		APS_DBG("ALS debug get_ps_value PS:  val = 1 FAR");
+	else if (ps < atomic_read(&obj->ps_thd_val_low))
 		val = 1;	/*far away */
-	}
-	APS_DBG("ALS debug get_ps_value PS:  %05d => %05d [M]\n", ps, val);
-	APS_DBG("ALS debug get_ps_value PS: thlow: %05d thhigh: %05d", atomic_read(&obj->ps_thd_val_low), atomic_read(&obj->ps_thd_val_high));
+
 	if (atomic_read(&obj->ps_suspend)) {
 		invalid = 1;
-		APS_DBG("ALS debug get_ps_value PS ps_suspend");
-	} else if (1 == atomic_read(&obj->ps_deb_on)) {
+	} else if (atomic_read(&obj->ps_deb_on) == 1) {
 #ifdef CONFIG_64BIT
 		unsigned long endt = atomic64_read(&obj->ps_deb_end);
 #else
 		unsigned long endt = atomic_read(&obj->ps_deb_end);
 #endif
-		APS_DBG("ALS debug get_ps_value PS ps_deb_on");
 		if (time_after(jiffies, endt))
 			atomic_set(&obj->ps_deb_on, 0);
 
-		if (1 == atomic_read(&obj->ps_deb_on))
+		if (atomic_read(&obj->ps_deb_on) == 1)
 			invalid = 1;
 	}
 
 	if (!invalid) {
-		APS_DBG("ALS debug get_ps_value PS if !invalid");
 		if (unlikely(atomic_read(&obj->trace) & CMC_TRC_CVT_PS)) {
 			if (mask)
 				APS_DBG("PS:  %05d => %05d [M]\n", ps, val);
 			else
 				APS_DBG("PS:  %05d => %05d\n", ps, val);
 		}
-		if (0 == test_bit(CMC_BIT_PS, &obj->enable)) {
+		if (test_bit(CMC_BIT_PS, &obj->enable) == 0) {
 			/* if ps is disable do not report value */
 			APS_DBG("PS: not enable and do not report this value\n");
 			return -1;
@@ -466,7 +483,6 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 		}
 
 	} else {
-		APS_DBG("ALS debug get_ps_value PS if invalid");
 		if (unlikely(atomic_read(&obj->trace) & CMC_TRC_CVT_PS))
 			APS_DBG("PS:  %05d => %05d (-1)\n", ps, val);
 		return -1;
@@ -486,13 +502,13 @@ static int cm36686_get_als_value(struct cm36686_priv *obj, u16 als)
 	int value_diff = 0;
 	int value = 0;
 
-	if ((0 == obj->als_level_num) || (0 == obj->als_value_num)) {
+	if ((obj->als_level_num == 0) || (obj->als_value_num == 0)) {
 		APS_ERR("invalid als_level_num = %d, als_value_num = %d\n", obj->als_level_num,
 			obj->als_value_num);
 		return -1;
 	}
 
-	if (1 == atomic_read(&obj->als_deb_on)) {
+	if (atomic_read(&obj->als_deb_on) == 1) {
 #ifdef CONFIG_64BIT
 		unsigned long endt = (unsigned long)atomic64_read(&obj->als_deb_end);
 #else
@@ -501,7 +517,7 @@ static int cm36686_get_als_value(struct cm36686_priv *obj, u16 als)
 		if (time_after(jiffies, endt))
 			atomic_set(&obj->als_deb_on, 0);
 
-		if (1 == atomic_read(&obj->als_deb_on))
+		if (atomic_read(&obj->als_deb_on) == 1)
 			invalid = 1;
 	}
 
@@ -579,7 +595,7 @@ static ssize_t cm36686_store_config(struct device_driver *ddri, const char *buf,
 		return 0;
 	}
 
-	if (5 == sscanf(buf, "%d %d %d %d %d", &retry, &als_deb, &mask, &thres, &ps_deb)) {
+	if (sscanf(buf, "%d %d %d %d %d", &retry, &als_deb, &mask, &thres, &ps_deb) == 5) {
 		atomic_set(&cm36686_obj->i2c_retry, retry);
 		atomic_set(&cm36686_obj->als_debounce, als_deb);
 		atomic_set(&cm36686_obj->ps_mask, mask);
@@ -615,7 +631,7 @@ static ssize_t cm36686_store_trace(struct device_driver *ddri, const char *buf, 
 		return 0;
 	}
 
-	if (1 == sscanf(buf, "0x%x", &trace))
+	if (sscanf(buf, "0x%x", &trace) == 1)
 		atomic_set(&cm36686_obj->trace, trace);
 	else
 		APS_ERR("invalid content: '%s', length = %zu\n", buf, count);
@@ -662,6 +678,7 @@ static ssize_t cm36686_show_reg(struct device_driver *ddri, char *buf)
 	u8 _bIndex = 0;
 	u8 databuf[2] = { 0 };
 	ssize_t _tLength = 0;
+	int res;
 
 	if (!cm36686_obj) {
 		APS_ERR("cm3623_obj is null!!\n");
@@ -670,7 +687,10 @@ static ssize_t cm36686_show_reg(struct device_driver *ddri, char *buf)
 
 	for (_bIndex = 0; _bIndex < 0x0D; _bIndex++) {
 		databuf[0] = _bIndex;
-		CM36686_i2c_master_operate(cm36686_obj->client, databuf, 0x201, I2C_FLAG_READ);
+		res = CM36686_i2c_master_operate(cm36686_obj->client, databuf, 0x201, I2C_FLAG_READ);
+		if (res < 0)
+			APS_ERR("i2c_master_send function err res = %d\n", res);
+
 		_tLength +=
 		    snprintf((buf + _tLength), (PAGE_SIZE - _tLength), "Reg[0x%02X]: 0x%02X\n",
 			     _bIndex, databuf[0]);
@@ -695,7 +715,7 @@ static ssize_t cm36686_store_send(struct device_driver *ddri, const char *buf, s
 	if (!cm36686_obj) {
 		APS_ERR("cm36686_obj is null!!\n");
 		return 0;
-	} else if (2 != sscanf(buf, "%x %x", &addr, &cmd)) {
+	} else if (sscanf(buf, "%x %x", &addr, &cmd) != 2) {
 		APS_ERR("invalid format: '%s'\n", buf);
 		return 0;
 	}
@@ -884,7 +904,7 @@ static struct driver_attribute *cm36686_attr_list[] = {
 static int cm36686_create_attr(struct device_driver *driver)
 {
 	int idx, err = 0;
-	int num = (int)(sizeof(cm36686_attr_list) / sizeof(cm36686_attr_list[0]));
+	int num = (int)(ARRAY_SIZE(cm36686_attr_list));
 
 	if (driver == NULL)
 		return -EINVAL;
@@ -904,7 +924,7 @@ static int cm36686_create_attr(struct device_driver *driver)
 static int cm36686_delete_attr(struct device_driver *driver)
 {
 	int idx, err = 0;
-	int num = (int)(sizeof(cm36686_attr_list) / sizeof(cm36686_attr_list[0]));
+	int num = (int)(ARRAY_SIZE(cm36686_attr_list));
 
 	if (!driver)
 		return -EINVAL;
@@ -1395,7 +1415,7 @@ static int cm36686_init_client(struct i2c_client *client)
 
 	APS_FUN();
 	databuf[0] = CM36686_REG_ALS_CONF;
-	if (1 == obj->hw->polling_mode_als)
+	if (obj->hw->polling_mode_als == 1)
 		databuf[1] = 0x41; /*0b01000001;*/
 	else
 		databuf[1] = 0x47; /*0b01000111;*/
@@ -1409,7 +1429,7 @@ static int cm36686_init_client(struct i2c_client *client)
 
 	databuf[0] = CM36686_REG_PS_CONF1_2;
 	databuf[1] = 0x63; /*0b01100011;*/
-	if (1 == obj->hw->polling_mode_ps)
+	if (obj->hw->polling_mode_ps == 1)
 		databuf[2] = 0x08; /*0b00001000;*/
 	else
 		databuf[2] = 0x0B; /*0b00001011;*/
@@ -1441,7 +1461,7 @@ static int cm36686_init_client(struct i2c_client *client)
 
 	APS_LOG("cm36686 ps CM36686_REG_PS_CANC command!\n");
 
-	if (0 == obj->hw->polling_mode_als) {
+	if (obj->hw->polling_mode_als == 0) {
 		databuf[0] = CM36686_REG_ALS_THDH;
 		databuf[1] = 0x00;
 		databuf[2] = atomic_read(&obj->als_thd_val_high);
@@ -1460,7 +1480,7 @@ static int cm36686_init_client(struct i2c_client *client)
 		}
 	}
 
-	if (0 == obj->hw->polling_mode_ps) {
+	if (obj->hw->polling_mode_ps == 0) {
 		databuf[0] = CM36686_REG_PS_THDL;
 		databuf[1] = atomic_read(&obj->ps_thd_val_low);
 		databuf[2] = atomic_read(&obj->ps_thd_val_low) >> 8;
@@ -1682,13 +1702,13 @@ static int cm36686_i2c_probe(struct i2c_client *client, const struct i2c_device_
 	obj->enable = 0;
 	obj->pending_intr = 0;
 	obj->ps_cali = 0;
-	obj->als_level_num = sizeof(obj->hw->als_level) / sizeof(obj->hw->als_level[0]);
-	obj->als_value_num = sizeof(obj->hw->als_value) / sizeof(obj->hw->als_value[0]);
+	obj->als_level_num = ARRAY_SIZE(obj->hw->als_level);
+	obj->als_value_num = ARRAY_SIZE(obj->hw->als_value);
 	/*-----------------------------value need to be confirmed-----------------------------------------*/
 
-	BUG_ON(sizeof(obj->als_level) != sizeof(obj->hw->als_level));
+	WARN_ON(sizeof(obj->als_level) != sizeof(obj->hw->als_level));
 	memcpy(obj->als_level, obj->hw->als_level, sizeof(obj->als_level));
-	BUG_ON(sizeof(obj->als_value) != sizeof(obj->hw->als_value));
+	WARN_ON(sizeof(obj->als_value) != sizeof(obj->hw->als_value));
 	memcpy(obj->als_value, obj->hw->als_value, sizeof(obj->als_value));
 	atomic_set(&obj->i2c_retry, 3);
 	clear_bit(CMC_BIT_ALS, &obj->enable);
@@ -1793,10 +1813,7 @@ static int cm36686_i2c_remove(struct i2c_client *client)
 		APS_ERR("cm36686_delete_attr fail: %d\n", err);
 	/*----------------------------------------------------------------------------------------*/
 
-	err = misc_deregister(&cm36686_device);
-	if (err)
-		APS_ERR("misc_deregister fail: %d\n", err);
-
+	misc_deregister(&cm36686_device);
 	cm36686_i2c_client = NULL;
 	i2c_unregister_device(client);
 	kfree(i2c_get_clientdata(client));
@@ -1806,13 +1823,14 @@ static int cm36686_i2c_remove(struct i2c_client *client)
 
 static int cm36686_i2c_detect(struct i2c_client *client, struct i2c_board_info *info)
 {
-	strcpy(info->type, CM36686_DEV_NAME);
+	strncpy(info->type, CM36686_DEV_NAME, sizeof(info->type));
 	return 0;
 
 }
 
-static int cm36686_i2c_suspend(struct i2c_client *client, pm_message_t msg)
+static int cm36686_i2c_suspend(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct cm36686_priv *obj = i2c_get_clientdata(client);
 	int err;
 
@@ -1830,8 +1848,9 @@ static int cm36686_i2c_suspend(struct i2c_client *client, pm_message_t msg)
 	return 0;
 }
 
-static int cm36686_i2c_resume(struct i2c_client *client)
+static int cm36686_i2c_resume(struct device *dev)
 {
+	struct i2c_client *client = to_i2c_client(dev);
 	struct cm36686_priv *obj = i2c_get_clientdata(client);
 	int err;
 	struct hwm_sensor_data sensor_data;
