@@ -1638,12 +1638,14 @@ static int ps_get_data(int *value, int *status)
 		return -1;
 	}
 
-	APS_LOG("ALSPS case ps_get_data called cm36686");
+	APS_LOG("ALSPS ps_get_data called cm36686");
 	err = cm36686_read_ps(cm36686_obj->client, &cm36686_obj->ps);
+	APS_LOG("ALSPS ps_get_data called cm36686 err %d", (int)err);
 	if (err) {
 		err = -1;
 	} else {
 		*value = cm36686_get_ps_value(cm36686_obj, cm36686_obj->ps);
+		APS_LOG("ALSPS ps_get_data called cm36686 value %d", *value);
 		if (*value < 0)
 			err = -1;
 		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
