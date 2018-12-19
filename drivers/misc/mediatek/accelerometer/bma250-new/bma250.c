@@ -1232,11 +1232,12 @@ static int yulong_acc_ReadCalibration(struct i2c_client *client)
 	struct bma250_i2c_data*obj = i2c_get_clientdata(client);  
 
 	printk("WANGYUFEI IN YULONG ACC_READ_CALIBRATION!\n");
-
+/*
 	if(read_acc_ps_cal_data_from_flash(16, tempbuf, NAND_FLASH_WR_RD_SIZE)<0)
 		printk("Use Default CALI , acc_cali_sw[BMA250_AXIS_X] = %d , acc_cali_sw[BMA250_AXIS_Y] = %d, acc_cali_sw[BMA250_AXIS_Z] = %d\n",
 		obj->cali_sw[BMA250_AXIS_X],obj->cali_sw[BMA250_AXIS_Y],obj->cali_sw[BMA250_AXIS_Z]);
 	else{
+*/
 	obj->cali_sw[BMA250_AXIS_X] = (s16)((tempbuf[1]<<8)|tempbuf[2]);
 	obj->cali_sw[BMA250_AXIS_Y] = (s16)((tempbuf[3]<<8)|tempbuf[4]);
 	obj->cali_sw[BMA250_AXIS_Z] = (s16)((tempbuf[5]<<8)|tempbuf[6]);
@@ -1247,7 +1248,7 @@ static int yulong_acc_ReadCalibration(struct i2c_client *client)
 		printk("Use yulong CALI , offset[BMA250_AXIS_X] = %d , offset[BMA250_AXIS_Y] = %d, offset[BMA250_AXIS_Z] = %d\n",
 			obj->cali_sw[BMA250_AXIS_X],obj->cali_sw[BMA250_AXIS_Y],obj->cali_sw[BMA250_AXIS_Z]);
 
-		}
+//		}
 	return 0;
 }
 //add by wangyufei@yulong.com modify for gsensor calibration end 20150415
@@ -1473,13 +1474,13 @@ static int yulong_accel_Calibration(struct i2c_client *client, char *buf, int bu
       //      __LINE__,tempbuf[0],tempbuf[1],tempbuf[2],tempbuf[3],tempbuf[4],tempbuf[5],tempbuf[6] );
       //  printk("(%s) TEMPBUF is (%x),(%x),(%x),(%x),(%x),(%x),(%x)\n",
       //      __LINE__,tempbuf[0],tempbuf[1],tempbuf[2],tempbuf[3],tempbuf[4],tempbuf[5],tempbuf[6] );
-
+/*
         printk(" wangyufei_write _acc_ps_cal_data  %s\n", __func__);
         if(write_acc_ps_cal_data_to_flash(16, tempbuf, NAND_FLASH_WR_RD_SIZE)<0)
             printk("Create ACC  calibration file error!!");
             else
             printk("Create ACC  calibration file Success!!");
-
+*/
         return 0;
     }
     else
