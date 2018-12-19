@@ -1079,6 +1079,14 @@ to make keypad work without such a hack */
 };
 /* end cm36686-new driver */
 /* bma25x accel start */
+&i2c2{
+	/delete-node/ gsensor@4c;
+        gsensor@18 {
+                        compatible = "mediatek,gsensor";
+                        reg = <0x18>;
+                        status = "okay";
+        };
+};
 / {
 	cust_accel@0 {
                 compatible = "mediatek,bma250";
