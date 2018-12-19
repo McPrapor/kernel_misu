@@ -393,6 +393,7 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 	struct cm36686_priv *obj = i2c_get_clientdata(client);
 
 	databuf[0] = CM36686_REG_PS_DATA;
+	APS_LOG("CM36686_REG_ALS_PS read_ps debug");
 	res = CM36686_i2c_master_operate(client, databuf, 0x201, I2C_FLAG_READ);
 	if (res < 0) {
 		APS_ERR("i2c_master_send function err\n");
@@ -446,6 +447,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	int invalid = 0;
 
 	val = intr_flag;	/* value between high/low threshold should sync. with hw status. */
+	APS_LOG("CM36686_REG_ALS_DATA get_ps_value");
 
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
