@@ -6,3 +6,9 @@ config MTK_BMA250_NEW
           If this option is set,
 	  it will support
           BMA250 Accelerometer.
+
+config BMA250_V36BML_SWAP_XY
+	bool "BMA250 swap X and Y axes"
+	default n
+	help
+	  Swap X and Y axes for BMA250 accelerometer
