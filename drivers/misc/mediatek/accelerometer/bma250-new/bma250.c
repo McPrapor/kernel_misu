@@ -1230,7 +1230,7 @@ static int bma250_delete_attr(struct device_driver *driver)
 //add by wangyufei@yulong.com modify for gsensor calibration begin 20150415
 static int yulong_acc_ReadCalibration(struct i2c_client *client)
 {
-	char tempbuf[NAND_FLASH_WR_RD_SIZE];
+	char tempbuf[NAND_FLASH_WR_RD_SIZE] = {};
 	struct bma250_i2c_data*obj = i2c_get_clientdata(client);  
 
 	printk("WANGYUFEI IN YULONG ACC_READ_CALIBRATION!\n");
