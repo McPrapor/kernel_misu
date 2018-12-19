@@ -663,13 +663,14 @@ static ssize_t cm36686_show_ps(struct device_driver *ddri, char *buf)
 {
 	ssize_t res;
 
+	APS_LOG("ALSPS cm36686 show_ps called");
 	if (!cm36686_obj) {
 		APS_ERR("cm3623_obj is null!!\n");
 		return 0;
 	}
 
 	res = cm36686_read_ps(cm36686_obj->client, &cm36686_obj->ps);
-	APS_ERR("ALSPS cm36686 read res %d\n", (int)res);
+	APS_LOG("ALSPS cm36686 read res %d\n", (int)res);
 	if (res)
 		return snprintf(buf, PAGE_SIZE, "ERROR: %d\n", (int)res);
 	else
@@ -1187,11 +1188,13 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_GET_PS_DATA:
+		APS_LOG("ALSPS case ALSPS_GET_PS_DATA cm36686");
 		err = cm36686_read_ps(obj->client, &obj->ps);
 		if (err)
 			goto err_out;
 
 		dat = cm36686_get_ps_value(obj, obj->ps);
+		APS_LOG("ALSPS case ALSPS_GET_PS_DATA cm36686 dat %x \n", (int)data);
 		if (copy_to_user(ptr, &dat, sizeof(dat))) {
 			err = -EFAULT;
 			goto err_out;
@@ -1200,6 +1203,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 	case ALSPS_GET_PS_RAW_DATA:
 		err = cm36686_read_ps(obj->client, &obj->ps);
+		APS_LOG("ALSPS case ALSPS_GET_PS_RAW_DATA cm36686");
 		if (err)
 			goto err_out;
 
@@ -1267,6 +1271,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 		/*----------------------------------for factory mode test---------------------------------------*/
 	case ALSPS_GET_PS_TEST_RESULT:
+		APS_LOG("ALSPS case ALSPS_GET_PS_TEST_RESULT cm36686");
 		err = cm36686_read_ps(obj->client, &obj->ps);
 		if (err)
 			goto err_out;
@@ -1628,12 +1633,13 @@ static int ps_set_delay(u64 ns)
 static int ps_get_data(int *value, int *status)
 {
 	int err = 0;
-
+AA
 	if (!cm36686_obj) {
 		APS_ERR("cm36686_obj is null!!\n");
 		return -1;
 	}
 
+	APS_LOG("ALSPS case ps_get_data called cm36686");
 	err = cm36686_read_ps(cm36686_obj->client, &cm36686_obj->ps);
 	if (err) {
 		err = -1;
