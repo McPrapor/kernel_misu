@@ -1331,15 +1331,18 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		}
 		APS_ERR("%s set threshold high: 0x%x, low: 0x%x\n", __func__, threshold[0],
 			threshold[1]);
-		atomic_set(&obj->ps_thd_val_high, (threshold[0] + obj->ps_cali));
-		atomic_set(&obj->ps_thd_val_low, (threshold[1] + obj->ps_cali));	/* need to confirm */
+//		atomic_set(&obj->ps_thd_val_high, (threshold[0] + obj->ps_cali));
+//		atomic_set(&obj->ps_thd_val_low, (threshold[1] + obj->ps_cali));	/* need to confirm */
+		atomic_set(&obj->ps_thd_val_high, (threshold[0] + 12));
+		atomic_set(&obj->ps_thd_val_low, (threshold[1] + 12));	/* need to confirm */
 
 		set_psensor_threshold(obj->client);
 
 		break;
 
 	case ALSPS_GET_PS_THRESHOLD_HIGH:
-		threshold[0] = atomic_read(&obj->ps_thd_val_high) - obj->ps_cali;
+//		threshold[0] = atomic_read(&obj->ps_thd_val_high) - obj->ps_cali;
+		threshold[0] = atomic_read(&obj->ps_thd_val_high) - 12;
 		APS_ERR("%s get threshold high: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
 			err = -EFAULT;
@@ -1348,7 +1351,8 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_GET_PS_THRESHOLD_LOW:
-		threshold[0] = atomic_read(&obj->ps_thd_val_low) - obj->ps_cali;
+//		threshold[0] = atomic_read(&obj->ps_thd_val_low) - obj->ps_cali;
+		threshold[0] = atomic_read(&obj->ps_thd_val_low) - 12;
 		APS_ERR("%s get threshold low: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
 			err = -EFAULT;
