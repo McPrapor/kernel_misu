@@ -467,9 +467,9 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 500; /* far, very far */
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
-		val = ps % 10;	/*far away */
+		val = 0;	/*far away */
 	else
-		val = 1000;
+		val = ps % 10;
 #else
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
