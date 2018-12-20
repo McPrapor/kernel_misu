@@ -300,10 +300,13 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 
 		for(i=0;i<3;i++)				
 		{								//because the data is store in binary complement number formation in computer system
-			if ( data[i] == 0x0200 )	//so we want to calculate actual number here
+			if ( data[i] == 0x0200 ){	//so we want to calculate actual number here
 				data[i]= -512;			//10bit resolution, 512= 2^(10-1)
+				GSE_LOG("IF i: %d data: %5d \n", i, data[i]);
+			}
 			else if ( data[i] & 0x0200 )//transfor format
 			{							//printk("data 0 step %x \n",data[i]);
+				GSE_LOG("NOT IF i: %d data: %5d \n", i, data[i]);
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
