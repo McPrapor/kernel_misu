@@ -1049,8 +1049,8 @@ to make keypad work without such a hack */
 	    	als_level  = <0 194 450 749 1705 3845 4230 7034 12907 16034 19011 26895 32956 32956 65535>;
 		/*  Total has 16 range*/
                 als_value  = <0 133 301 500 1002 2003 3002 5003 8005 10010 12010 16000 20000 20000 20000 20000>;
-                ps_threshold_high = <120>;
-                ps_threshold_low = <90>; 
+                ps_threshold_high = <70>;
+                ps_threshold_low = <40>; 
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
                 pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
