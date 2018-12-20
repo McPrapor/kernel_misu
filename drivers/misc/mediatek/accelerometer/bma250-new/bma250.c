@@ -866,10 +866,15 @@ static int BMA250_ReadSensorData(struct i2c_client *client, char *buf, int bufsi
 
 		//Out put the mg
 		//printk("mg acc=%d, GRAVITY=%d, sensityvity=%d \n",acc[BMA150_AXIS_X],GRAVITY_EARTH_1000,obj->reso->sensitivity);
+
 		acc[BMA250_AXIS_X] = acc[BMA250_AXIS_X] * GRAVITY_EARTH_1000 / obj->reso->sensitivity;
 		acc[BMA250_AXIS_Y] = acc[BMA250_AXIS_Y] * GRAVITY_EARTH_1000 / obj->reso->sensitivity;
 		acc[BMA250_AXIS_Z] = acc[BMA250_AXIS_Z] * GRAVITY_EARTH_1000 / obj->reso->sensitivity;	
 		
+#ifdef CONFIG_BMA250_V36BML_SWAP_XY
+		acc[BMA250_AXIS_X] = (-1) * acc[BMA250_AXIS_X];
+		acc[BMA250_AXIS_Y] = (-1) * acc[BMA250_AXIS_Y];
+#endif
 		//add by wangyufei@yulong.com for acc calibration begin at 20150416
 		acc_data_b[BMA250_AXIS_X] = acc[BMA250_AXIS_X];
 		acc_data_b[BMA250_AXIS_Y] = acc[BMA250_AXIS_Y];
