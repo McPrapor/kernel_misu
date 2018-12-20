@@ -464,6 +464,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	APS_LOG("CM36686_REG_ALS_DATA get_ps_value value: %hu", ps);
 
 #ifdef CONFIG_CM36686_V36BML_CUST_CALI
+//dont ask f*ckin magic
 	if (ps > atomic_read(&obj->ps_thd_val_high)) {
 		val = 0;
 	}
@@ -471,7 +472,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 		if ( (( 700 - ps ) / 100 ) < 1 ) {
 			val = 0;
 		} else {
-			val = ( 800 - ps ) / 100;
+			val = ( 900 - ps ) / 100;
 		}
 	}
 #else
