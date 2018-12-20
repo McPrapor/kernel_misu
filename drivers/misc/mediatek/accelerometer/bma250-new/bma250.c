@@ -310,14 +310,15 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
-#ifndef CONFIG_BMA250_V36BML_SWAP_XY
+//#ifndef CONFIG_BMA250_V36BML_SWAP_XY
 				data[i] = -data[i];		
+/*
 #else
 				if ( i == BMA250_AXIS_Z ) {
 					data[i] = -data[i];		
 				}
 #endif
-			} else {
+*/			} else {
 				GSE_LOG("ELSE IF i: %d data: %5d \n", i, data[i]);
 			}
 		}	
