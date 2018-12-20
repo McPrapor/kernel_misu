@@ -37,6 +37,9 @@
 *******************************************************************************/
 /*----------------------------------------------------------------------------*/
 
+#ifdef CONFIG_CM36686_V36BML_CUST_CALI
+#define CALI 5
+#endif
 #define CM36686_DEV_NAME     "cm36686"
 /*----------------------------------------------------------------------------*/
 #define APS_TAG                  "[ALS/PS] "
@@ -417,10 +420,10 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 		*data = *data - obj->ps_cali;
 */
 //#endif
-	if (*data < 4)
+	if (*data < CALI)
 		*data = 0;
 	else
-		*data = *data - 4;
+		*data = *data - CALI;
 	APS_LOG("QWE CM36686_REG_ALS_PS read_ps data %d", *data);
 	return 0;
 READ_PS_EXIT_ERR:
@@ -1337,8 +1340,8 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 			threshold[1]);
 //		atomic_set(&obj->ps_thd_val_high, (threshold[0] + obj->ps_cali));
 //		atomic_set(&obj->ps_thd_val_low, (threshold[1] + obj->ps_cali));	/* need to confirm */
-		atomic_set(&obj->ps_thd_val_high, (threshold[0] + 12));
-		atomic_set(&obj->ps_thd_val_low, (threshold[1] + 12));	/* need to confirm */
+		atomic_set(&obj->ps_thd_val_high, (threshold[0] + CALI));
+		atomic_set(&obj->ps_thd_val_low, (threshold[1] + CALI));	/* need to confirm */
 
 		set_psensor_threshold(obj->client);
 
@@ -1346,7 +1349,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 	case ALSPS_GET_PS_THRESHOLD_HIGH:
 //		threshold[0] = atomic_read(&obj->ps_thd_val_high) - obj->ps_cali;
-		threshold[0] = atomic_read(&obj->ps_thd_val_high) - 4;
+		threshold[0] = atomic_read(&obj->ps_thd_val_high) - CALI;
 		APS_LOG("ALSPS cm36686 ALSPS_GET_PS_THRESHOLD_HIGH");
 		APS_ERR("%s get threshold high: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
@@ -1357,7 +1360,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 	case ALSPS_GET_PS_THRESHOLD_LOW:
 //		threshold[0] = atomic_read(&obj->ps_thd_val_low) - obj->ps_cali;
-		threshold[0] = atomic_read(&obj->ps_thd_val_low) - 12;
+		threshold[0] = atomic_read(&obj->ps_thd_val_low) - CALI;
 		APS_LOG("ALSPS cm36686 ALSPS_GET_PS_THRESHOLD_LOW");
 		APS_ERR("%s get threshold low: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
