@@ -468,7 +468,7 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 		val = 0;
 	}
 	else if (ps < atomic_read(&obj->ps_thd_val_low)) {
-		if ( (( 800 - ps ) / 100 ) < 1 ) {
+		if ( (( 700 - ps ) / 100 ) < 1 ) {
 			val = 0;
 		} else {
 			val = ( 800 - ps ) / 100;
