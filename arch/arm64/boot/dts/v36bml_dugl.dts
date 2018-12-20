@@ -1050,7 +1050,7 @@ to make keypad work without such a hack */
 		/*  Total has 16 range*/
                 als_value  = <0 133 301 500 1002 2003 3002 5003 8005 10010 12010 16000 20000 20000 20000 20000>;
                 ps_threshold_high = <140>;
-                ps_threshold_low = <10>; 
+                ps_threshold_low = <110>; 
                 is_batch_supported_ps = <0x1>;
                 is_batch_supported_als = <0x1>;
                 pinctrl-names = "pin_default", "pin_cfg", "default", "cfg";
