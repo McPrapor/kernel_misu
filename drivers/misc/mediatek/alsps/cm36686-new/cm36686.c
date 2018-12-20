@@ -463,12 +463,17 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	val = intr_flag;	/* value between high/low threshold should sync. with hw status. */
 	APS_LOG("CM36686_REG_ALS_DATA get_ps_value");
 
+#ifdef CONFIG_CM36686_V36BML_CUST_CALI
+	if (ps > atomic_read(&obj->ps_thd_val_high))
+		val = 500; /* far, very far */
+	else if (ps < atomic_read(&obj->ps_thd_val_low))
+		val = ps % 10;	/*far away */
+	else
+		val = 1000;
+#else
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
-#ifdef CONFIG_CM36686_V36BML_CUST_CALI
-		val = ps % CALI;
-#else
 		val = 1;	/*far away */
 #endif
 
