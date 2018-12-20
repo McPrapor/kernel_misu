@@ -409,7 +409,7 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 	APS_LOG("CM36686_REG_ALS_PS read_ps databuf %5d %5d %x %x", databuf[0], databuf[1], databuf[0], databuf[1]);
 
 	APS_LOG("QWE CM36686_REG_ALS_PS read_ps databuf %d, obj->ps_cali %d", *data, obj->ps_cali);
-//#ifndef CONFIG_CM36686_V36BML_DIS_CALI
+//#ifndef CONFIG_CM36686_V36BML_CUST_CALI
 /*
 	if (*data < obj->ps_cali)
 		*data = 0;
@@ -417,10 +417,10 @@ long cm36686_read_ps(struct i2c_client *client, u16 *data)
 		*data = *data - obj->ps_cali;
 */
 //#endif
-	if (*data < 12)
+	if (*data < 4)
 		*data = 0;
 	else
-		*data = *data - 12;
+		*data = *data - 4;
 	APS_LOG("QWE CM36686_REG_ALS_PS read_ps data %d", *data);
 	return 0;
 READ_PS_EXIT_ERR:
@@ -1298,6 +1298,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_IOCTL_CLR_CALI:
+		APS_LOG("ALSPS cm36686 ALSPS_IOCTL_CLR_CALI");
 		if (copy_from_user(&dat, ptr, sizeof(dat))) {
 			err = -EFAULT;
 			goto err_out;
@@ -1308,6 +1309,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_IOCTL_GET_CALI:
+		APS_LOG("ALSPS cm36686 ALSPS_IOCTL_GET_CALI");
 		ps_cali = obj->ps_cali;
 		if (copy_to_user(ptr, &ps_cali, sizeof(ps_cali))) {
 			err = -EFAULT;
@@ -1316,6 +1318,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_IOCTL_SET_CALI:
+		APS_LOG("ALSPS cm36686 ALSPS_IOCTL_SET_CALI");
 		if (copy_from_user(&ps_cali, ptr, sizeof(ps_cali))) {
 			err = -EFAULT;
 			goto err_out;
@@ -1325,6 +1328,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 		break;
 
 	case ALSPS_SET_PS_THRESHOLD:
+		APS_LOG("ALSPS cm36686 ALSPS_SET_PS_THRESHOLD");
 		if (copy_from_user(threshold, ptr, sizeof(threshold))) {
 			err = -EFAULT;
 			goto err_out;
@@ -1342,7 +1346,8 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 	case ALSPS_GET_PS_THRESHOLD_HIGH:
 //		threshold[0] = atomic_read(&obj->ps_thd_val_high) - obj->ps_cali;
-		threshold[0] = atomic_read(&obj->ps_thd_val_high) - 12;
+		threshold[0] = atomic_read(&obj->ps_thd_val_high) - 4;
+		APS_LOG("ALSPS cm36686 ALSPS_GET_PS_THRESHOLD_HIGH");
 		APS_ERR("%s get threshold high: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
 			err = -EFAULT;
@@ -1353,6 +1358,7 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 	case ALSPS_GET_PS_THRESHOLD_LOW:
 //		threshold[0] = atomic_read(&obj->ps_thd_val_low) - obj->ps_cali;
 		threshold[0] = atomic_read(&obj->ps_thd_val_low) - 12;
+		APS_LOG("ALSPS cm36686 ALSPS_GET_PS_THRESHOLD_LOW");
 		APS_ERR("%s get threshold low: 0x%x\n", __func__, threshold[0]);
 		if (copy_to_user(ptr, &threshold[0], sizeof(threshold[0]))) {
 			err = -EFAULT;
