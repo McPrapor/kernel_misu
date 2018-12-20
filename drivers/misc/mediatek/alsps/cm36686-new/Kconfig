@@ -3,6 +3,6 @@ config MTK_CM36686_NEW
 	bool "cm36686 for MediaTek package"
 	default n
 
-config CM36686_V36BML_DIS_CALI
-	bool "cm36686 temp cali disable"
+config CM36686_V36BML_CUST_CALI
+	bool "cm36686 v36bml cust cali"
 	default n
