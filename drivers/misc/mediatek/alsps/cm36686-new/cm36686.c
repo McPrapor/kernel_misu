@@ -466,7 +466,11 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
+#ifdef CONFIG_CM36686_V36BML_CUST_CALI
+		val = ps % CALI;
+#else
 		val = 1;	/*far away */
+#endif
 
 	if (atomic_read(&obj->ps_suspend)) {
 		invalid = 1;
