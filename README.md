@@ -40,23 +40,23 @@ Front Camera | 5MP, Int. 5MP
  * kpd works fine
  * htc_acoustic
  * lcd-brightness
- * notification leds
-
--------------
-## Testing...
  * fm radio
- * lm3642
- * camera
-
--------------
-## Broken/Bugs
- * ramconsole bad addresing
- * hall_ak8789
- * iio sensor hub
  * bma253 acceleration sensor 
  * cm36686 alsps sensor
- * flashlight
- * battery meter tables
- * himax 852xes touchpad wake on double touch
+ 
+-------------
+## Testing...
+ * notification leds
+ 
+-------------
+## Broken/Bugs
+ * SGM3785 flashlight
+ * LM3642 led torch
+ * ramconsole bad addresing
+ * hall_ak8789 magnetometer
+ * SENTRAL iio sensor hub needs new sensor drivers support
+ * cameras (ov5670, s5k3l2)
+ * battery meter tables are broken
+ * himax 852xes DT2W
 
 -------------
