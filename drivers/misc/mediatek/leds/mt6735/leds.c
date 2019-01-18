@@ -976,16 +976,19 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 	    container_of(led_cdev, struct mt65xx_led_data, cdev);
 	static int got_wake_lock;
 	struct nled_setting nled_tmp_setting = { 0, 0, 0 };
-
+LEDS_DEBUG("mt_mt65xx_blink_set called");
 	/* only allow software blink when delay_on or delay_off changed */
 	if (*delay_on != led_data->delay_on
 	    || *delay_off != led_data->delay_off) {
+LEDS_DEBUG("mt_mt65xx_blink_set first if true");
 		led_data->delay_on = *delay_on;
 		led_data->delay_off = *delay_off;
 		if (led_data->delay_on && led_data->delay_off) {	/* enable blink */
+LEDS_DEBUG("mt_mt65xx_blink_set second if true");			
 			led_data->level = 255;	/* when enable blink  then to set the level  (255) */
 			/* AP PWM all support OLD mode */
 			if (led_data->cust.mode == MT65XX_LED_MODE_PWM) {
+LEDS_DEBUG("mt_mt65xx_blink_set third if true");				
 				nled_tmp_setting.nled_mode = NLED_BLINK;
 				nled_tmp_setting.blink_off_time =
 				    led_data->delay_off;
@@ -1003,6 +1006,7 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 				       MT65XX_LED_PMIC_NLED_ISINK2
 				       || led_data->cust.data ==
 				       MT65XX_LED_PMIC_NLED_ISINK3)) {
+LEDS_DEBUG("mt_mt65xx_blink_set third if second var");				
 				nled_tmp_setting.nled_mode = NLED_BLINK;
 				nled_tmp_setting.blink_off_time =
 				    led_data->delay_off;
@@ -1012,17 +1016,21 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 						  &nled_tmp_setting);
 				return 0;
 			} else if (!got_wake_lock) {
+LEDS_DEBUG("mt_mt65xx_blink_set third if false");					
 				wake_lock(&leds_suspend_lock);
 				got_wake_lock = 1;
 			}
 		} else if (!led_data->delay_on && !led_data->delay_off) {	/* disable blink */
+LEDS_DEBUG("mt_mt65xx_blink_set seconf if second var");				
 			/* AP PWM all support OLD mode */
 			if (led_data->cust.mode == MT65XX_LED_MODE_PWM) {
+LEDS_DEBUG("mt_mt65xx_blink_set fourth if true");					
 				nled_tmp_setting.nled_mode = NLED_OFF;
 				mt_led_set_pwm(led_data->cust.data,
 					       &nled_tmp_setting);
 				return 0;
 			} else if ((led_data->cust.mode == MT65XX_LED_MODE_PMIC)
+LEDS_DEBUG("mt_mt65xx_blink_set fourth if second chance");					   
 				   && (led_data->cust.data ==
 				       MT65XX_LED_PMIC_NLED_ISINK0
 				       || led_data->cust.data ==
@@ -1035,12 +1043,15 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 						       0);
 				return 0;
 			} else if (got_wake_lock) {
+LEDS_DEBUG("mt_mt65xx_blink_set fourth if false");					
 				wake_unlock(&leds_suspend_lock);
 				got_wake_lock = 0;
 			}
 		}
+LEDS_DEBUG("mt_mt65xx_blink_set everything failed");			
 		return -1;
 	}
+LEDS_DEBUG("mt_mt65xx_blink_set it is 0");		
 	/* delay_on and delay_off are not changed */
 	return 0;
 }
