@@ -61,10 +61,15 @@ static int I2C_SET_FOR_BACKLIGHT  = 350;
  ***************************************************************************/
 static int debug_enable_led = 1;
 /* #define pr_fmt(fmt) "[LED_DRV]"fmt */
+/*
 #define LEDS_DRV_DEBUG(format, args...) do { \
 	if (debug_enable_led) {	\
 		printk("[LED_DRV]"format, ##args);\
 	} \
+} while (0)
+*/
+#define LEDS_DRV_DEBUG(format, args...) do { \
+		printk("[LED_DRV]"format, ##args);\
 } while (0)
 
 /****************************************************************************
