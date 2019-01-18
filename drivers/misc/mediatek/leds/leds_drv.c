@@ -840,20 +840,24 @@ static int __init mt65xx_leds_init(void)
 	int ret;
 
 	LEDS_DRV_DEBUG("%s\n", __func__);
+	printk("[LEDZ] mt65xx_leds_init called");
 
 #ifdef CONFIG_OF
+	printk("[LEDZ] mt65xx_leds_init CONFIG_OF");
 	ret = platform_device_register(&mt65xx_leds_device);
 	if (ret)
 		LEDS_DRV_DEBUG("mt65xx_leds_init:dev:E%d\n", ret);
 #endif
+	printk("[LEDZ] mt65xx_leds_init post CONFIG_OF");
 	ret = platform_driver_register(&mt65xx_leds_driver);
 
 	if (ret) {
+		printk("[LEDZ] mt65xx_leds_init ret not OK: E%d\n", ret);
 		LEDS_DRV_DEBUG("mt65xx_leds_init:drv:E%d\n", ret);
 /* platform_device_unregister(&mt65xx_leds_device); */
 		return ret;
 	}
-
+printk("[LEDZ] mt65xx_leds_init ret OK: E%d\n", ret);
 	mt_leds_wake_lock_init();
 
 	return ret;
@@ -861,6 +865,7 @@ static int __init mt65xx_leds_init(void)
 
 static void __exit mt65xx_leds_exit(void)
 {
+	printk("[LEDZ] mt65xx_leds_exit called");
 	platform_driver_unregister(&mt65xx_leds_driver);
 /* platform_device_unregister(&mt65xx_leds_device); */
 }
