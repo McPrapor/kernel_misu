@@ -61,15 +61,10 @@ static int I2C_SET_FOR_BACKLIGHT  = 350;
  ***************************************************************************/
 static int debug_enable_led = 1;
 /* #define pr_fmt(fmt) "[LED_DRV]"fmt */
-/*
 #define LEDS_DRV_DEBUG(format, args...) do { \
 	if (debug_enable_led) {	\
-		printk("[LED_DRV]"format, ##args);\
+		pr_debug("[LED_DRV]"format, ##args);\
 	} \
-} while (0)
-*/
-#define LEDS_DRV_DEBUG(format, args...) do { \
-		printk("[LED_DRV]"format, ##args);\
 } while (0)
 
 /****************************************************************************
@@ -181,7 +176,6 @@ static int led_set_pwm(int pwm_num, struct nled_setting *led)
 static int brightness_set_pmic(enum mt65xx_led_pmic pmic_type, u32 level,
 			       u32 div)
 {
-	LEDS_DRV_DEBUG("brightness_set_pmic called");
 	mt_brightness_set_pmic(pmic_type, level, div);
 	return -1;
 
@@ -189,7 +183,6 @@ static int brightness_set_pmic(enum mt65xx_led_pmic pmic_type, u32 level,
 
 static int mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 {
-	LEDS_DRV_DEBUG("led_set_cust called");
 #ifdef CONTROL_BL_TEMPERATURE
 	mutex_lock(&bl_level_limit_mutex);
 	current_level = level;
@@ -296,17 +289,10 @@ static void mt65xx_led_set(struct led_classdev *led_cdev,
 static int mt65xx_blink_set(struct led_classdev *led_cdev,
 			    unsigned long *delay_on, unsigned long *delay_off)
 {
-//	LEDS_DRV_DEBUG("blink_set called on: %lu off: %lu", (*)delay_on, (*)delay_off);
-		LEDS_DRV_DEBUG("blink_set called on");
-	if (mt_mt65xx_blink_set(led_cdev, delay_on, delay_off)) {
-		LEDS_DRV_DEBUG("mt_mt65xx_blink_set returned -1");		
+	if (mt_mt65xx_blink_set(led_cdev, delay_on, delay_off))
 		return -1;
-	}
 	else
-	{
-		LEDS_DRV_DEBUG("mt_mt65xx_blink_set returned OK");		
 		return 0;
-	}
 }
 
 /****************************************************************************
@@ -644,7 +630,6 @@ static int mt65xx_leds_probe(struct platform_device *pdev)
 	int i;
 	int ret;/* rc; */
 	struct cust_mt65xx_led *cust_led_list = mt_get_cust_led_list();
-LEDS_DRV_DEBUG("led_probe called");	
 	#ifdef BACKLIGHT_SUPPORT_LP8557
 
 	/*i2c_register_board_info(4, &leds_board_info, 1);*/
@@ -841,24 +826,20 @@ static int __init mt65xx_leds_init(void)
 	int ret;
 
 	LEDS_DRV_DEBUG("%s\n", __func__);
-	printk("[LEDZ] mt65xx_leds_init called");
 
 #ifdef CONFIG_OF
-	printk("[LEDZ] mt65xx_leds_init CONFIG_OF");
 	ret = platform_device_register(&mt65xx_leds_device);
 	if (ret)
 		LEDS_DRV_DEBUG("mt65xx_leds_init:dev:E%d\n", ret);
 #endif
-	printk("[LEDZ] mt65xx_leds_init post CONFIG_OF");
 	ret = platform_driver_register(&mt65xx_leds_driver);
 
 	if (ret) {
-		printk("[LEDZ] mt65xx_leds_init ret not OK: E%d\n", ret);
 		LEDS_DRV_DEBUG("mt65xx_leds_init:drv:E%d\n", ret);
 /* platform_device_unregister(&mt65xx_leds_device); */
 		return ret;
 	}
-printk("[LEDZ] mt65xx_leds_init ret OK: E%d\n", ret);
+
 	mt_leds_wake_lock_init();
 
 	return ret;
@@ -866,7 +847,6 @@ printk("[LEDZ] mt65xx_leds_init ret OK: E%d\n", ret);
 
 static void __exit mt65xx_leds_exit(void)
 {
-	printk("[LEDZ] mt65xx_leds_exit called");
 	platform_driver_unregister(&mt65xx_leds_driver);
 /* platform_device_unregister(&mt65xx_leds_device); */
 }

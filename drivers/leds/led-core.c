@@ -76,12 +76,21 @@ void led_blink_set(struct led_classdev *led_cdev,
 		   unsigned long *delay_on,
 		   unsigned long *delay_off)
 {
+#ifdef CONFIG_A51B_LED
+        unsigned long onstate, offstate;
+        onstate = *delay_on;
+        offstate = *delay_off;
+#endif
 	led_stop_software_blink(led_cdev);
 
 	led_cdev->flags &= ~LED_BLINK_ONESHOT;
 	led_cdev->flags &= ~LED_BLINK_ONESHOT_STOP;
 
+#ifdef CONFIG_A51B_LED
+        led_blink_setup(led_cdev, &onstate, &offstate);
+#else
 	led_blink_setup(led_cdev, delay_on, delay_off);
+#endif
 }
 EXPORT_SYMBOL(led_blink_set);
 
