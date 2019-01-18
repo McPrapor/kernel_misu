@@ -1030,7 +1030,6 @@ LEDS_DEBUG("mt_mt65xx_blink_set fourth if true");
 					       &nled_tmp_setting);
 				return 0;
 			} else if ((led_data->cust.mode == MT65XX_LED_MODE_PMIC)
-LEDS_DEBUG("mt_mt65xx_blink_set fourth if second chance");					   
 				   && (led_data->cust.data ==
 				       MT65XX_LED_PMIC_NLED_ISINK0
 				       || led_data->cust.data ==
@@ -1041,7 +1040,10 @@ LEDS_DEBUG("mt_mt65xx_blink_set fourth if second chance");
 				       MT65XX_LED_PMIC_NLED_ISINK3)) {
 				mt_brightness_set_pmic(led_data->cust.data, 0,
 						       0);
+				{
+					LEDS_DEBUG("mt_mt65xx_blink_set fourth if second chance");					   
 				return 0;
+				}
 			} else if (got_wake_lock) {
 LEDS_DEBUG("mt_mt65xx_blink_set fourth if false");					
 				wake_unlock(&leds_suspend_lock);
