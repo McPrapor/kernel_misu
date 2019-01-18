@@ -296,7 +296,7 @@ static void mt65xx_led_set(struct led_classdev *led_cdev,
 static int mt65xx_blink_set(struct led_classdev *led_cdev,
 			    unsigned long *delay_on, unsigned long *delay_off)
 {
-	LEDS_DRV_DEBUG("blink_set called on: %d off: %d", delay_on, delay_off);	
+	LEDS_DRV_DEBUG("blink_set called on: %lu off: %lu", delay_on, delay_off);	
 	if (mt_mt65xx_blink_set(led_cdev, delay_on, delay_off)) {
 		LEDS_DRV_DEBUG("led_probe return -1");		
 		return -1;
