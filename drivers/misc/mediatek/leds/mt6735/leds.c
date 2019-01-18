@@ -976,7 +976,7 @@ int mt_mt65xx_blink_set(struct led_classdev *led_cdev,
 	    container_of(led_cdev, struct mt65xx_led_data, cdev);
 	static int got_wake_lock;
 	struct nled_setting nled_tmp_setting = { 0, 0, 0 };
-LEDS_DEBUG("mt_mt65xx_blink_set called");
+LEDS_DEBUG("mt_mt65xx_blink_set called on: %lu off: %lu", *delay_on, *delay_off);
 	/* only allow software blink when delay_on or delay_off changed */
 	if (*delay_on != led_data->delay_on
 	    || *delay_off != led_data->delay_off) {
