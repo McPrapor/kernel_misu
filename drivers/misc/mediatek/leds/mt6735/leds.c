@@ -528,6 +528,7 @@ int mt_led_blink_pmic(enum mt65xx_led_pmic pmic_type, struct nled_setting *led)
 	if ((pmic_type != MT65XX_LED_PMIC_NLED_ISINK0
 	     && pmic_type != MT65XX_LED_PMIC_NLED_ISINK1)
 	    || led->nled_mode != NLED_BLINK) {
+	LEDS_DEBUG("LED led_blink_pmic return -1);		
 		return -1;
 	}
 
