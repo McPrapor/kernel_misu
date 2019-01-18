@@ -50,6 +50,7 @@ Front Camera | 5MP, Int. 5MP
  
 -------------
 ## Broken/Bugs
+ * hx8394d_hd720_dsi_vdo_truly_v36 lcm
  * SGM3785 flashlight
  * LM3642 led torch
  * ramconsole bad addresing
