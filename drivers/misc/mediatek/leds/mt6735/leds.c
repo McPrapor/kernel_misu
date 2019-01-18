@@ -550,7 +550,7 @@ int mt_led_blink_pmic(enum mt65xx_led_pmic pmic_type, struct nled_setting *led)
 		pmic_set_register_value(PMIC_ISINK_CH0_MODE, ISINK_PWM_MODE);
 		pmic_set_register_value(PMIC_ISINK_CH0_STEP, ISINK_0); //modified 16mA to 4mA,zhoumaiyun@yulong.com 2016.05.04
 #ifdef CONFIG_A51B_LED
-                pmic_set_register_value(PMIC_ISINK_CH0_STEP,ISINK_2);//12mA for A51B
+//                pmic_set_register_value(PMIC_ISINK_CH0_STEP,ISINK_2);//12mA for A51B
 #endif
 		pmic_set_register_value(PMIC_ISINK_DIM0_DUTY, duty);
 		pmic_set_register_value(PMIC_ISINK_DIM0_FSEL,
@@ -563,7 +563,7 @@ int mt_led_blink_pmic(enum mt65xx_led_pmic pmic_type, struct nled_setting *led)
 		pmic_set_register_value(PMIC_ISINK_CH1_MODE, ISINK_PWM_MODE);
 		pmic_set_register_value(PMIC_ISINK_CH1_STEP, ISINK_0); //modified 16mA to 4mA,zhoumaiyun@yulong.com 2016.05.04
 #ifdef CONFIG_A51B_LED
-                pmic_set_register_value(PMIC_ISINK_CH1_STEP,ISINK_1);//8mA for A51B
+//                pmic_set_register_value(PMIC_ISINK_CH1_STEP,ISINK_1);//8mA for A51B
 #endif
 		pmic_set_register_value(PMIC_ISINK_DIM1_DUTY, duty);
 		pmic_set_register_value(PMIC_ISINK_DIM1_FSEL,
@@ -746,7 +746,7 @@ int mt_brightness_set_pmic(enum mt65xx_led_pmic pmic_type, u32 level, u32 div)
 		pmic_set_register_value(PMIC_ISINK_CH0_MODE, ISINK_PWM_MODE);
 		pmic_set_register_value(PMIC_ISINK_CH0_STEP, ISINK_0); //modified 16mA to 4mA,zhoumaiyun@yulong.com 2016.05.04
 #ifdef CONFIG_A51B_LED
-                pmic_set_register_value(PMIC_ISINK_CH0_STEP,ISINK_2);//12mA for A51B
+//                pmic_set_register_value(PMIC_ISINK_CH0_STEP,ISINK_2);//12mA for f
 #endif
 		pmic_set_register_value(PMIC_ISINK_DIM0_DUTY, 15);
 		pmic_set_register_value(PMIC_ISINK_DIM0_FSEL, ISINK_1KHZ);	/* 1KHz */
@@ -776,7 +776,7 @@ int mt_brightness_set_pmic(enum mt65xx_led_pmic pmic_type, u32 level, u32 div)
 		pmic_set_register_value(PMIC_ISINK_CH1_MODE, ISINK_PWM_MODE);
 		pmic_set_register_value(PMIC_ISINK_CH1_STEP, ISINK_0); //modified 16mA to 4mA,zhoumaiyun@yulong.com 2016.05.04
 #ifdef CONFIG_A51B_LED
-                pmic_set_register_value(PMIC_ISINK_CH1_STEP,ISINK_1);//8mA for A51B
+//                pmic_set_register_value(PMIC_ISINK_CH1_STEP,ISINK_1);//8mA for A51B
 #endif
 		pmic_set_register_value(PMIC_ISINK_DIM1_DUTY, 15);
 		pmic_set_register_value(PMIC_ISINK_DIM1_FSEL, ISINK_1KHZ);	/* 1KHz */
