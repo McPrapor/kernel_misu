@@ -176,7 +176,7 @@ config MTK_SIM2_SOCKET_TYPE
         help
           MTK_SIM1_SOCKET_TYPE=1: support type 1 socket type
 
-config HTC_V36BML_BATTERY
+config V36BML_BATTERY
         bool "HTC v36bml_(d)ugl 2200mA battery"
 	default y
 	help
