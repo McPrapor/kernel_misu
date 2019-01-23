@@ -1,6 +1,6 @@
 #ifndef _CUST_BATTERY_METER_TABLE_H
 #define _CUST_BATTERY_METER_TABLE_H
-#include "battery_param.h"
+#include "v36bml_battery_param.h"
 
 
 #include <mach/mt_typedefs.h>
