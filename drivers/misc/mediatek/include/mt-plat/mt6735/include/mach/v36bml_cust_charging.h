@@ -1,6 +1,8 @@
 #ifndef _CUST_BAT_H_
 #define _CUST_BAT_H_
 
+#define V_0PERCENT_TRACKING_TIME                40      //40 second
+
 /* stop charging while in talking mode */
 #define STOP_CHARGING_IN_TAKLING
 #define TALKING_RECHARGE_VOLTAGE 3800

@@ -2,7 +2,7 @@
 
 #include "v36bml_cust_pmic.h"
 
-#elif
+#else
 
 #include "yulong_cust_pmic.h"
 

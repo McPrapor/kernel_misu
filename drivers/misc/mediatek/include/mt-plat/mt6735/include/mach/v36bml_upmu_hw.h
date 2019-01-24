@@ -1,7 +1,7 @@
 #ifndef _MT_PMIC_UPMU_HW_H_
 #define _MT_PMIC_UPMU_HW_H_
 
-#include <mach/mt_typedefs.h>
+//#include <mach/mt_typedefs.h>
 
 #define MT6328_PMIC_REG_BASE (0x0000)
 

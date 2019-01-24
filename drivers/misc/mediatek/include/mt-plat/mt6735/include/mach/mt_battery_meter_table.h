@@ -2,7 +2,7 @@
 
 #include "v36bml_cust_battery_meter_table.h"
 
-#elif
+#else
 
 #include "yulong_cust_battery_meter_table.h"
 
