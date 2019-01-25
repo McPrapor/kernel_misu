@@ -2668,11 +2668,9 @@ signed int fgauge_update_dod(void)
 	signed int FG_dod_1 = 0;
 	int adjust_coulomb_counter = batt_meter_cust_data.car_tune_value;
 #ifdef Q_MAX_BY_CURRENT
-#ifndef CONFIG_V36BML_BATTERY
 	signed int C_0mA = 0;
 	signed int C_400mA = 0;
 	signed int C_FGCurrent = 0;
-#endif
 #endif
 
 	if (gFG_DOD0 > 100) {
