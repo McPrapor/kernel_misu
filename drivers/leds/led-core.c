@@ -60,6 +60,7 @@ static void led_blink_setup(struct led_classdev *led_cdev,
 		     unsigned long *delay_on,
 		     unsigned long *delay_off)
 {
+	printk("LEDZ blink_setup on: %lu off: %lu \n", *delay_on, *delay_off);
 	if (!(led_cdev->flags & LED_BLINK_ONESHOT) &&
 	    led_cdev->blink_set &&
 	    !led_cdev->blink_set(led_cdev, delay_on, delay_off))
@@ -68,7 +69,7 @@ static void led_blink_setup(struct led_classdev *led_cdev,
 	/* blink with 1 Hz as default if nothing specified */
 	if (!*delay_on && !*delay_off)
 		*delay_on = *delay_off = 500;
-
+	printk("LEDZ set_soft_blink on: %lu off: %lu \n", *delay_on, *delay_off);
 	led_set_software_blink(led_cdev, *delay_on, *delay_off);
 }
 
@@ -81,11 +82,13 @@ void led_blink_set(struct led_classdev *led_cdev,
         onstate = *delay_on;
         offstate = *delay_off;
 #endif
+	printk("LEDZ debug before delay_on: %lu delay_off: %lu \n", *delay_on, *delay_off);
 	led_stop_software_blink(led_cdev);
 
 	led_cdev->flags &= ~LED_BLINK_ONESHOT;
 	led_cdev->flags &= ~LED_BLINK_ONESHOT_STOP;
 
+	printk("LEDZ debug after delay_on: %lu delay_off: %lu onstate: %lu offstate: %lu \n", *delay_on, *delay_off, onstate, offstate);
 #ifdef CONFIG_A51B_LED
         led_blink_setup(led_cdev, &onstate, &offstate);
 #else
