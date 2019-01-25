@@ -43,17 +43,6 @@
 #include <mt-plat/battery_meter.h>
 #include <mt-plat/battery_common.h>
 #include <mt-plat/battery_meter_hal.h>
-/*
-#ifdef CONFIG_HTC_V36BML_BATTERY
-#include <mach/v36bml_cust_battery_meter.h>
-#include <mach/v36bml_cust_battery_meter_table.h>
-#include <mach/v36bml_cust_pmic.h>
-#else
-#include <mach/mt_battery_meter.h>
-#include <mach/mt_battery_meter_table.h>
-#include <mach/mt_pmic.h>
-#endif
-*/
 #include <mach/mt_battery_meter.h>
 #include <mach/mt_battery_meter_table.h>
 #include <mach/mt_pmic.h>

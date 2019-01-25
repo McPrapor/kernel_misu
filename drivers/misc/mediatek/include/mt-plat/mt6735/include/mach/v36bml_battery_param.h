@@ -17,7 +17,7 @@
  *      sed -i '12,30s/$/&\\/g' battery_param.h 
  *     */
 
-#include <generated/autoconf.h>
+//#include <generated/autoconf.h>
 //#include <mach/mt_typedefs.h>
 //to be modified
 

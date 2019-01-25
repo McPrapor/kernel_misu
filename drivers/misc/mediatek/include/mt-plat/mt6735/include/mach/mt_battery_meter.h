@@ -8,6 +8,10 @@
 #define EXTERNAL_SWCHR_SUPPORT
 #endif
 
+#ifdef CONFIG_MTK_BQ24158_SUPPORT
+#define EXTERNAL_SWCHR_SUPPORT
+#endif
+
 #if defined(CONFIG_ARCH_MT6735)
 /* ============================================================
 // define
@@ -39,10 +43,6 @@
 //Add by liuwenbo for support multi battery begin
 #define MTK_MULTI_BAT_PROFILE_SUPPORT
 #define MTK_GET_BATTERY_ID_BY_AUXADC
-
-#ifndef CONFIG_HTC_V36BML_BATTERY
-#define BATTERY_ID_CHANNEL_NUM                7
-#endif
 
 #if defined(CONFIG_YULONG_BATTERY_2500MA)
 #define TOTAL_BATTERY_NUMBER                  3
@@ -326,15 +326,22 @@
 //Add by liuwenbo for support multi battery begin
 #define MTK_MULTI_BAT_PROFILE_SUPPORT
 #define MTK_GET_BATTERY_ID_BY_AUXADC
-#ifndef CONFIG_HTC_V36BML_BATTERY
-#define BATTERY_ID_CHANNEL_NUM                7
-#define TOTAL_BATTERY_NUMBER                  4
-#endif
 //end
 
 #define FG_METER_RESISTANCE 0
 
 /* Qmax for battery  */
+#ifdef CONFIG_V36BML_BATTERY
+#define Q_MAX_POS_50	2500
+#define Q_MAX_POS_25	2432
+#define Q_MAX_POS_0		2244
+#define Q_MAX_NEG_10	1654
+
+#define Q_MAX_POS_50_H_CURRENT	2500
+#define Q_MAX_POS_25_H_CURRENT	2390
+#define Q_MAX_POS_0_H_CURRENT	1814
+#define Q_MAX_NEG_10_H_CURRENT	696
+#else
 #define Q_MAX_POS_50 1463
 #define Q_MAX_POS_25 1437
 #define Q_MAX_POS_0 1220
@@ -344,7 +351,7 @@
 #define Q_MAX_POS_25_H_CURRENT 1462
 #define Q_MAX_POS_0_H_CURRENT 818
 #define Q_MAX_NEG_10_H_CURRENT 149
-
+#endif
 
 /* Discharge Percentage */
 #define OAM_D5		 1		/*  1 : D5,   0: D2*/
@@ -361,12 +368,15 @@
 #define CUST_HW_CC 0
 #define AGING_TUNING_VALUE 103
 #define CUST_R_FG_OFFSET 0
-
 #define OCV_BOARD_COMPESATE	0 /*mV */
 #define R_FG_BOARD_BASE 1000
 #define R_FG_BOARD_SLOPE 1000 /*slope*/
-#define CAR_TUNE_VALUE 102 /*1.02 modified by liuwenbo@yulong.com*/
 
+#ifdef CONFIG_V36BML_BATTERY
+#define CAR_TUNE_VALUE 99 //0.991
+#else
+#define CAR_TUNE_VALUE 102 /*1.02 modified by liuwenbo@yulong.com*/
+#endif
 
 /* HW Fuel gague  */
 #define CURRENT_DETECT_R_FG 10  /*1mA*/
@@ -403,7 +413,11 @@
 #define DIFFERENCE_HWOCV_VBAT		30
 
 /* fg 1.0 */
+#ifdef CONFIG_V36BML_BATTERY
+#define CUST_POWERON_DELTA_CAPACITY_TOLRANCE	100
+#else
 #define CUST_POWERON_DELTA_CAPACITY_TOLRANCE	40
+#endif
 #define CUST_POWERON_LOW_CAPACITY_TOLRANCE		5
 #define CUST_POWERON_MAX_VBAT_TOLRANCE			90
 #define CUST_POWERON_DELTA_VBAT_TOLRANCE		30
@@ -418,7 +432,11 @@
 /* Dynamic change wake up period of battery thread when suspend*/
 #define VBAT_NORMAL_WAKEUP		3600
 #define VBAT_LOW_POWER_WAKEUP		3500
+#ifdef CONFIG_V36BML_BATTERY
+#define NORMAL_WAKEUP_PERIOD		3600
+#else
 #define NORMAL_WAKEUP_PERIOD		5400
+#endif
 #define LOW_POWER_WAKEUP_PERIOD		300
 #define CLOSE_POWEROFF_WAKEUP_PERIOD	30
 
@@ -428,9 +446,9 @@
 */
 #define MTK_ENABLE_AGING_ALGORITHM	/*6. Q_MAX aging algorithm*/
 #define MD_SLEEP_CURRENT_CHECK	/*5. Gauge Adjust by OCV 9. MD sleep current check*/
-/*
-//#define Q_MAX_BY_CURRENT		//7. Qmax variant by current loading.
-*/
+#ifdef CONFIG_V36BML_BATTERY
+#define Q_MAX_BY_CURRENT		//7. Qmax variant by current loading.
+#endif
 #define FG_BAT_INT
 /*modify bigin by sunxiaogang@yulong.com 2015.06.03 to disable the function for the result is always wrong.*/
 //#define IS_BATTERY_REMOVE_BY_PMIC
