@@ -1235,42 +1235,42 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
     camera_pins_cam_rdp0_a: cam@1 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO33__FUNC_GPIO33>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
     camera_pins_cam_rdn1_a: cam@2 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO34__FUNC_GPIO34>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
     camera_pins_cam_rdp1_a: cam@3 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO35__FUNC_GPIO35>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
     camera_pins_cam_rcn_a: cam@4 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO36__FUNC_GPIO36>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
     camera_pins_cam_rcp_a: cam@5 {
 		pins_cmd_dat {
 			pins = <PINMUX_GPIO37__FUNC_GPIO37>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
-    }
+    };
 	camera_pins_default: camdefault {};
 };
 
@@ -1292,8 +1292,9 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 */
 
-&kd_camera_hw1 {"default", "cam0_rst0", "cam0_rst1", "cam0_pnd0", "cam0_pnd1",
-			"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1",
+&kd_camera_hw1 {
+	pinctrl-names =  "default", "cam0_rst0", "cam0_rst1", "cam0_pnd0", "cam0_pnd1",
+		"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1",
             "cam_rdn0_a", "cam_rdp0_a", "cam_rdn1_a", "cam_rdp1_a", 
             "cam_rcn_a", "cam_rcp_a";
 	pinctrl-0 = <&camera_pins_default>;
