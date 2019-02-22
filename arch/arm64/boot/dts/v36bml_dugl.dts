@@ -1147,11 +1147,13 @@ to make keypad work without such a hack */
 };
 
 /*
+front s5k5e8xyv36
 GPIO4 GPIO_CAMERA_CMRST out low
-GPIO7 GPIO_CAMERA_CMPDN out high
-
-GPIO46 GPIO_CAMERA_CMRST out low
 GPIO122 GPIO_CAMERA_CMPDN out high
+
+rear ov13850v36
+GPIO46 GPIO_CAMERA_CMRST out low
+GPIO7 GPIO_CAMERA_CMPDN out high
 
 GPIO32 GPIO_CAMERA_RDN0_A out -
 GPIO33 GPIO_CAMERA_RDP0_A out -
@@ -1183,7 +1185,7 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 	camera_pins_cam0_pnd0: cam0@2 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO7__FUNC_GPIO7>; /* GPIO_CAMERA_CMPDN_PIN */
+			pins = <PINMUX_GPIO122__FUNC_GPIO122>; /* GPIO_CAMERA_CMPDN_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
@@ -1191,7 +1193,7 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 	camera_pins_cam0_pnd1: cam0@3 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO7__FUNC_GPIO7>; /* GPIO_CAMERA_CMPDN_PIN */
+			pins = <PINMUX_GPIO122__FUNC_GPIO122>; /* GPIO_CAMERA_CMPDN_PIN */
 			slew-rate = <1>;
 			output-high;
 		};
@@ -1215,7 +1217,7 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 	camera_pins_cam1_pnd0: cam1@2 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO122__FUNC_GPIO122>; /* GPIO_CAMERA_CMPDN1_PIN */
+			pins = <PINMUX_GPIO7__FUNC_GPIO7>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-low;
 		};
@@ -1223,7 +1225,7 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 	camera_pins_cam1_pnd1: cam1@3 {
 		pins_cmd_dat {
-			pins = <PINMUX_GPIO122__FUNC_GPIO122>; /* GPIO_CAMERA_CMPDN1_PIN */
+			pins = <PINMUX_GPIO7__FUNC_GPIO7>; /* GPIO_CAMERA_CMPDN1_PIN */
 			slew-rate = <1>;
 			output-high;
 		};
@@ -1275,11 +1277,13 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 };
 
 /*
+front s5k5e8xyv36
 GPIO4 GPIO_CAMERA_CMRST out low
-GPIO7 GPIO_CAMERA_CMPDN out high
-
-GPIO46 GPIO_CAMERA_CMRST out low
 GPIO122 GPIO_CAMERA_CMPDN out high
+
+rear ov13850v36
+GPIO46 GPIO_CAMERA_CMRST out low
+GPIO7 GPIO_CAMERA_CMPDN out high
 
 GPIO32 GPIO_CAMERA_RDN0_A out -
 GPIO33 GPIO_CAMERA_RDP0_A out -
@@ -1294,9 +1298,12 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 
 &kd_camera_hw1 {
 	pinctrl-names =  "default", "cam0_rst0", "cam0_rst1", "cam0_pnd0", "cam0_pnd1",
-		"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1",
+		"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1"
+/*		,
             "cam_rdn0_a", "cam_rdp0_a", "cam_rdn1_a", "cam_rdp1_a", 
-            "cam_rcn_a", "cam_rcp_a";
+            "cam_rcn_a", "cam_rcp_a"
+*/
+;
 	pinctrl-0 = <&camera_pins_default>;
 	pinctrl-1 = <&camera_pins_cam0_rst0>;
 	pinctrl-2 = <&camera_pins_cam0_rst1>;
@@ -1306,13 +1313,14 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 	pinctrl-6 = <&camera_pins_cam1_rst1>;
 	pinctrl-7 = <&camera_pins_cam1_pnd0>;
 	pinctrl-8 = <&camera_pins_cam1_pnd1>;
+/*	
         pinctrl-9 = <&camera_pins_cam_rdn0_a>;
         pinctrl-10 = <&camera_pins_cam_rdp0_a>;
         pinctrl-11 = <&camera_pins_cam_rdn1_a>;
         pinctrl-12 = <&camera_pins_cam_rdp1_a>;
         pinctrl-13 = <&camera_pins_cam_rcn_a>;
         pinctrl-14 = <&camera_pins_cam_rcp_a>;
-
+*/
         vcama-supply = <&mt_pmic_vcama_ldo_reg>;
         vcama_main2-supply = <&mt_pmic_vcama_ldo_reg>;
         vcama_sub-supply = <&mt_pmic_vcama_ldo_reg>;
