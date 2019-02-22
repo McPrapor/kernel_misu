@@ -350,10 +350,10 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_IO
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_IO, VOL_1800, mode_name))
-            if(TRUE != hwPowerOn(VCAMIO, VOL_1800))
+            if(TRUE != _hwPowerOn(VCAMIO, VOL_1800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", CAMERA_POWER_VCAM_IO);
-                PK_DBG("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", VCAMIO);
+                printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", VCAMIO);
                 goto _kdCISModulePowerOn_exit_;
             }
 
@@ -361,17 +361,17 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_A
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_A, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMA, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMA, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", CAMERA_POWER_VCAM_A);
-                PK_DBG("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", VCAMA);
+                printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", VCAMA);
                 goto _kdCISModulePowerOn_exit_;
             }
 	
             mdelay(1);
 
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_D, VOL_1200,mode_name))
-            if(TRUE != hwPowerOn(VCAMD, VOL_1200))
+            if(TRUE != _hwPowerOn(VCAMD, VOL_1200))
             {
 //                 PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", CAMERA_POWER_VCAM_D);
                  printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", VCAMD);
@@ -382,7 +382,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //AF_VCC
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_AF, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMAF, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMAF, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", CAMERA_POWER_VCAM_AF);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", VCAMAF);
@@ -427,7 +427,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_IO
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_IO, VOL_1800, mode_name))
-            if(TRUE != hwPowerOn(VCAMIO, VOL_1800))
+            if(TRUE != _hwPowerOn(VCAMIO, VOL_1800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", CAMERA_POWER_VCAM_IO);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", VCAMIO);
@@ -438,7 +438,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_A
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_A, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMA, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMA, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", CAMERA_POWER_VCAM_A);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", VCAMA);
@@ -448,7 +448,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
             mdelay(1);
 
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_D, VOL_1200,mode_name))
-            if(TRUE != hwPowerOn(VCAMD, VOL_1200))
+            if(TRUE != _hwPowerOn(VCAMD, VOL_1200))
             {
 //                 PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", CAMERA_POWER_VCAM_D);
                 PK_DBG("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", VCAMD);
@@ -459,7 +459,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 		
             //AF_VCC
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_AF, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMAF, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMAF, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", CAMERA_POWER_VCAM_AF);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", VCAMAF);
@@ -470,6 +470,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //AF_VCC
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_AF, VOL_2800,mode_name))
+            if(TRUE != _hwPowerOn(VCAMAF, VOL_2800))		
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", CAMERA_POWER_VCAM_AF);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_AF), power id = %d \n", VCAMAF);
@@ -514,7 +515,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_A
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_A, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMA, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMA, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", CAMERA_POWER_VCAM_A);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", VCAMA);
@@ -524,7 +525,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
             mdelay(1);
 
 //            if(TRUE != hwPowerOn(SUB_CAMERA_POWER_VCAM_D, VOL_1200,mode_name))
-            if(TRUE != hwPowerOn(VCAMD, VOL_1200))
+            if(TRUE != _hwPowerOn(VCAMD, VOL_1200))
             {
 //                 PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", CAMERA_POWER_VCAM_D);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", VCAMD);
@@ -535,7 +536,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_IO
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_IO, VOL_1800, mode_name))
-            if(TRUE != hwPowerOn(VCAMIO, VOL_1800))
+            if(TRUE != _hwPowerOn(VCAMIO, VOL_1800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", CAMERA_POWER_VCAM_IO);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", VCAMIO);
@@ -585,7 +586,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_A
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_A, VOL_2800,mode_name))
-            if(TRUE != hwPowerOn(VCAMA, VOL_2800))
+            if(TRUE != _hwPowerOn(VCAMA, VOL_2800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", CAMERA_POWER_VCAM_A);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable analog power (VCAM_A), power id = %d\n", VCAMA);
@@ -595,7 +596,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
             mdelay(1);
 
 //            if(TRUE != hwPowerOn(SUB_CAMERA_POWER_VCAM_D, VOL_1200,mode_name))
-            if(TRUE != hwPowerOn(VCAMD, VOL_1200))
+            if(TRUE != _hwPowerOn(VCAMD, VOL_1200))
             {
 //                 PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", CAMERA_POWER_VCAM_D);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_D), power id = %d \n", VCAMD);
@@ -606,7 +607,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
             //VCAM_IO
 //            if(TRUE != hwPowerOn(CAMERA_POWER_VCAM_IO, VOL_1800, mode_name))
-            if(TRUE != hwPowerOn(VCAMIO, VOL_1800))
+            if(TRUE != _hwPowerOn(VCAMIO, VOL_1800))
             {
 //                PK_DBG("[CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", CAMERA_POWER_VCAM_IO);
                 printk("[camdebug][CAMERA SENSOR] Fail to enable digital power (VCAM_IO), power id = %d \n", VCAMIO);
