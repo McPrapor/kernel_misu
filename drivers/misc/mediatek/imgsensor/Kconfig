@@ -9,3 +9,9 @@ config YL_CAM_MODULE_NAME
   default n
   help
     CONFIG_YL_CAM_MODULE_NAME
+
+config V36BML_CAMERA
+  bool CONFIG_V36BML_CAMERA
+  default n
+  help
+    HTC v36bml camera related option
