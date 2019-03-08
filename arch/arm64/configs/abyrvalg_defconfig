@@ -1194,6 +1194,7 @@ CONFIG_MTK_THERMAL_PA_VIA_ATCMD=y
 #
 # MultiMedia, Display, Camera related configs
 #
+CONFIG_V36BML_CAMERA=y
 CONFIG_CUSTOM_KERNEL_IMGSENSOR="ov13850v36_mipi_raw s5k3l2xxv36_mipi_raw s5k5e8yxv36_mipi_raw ov5670v36_mipi_raw"
 CONFIG_CUSTOM_KERNEL_CAM_CAL_DRV=""
 # CONFIG_MTK_LCM_PHYSICAL_ROTATION_HW is not set
