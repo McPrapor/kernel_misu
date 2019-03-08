@@ -306,7 +306,7 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 			}
 			else if ( data[i] & 0x0200 )//transfor format
 			{							//printk("data 0 step %x \n",data[i]);
-				GSE_LOG("NOT IF i: %d data: %5d \n", i, data[i]);
+// debug off by Max				GSE_LOG("NOT IF i: %d data: %5d \n", i, data[i]);
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
@@ -318,15 +318,18 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 					data[i] = -data[i];		
 				}
 #endif
-*/			} else {
-				GSE_LOG("ELSE IF i: %d data: %5d \n", i, data[i]);
+*/
+// debug off by Max		} else {
+// debug off by Max				GSE_LOG("ELSE IF i: %d data: %5d \n", i, data[i]);
 			}
 		}	
+/* debug off by Max
 		if(1)//(atomic_read(&priv->trace) & ADX_TRC_RAWDATA)
 		{
 			GSE_LOG("[%08X %08X %08X] => [%5d %5d %5d] after\n", data[BMA250_AXIS_X], data[BMA250_AXIS_Y], data[BMA250_AXIS_Z],
 		                               data[BMA250_AXIS_X], data[BMA250_AXIS_Y], data[BMA250_AXIS_Z]);
 		}
+*/
 #ifdef CONFIG_BMA250_LOWPASS
 		if(atomic_read(&priv->filter))
 		{
