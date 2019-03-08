@@ -108,6 +108,7 @@ int mtkcam_gpio_init(struct platform_device *pdev)
 		ret = PTR_ERR(cam1_rst_l);
 		pr_debug("%s : pinctrl err, cam1_rst_l\n", __func__);
 	}
+#ifndef CONFIG_V36BML_CAMERA
 	/*externel LDO enable */
 	cam_ldo0_h = pinctrl_lookup_state(camctrl, "cam_ldo0_1");
 	if (IS_ERR(cam_ldo0_h)) {
@@ -134,6 +135,7 @@ int mtkcam_gpio_init(struct platform_device *pdev)
 		ret = PTR_ERR(cam_ldo1_l);
 		pr_debug("%s : pinctrl err, cam_ldo1_l\n", __func__);
 	}
+#endif	
 	return ret;
 }
 
@@ -269,6 +271,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 
 		PK_DBG("[PowerON]pinSetIdx:%d, currSensorName: %s\n", pinSetIdx, currSensorName);
                 /* disable inactive sensor for CTS test 20160725 start */
+#ifndef CONFIG_V36BML_CAMERA		
 		if(pinSetIdx ==0 || pinSetIdx ==2) {  /* disable sub */
 		    if (GPIO_CAMERA_INVALID != pinSet[1][IDX_PS_CMPDN])
 		        mtkcam_gpio_set(1, CAMPDN, pinSet[1][IDX_PS_CMPDN + IDX_PS_OFF]);
@@ -276,6 +279,7 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
 		    if (GPIO_CAMERA_INVALID != pinSet[0][IDX_PS_CMPDN])
 		        mtkcam_gpio_set(0, CAMPDN, pinSet[0][IDX_PS_CMPDN + IDX_PS_OFF]);
 		}
+#endif		
 		/* disable inactive sensor for CTS test 20160725 end */
 
 		if ((currSensorName && (0 == strcmp(currSensorName, "imx135mipiraw"))) ||
@@ -413,6 +417,12 @@ int kdCISModulePowerOn(CAMERA_DUAL_CAMERA_SENSOR_ENUM SensorIdx, char *currSenso
             if(mt_set_gpio_dir(pinSet[1-pinSetIdx][IDX_PS_CMRST],GPIO_DIR_OUT)){PK_DBG("[CAMERA SENSOR] set gpio dir failed!! (CMRST)\n");}
             if(mt_set_gpio_out(pinSet[1-pinSetIdx][IDX_PS_CMRST],pinSet[1-pinSetIdx][IDX_PS_CMRST+IDX_PS_OFF])){PK_DBG("[CAMERA SENSOR] set gpio failed!! (CMRST)\n");}
 	    */
+
+// pin7 mode0		
+	    mtkcam_gpio_set(pinSetIdx, CAMPDN, pinSet[pinSetIdx][IDX_PS_CMPDN + IDX_PS_OFF]);		
+	    mdelay(20);
+	    mtkcam_gpio_set(pinSetIdx, CAMPDN, pinSet[pinSetIdx][IDX_PS_CMPDN + IDX_PS_ON]);				
+	    mdelay(20);
 // pin4 mode0		
             mtkcam_gpio_set(1-pinSetIdx, CAMRST, pinSet[1-pinSetIdx][IDX_PS_CMRST + IDX_PS_OFF]);
                         //set main camera
