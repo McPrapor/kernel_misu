@@ -91,12 +91,8 @@ static struct himax_config *config_selected = NULL;
 static int iref_number = 11;
 static bool iref_found = false;
 
-//int himax_tpd_rst_gpio_number = 0;
-//int himax_tpd_int_gpio_number = 1;
-//int himax_tpd_rst_gpio_number = 62;
-int himax_tpd_rst_gpio_number = 0x3e;
-//int himax_tpd_int_gpio_number = 10;
-int himax_tpd_int_gpio_number = 0x0a;
+int himax_tpd_rst_gpio_number = 0;
+int himax_tpd_int_gpio_number = 1;
 
 static int self_test_inter_flag = 0;
 
