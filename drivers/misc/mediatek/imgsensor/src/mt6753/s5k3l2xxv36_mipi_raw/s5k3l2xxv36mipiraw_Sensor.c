@@ -271,7 +271,7 @@ static void set_max_framerate(UINT16 framerate,kal_bool min_framelength_en)
     kal_uint32 frame_length = imgsensor.frame_length;
     //unsigned long flags;
 
-    LOG_INF("framerate = %d, min framelength should enable? \n", framerate,min_framelength_en);
+    LOG_INF("framerate = %d, min framelength should enable? %d \n", framerate,min_framelength_en);
 
     frame_length = imgsensor.pclk / framerate * 10 / imgsensor.line_length;
     spin_lock(&imgsensor_drv_lock);
@@ -2652,7 +2652,7 @@ static kal_uint32 feature_control(MSDK_SENSOR_FEATURE_ENUM feature_id,
             *feature_para_len=4;
             break;
         case SENSOR_FEATURE_SET_FRAMERATE:
-            LOG_INF("current fps :%d\n", *feature_data);
+            LOG_INF("current fps :%llu\n", *feature_data);
             spin_lock(&imgsensor_drv_lock);
             imgsensor.current_fps = *feature_data;
             spin_unlock(&imgsensor_drv_lock);
@@ -2682,7 +2682,7 @@ static kal_uint32 feature_control(MSDK_SENSOR_FEATURE_ENUM feature_id,
             spin_unlock(&imgsensor_drv_lock);
             break;
         case SENSOR_FEATURE_GET_CROP_INFO:
-            LOG_INF("SENSOR_FEATURE_GET_CROP_INFO scenarioId:%d\n", *feature_data);
+            LOG_INF("SENSOR_FEATURE_GET_CROP_INFO scenarioId:%llu\n", *feature_data);
 
             wininfo = (SENSOR_WINSIZE_INFO_STRUCT *)(uintptr_t)(*(feature_data+1));
 

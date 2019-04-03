@@ -208,7 +208,8 @@ static void set_max_framerate(UINT16 framerate,kal_bool min_framelength_en)
 	kal_uint32 frame_length = imgsensor.frame_length;
 	//unsigned long flags;
 
-	LOG_INF("framerate = %d, min framelength should enable? \n", framerate,min_framelength_en);
+//	LOG_INF("framerate = %d, min framelength should enable? \n", framerate,min_framelength_en);
+	LOG_INF("framerate = %d, min framelength should enable? %d\n", framerate,min_framelength_en);
    
 	frame_length = imgsensor.pclk / framerate * 10 / imgsensor.line_length;
 	spin_lock(&imgsensor_drv_lock);
@@ -1177,7 +1178,7 @@ static kal_uint32 get_imgsensor_id(UINT32 *sensor_id)
 				LOG_INF("[ryf]i2c write id: 0x%x, sensor id: 0x%x\n", imgsensor.i2c_write_id,*sensor_id);	  
 				return ERROR_NONE;
 			}	
-			LOG_INF("Read sensor id fail, id: 0x%x\n", imgsensor.i2c_write_id,*sensor_id);
+			LOG_INF("Read sensor id:0x%x fail, id: 0x%x\n", imgsensor.i2c_write_id,*sensor_id);
 			retry--;
 		} while(retry > 0);
 		i++;
@@ -1228,7 +1229,7 @@ static kal_uint32 open(void)
 				LOG_INF("[ryf]i2c write id: 0x%x, sensor id: 0x%x\n", imgsensor.i2c_write_id,sensor_id);	  
 				break;
 			}	
-			LOG_INF("Read sensor id fail, id: 0x%x\n", imgsensor.i2c_write_id,sensor_id);
+			LOG_INF("Read sensor id:0x%x fail, id: 0x%x\n", imgsensor.i2c_write_id,sensor_id);
 			retry--;
 		} while(retry > 0);
 		i++;
@@ -1821,19 +1822,19 @@ static kal_uint32 feature_control(MSDK_SENSOR_FEATURE_ENUM feature_id,
 			*feature_para_len=4;							 
 			break;				
 		case SENSOR_FEATURE_SET_FRAMERATE:
-            LOG_INF("current fps :%d\n", *feature_data);
+            LOG_INF("current fps :%llu\n", *feature_data);
 			spin_lock(&imgsensor_drv_lock);
             imgsensor.current_fps = *feature_data;
 			spin_unlock(&imgsensor_drv_lock);		
 			break;
 		case SENSOR_FEATURE_SET_HDR:
-            LOG_INF("ihdr enable :%d\n", *feature_data);
+            LOG_INF("ihdr enable :%llu\n", *feature_data);
 			spin_lock(&imgsensor_drv_lock);
 			imgsensor.ihdr_en = *feature_data;
 			spin_unlock(&imgsensor_drv_lock);		
 			break;
 		case SENSOR_FEATURE_GET_CROP_INFO:
-            LOG_INF("SENSOR_FEATURE_GET_CROP_INFO scenarioId:%d\n", *feature_data);
+            LOG_INF("SENSOR_FEATURE_GET_CROP_INFO scenarioId:%llu\n", *feature_data);
             wininfo = (SENSOR_WINSIZE_INFO_STRUCT *)(uintptr_t)(*(feature_data+1));
 		
 			switch (*feature_data_32) {
@@ -1856,7 +1857,7 @@ static kal_uint32 feature_control(MSDK_SENSOR_FEATURE_ENUM feature_id,
 			}
             break;
 		case SENSOR_FEATURE_SET_IHDR_SHUTTER_GAIN:
-            LOG_INF("SENSOR_SET_SENSOR_IHDR LE=%d, SE=%d, Gain=%d\n",*feature_data,*(feature_data+1),*(feature_data+2));
+            LOG_INF("SENSOR_SET_SENSOR_IHDR LE=%llu, SE=%llu, Gain=%llu\n",*feature_data,*(feature_data+1),*(feature_data+2));
             ihdr_write_shutter_gain(*feature_data,*(feature_data+1),*(feature_data+2));
 			break;
 		default:
