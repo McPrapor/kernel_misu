@@ -43,7 +43,8 @@
 #define LOG_1 LOG_INF("s5k5e8yx,MIPI 2LANE\n")
 #define LOG_2 LOG_INF("preview 1280*960@30fps,864Mbps/lane; video 1280*960@30fps,864Mbps/lane; capture 5M@30fps,864Mbps/lane\n")
 /****************************   Modify end    *******************************************/
-#define LOG_INF(format, args...)	xlog_printk(ANDROID_LOG_ERROR   , PFX, "[%s] " format, __FUNCTION__, ##args)
+//#define LOG_INF(format, args...)	xlog_printk(ANDROID_LOG_ERROR   , PFX, "[%s] " format, __FUNCTION__, ##args)
+#define LOG_INF(format, args...)   printk("[%s] %s " format, PFX, __FUNCTION__, ##args)
 #define S5K5E8_OTP_ENABLE //txr 20151222
 static int first_flag = 1;
 static DEFINE_SPINLOCK(imgsensor_drv_lock);

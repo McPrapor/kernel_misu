@@ -31,7 +31,8 @@ extern int ov13850lenmin, ov13850lenmax;
 
 //#define OV13850_R2A_write_i2c(addr, para) iWriteReg((u16) addr , (u32) para , 1, OV13850MIPI_WRITE_ID)
 #define PFX "OV13850_R2A_OTP"
-#define LOG_INF(format, args...)	xlog_printk(ANDROID_LOG_ERROR   , PFX, "[%s] " format, __FUNCTION__, ##args)
+//#define LOG_INF(format, args...)	xlog_printk(ANDROID_LOG_ERROR   , PFX, "[%s] " format, __FUNCTION__, ##args)
+#define LOG_INF(format, args...)   printk("[%s] %s " format, PFX, __FUNCTION__, ##args)
 
 
 #define Delay(ms)  mdelay(ms)

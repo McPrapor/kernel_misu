@@ -1406,6 +1406,7 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 #ifndef CONFIG_MTK_FPGA
 	KD_IMGSENSOR_PROFILE_INIT();
 	/* power on sensor */
+	printk("[camdebug] g_invokeSensorNameStr %s CAMERA_HW_DRVNAME1 %s\n", (char *)g_invokeSensorNameStr, CAMERA_HW_DRVNAME1);
 	kdModulePowerOn((CAMERA_DUAL_CAMERA_SENSOR_ENUM *)g_invokeSocketIdx, g_invokeSensorNameStr, true, CAMERA_HW_DRVNAME1);
 	/* wait for power stable */
 	mDELAY(10);
@@ -1426,6 +1427,7 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 
 	if (g_pSensorFunc) {
 		for (i = KDIMGSENSOR_INVOKE_DRIVER_0; i < KDIMGSENSOR_MAX_INVOKE_DRIVERS; i++) {
+		printk("[camdebug] g_invokeSensorNameStr[%d] %s mtk_ccm_name %s", i, g_invokeSensorNameStr[i], mtk_ccm_name);
 			if (DUAL_CAMERA_NONE_SENSOR != g_invokeSocketIdx[i]) {
 				err = g_pSensorFunc->SensorFeatureControl(g_invokeSocketIdx[i], SENSOR_FEATURE_CHECK_SENSOR_ID, (MUINT8 *)&sensorID, &retLen);
 				if (sensorID == 0) {    /* not implement this feature ID */
