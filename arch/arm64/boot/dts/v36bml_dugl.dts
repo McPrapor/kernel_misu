@@ -2,7 +2,7 @@
 /dts-v1/;
 
 #include "mt6753.dtsi"
-#include "dt-bindings/lcm/hx8394f_hd720_dsi_vdo_truly_v36.dtsi"
+/* #include "dt-bindings/lcm/hx8394f_hd720_dsi_vdo_truly_v36.dtsi" */
 /* see below #include "cust.dtsi" */
 
 / {
@@ -152,26 +152,26 @@
                 };
         };
 
-        gpio83_mode2_drvvbus: drvvbus_init {
+        gpio2_mode2_drvvbus: drvvbus_init {
                 pins_cmd_dat {
-                        pins = <PINMUX_GPIO83__FUNC_GPIO83>;
+                        pins = <PINMUX_GPIO2__FUNC_GPIO2>;
                         slew-rate = <1>;
                         bias-pull-up = <00>;
                 };
         };
 
-        gpio83_mode2_drvvbus_low: drvvbus_low {
+        gpio2_mode2_drvvbus_low: drvvbus_low {
                 pins_cmd_dat {
-                        pins = <PINMUX_GPIO83__FUNC_GPIO83>;
+                        pins = <PINMUX_GPIO2__FUNC_GPIO2>;
                         slew-rate = <1>;
                         output-low;
                         bias-pull-down = <00>;
                 };
         };
 
-        gpio83_mode2_drvvbus_high: drvvbus_high {
+        gpio2_mode2_drvvbus_high: drvvbus_high {
                 pins_cmd_dat {
-                        pins = <PINMUX_GPIO83__FUNC_GPIO83>;
+                        pins = <PINMUX_GPIO2__FUNC_GPIO2>;
                         slew-rate = <1>;
                         output-high;
                         bias-pull-down = <00>;
@@ -182,16 +182,17 @@
 &usb0 {
         iddig_gpio = <0 1>;
         pinctrl-names = "default", "iddig_irq_init", "drvvbus_init", "drvvbus_low", "drvvbus_high";
-        pinctrl-0 = <&usb_default>; /* 0x75 */
-        pinctrl-1 = <&gpio0_mode1_iddig>; /* 0x76 */
-        pinctrl-2 = <&gpio83_mode2_drvvbus>; /* 0x77 */
-        pinctrl-3 = <&gpio83_mode2_drvvbus_low>; /* 0x78 */
-        pinctrl-4 = <&gpio83_mode2_drvvbus_high>; /* 0x79 */
+        pinctrl-0 = <&usb_default>;
+        pinctrl-1 = <&gpio0_mode1_iddig>;
+        pinctrl-2 = <&gpio2_mode2_drvvbus>;
+        pinctrl-3 = <&gpio2_mode2_drvvbus_low>;
+        pinctrl-4 = <&gpio2_mode2_drvvbus_high>;
         status = "okay";
 };
 /* USB GPIO Kernal Standardization end */
 
 /* LCM GPIO Kernal Standardization start */
+/*
 &pio {
         lcm_mode_default: lcm_mode_default {
                 pins_cmd_dat {
@@ -264,6 +265,7 @@
         lcm_bl_gpio = <&pio 86 0>;
         status = "okay";
 };
+*/
 /* LCM GPIO Kernal Standardization end */
 
 /* TOUCH start */
@@ -337,7 +339,7 @@
                         TOUCH_PANEL@10 {
                                 compatible = "mediatek, TOUCH_PANEL-eint";
                                 interrupt-parent = <&eintc>;
-                                interrupts = <0xa 0x2>;
+                                interrupts = <0xa IRQ_TYPE_EDGE_FALLING>;
                                 debounce = <0xa 0x0>;
                         };
 };
