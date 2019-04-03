@@ -237,11 +237,15 @@ int md_cd_power_on(struct ccci_modem *md)
 			CCCI_INF_MSG(md->index, CORE, "cannot find vsram_output_high pintrl. ret=%ld\n",
 				     PTR_ERR(vsram_output_high));
 		}
+#ifndef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
 		pinctrl_select_state(mdcldma_pinctrl, vsram_output_high);
+#endif
 	} else {
 		CCCI_INF_MSG(md->index, CORE, "mdcldma_pinctrl is NULL, some error happend.\n");
 	}
+#ifndef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
 	CCCI_INF_MSG(md->index, CORE, "md_cd_power_on:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,1)\n");
+#endif
 
 	/* if(!(mt6325_upmu_get_swcid()==PMIC6325_E1_CID_CODE || */
 	/* mt6325_upmu_get_swcid()==PMIC6325_E2_CID_CODE)) */
@@ -402,11 +406,15 @@ int md_cd_power_off(struct ccci_modem *md, unsigned int timeout)
 			CCCI_INF_MSG(md->index, CORE, "cannot find vsram_output_low pintrl. ret=%ld\n",
 				     PTR_ERR(vsram_output_low));
 		}
+#ifndef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
 		pinctrl_select_state(mdcldma_pinctrl, vsram_output_low);
+#endif
 	} else {
 		CCCI_INF_MSG(md->index, CORE, "mdcldma_pinctrl is NULL, some error happend.\n");
 	}
+#ifndef CONFIG_V36BML_ECCCI_FIRMWARE_LEGACY
 	CCCI_INF_MSG(md->index, CORE, "md_cd_power_off:mt_set_gpio_out(GPIO_LTE_VSRAM_EXT_POWER_EN_PIN,0)\n");
+#endif
 #endif
 	return ret;
 }
