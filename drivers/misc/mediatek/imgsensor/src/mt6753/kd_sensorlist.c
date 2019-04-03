@@ -1427,7 +1427,7 @@ static inline int adopt_CAMERA_HW_CheckIsAlive(void)
 
 	if (g_pSensorFunc) {
 		for (i = KDIMGSENSOR_INVOKE_DRIVER_0; i < KDIMGSENSOR_MAX_INVOKE_DRIVERS; i++) {
-		printk("[camdebug] g_invokeSensorNameStr[%d] %s mtk_ccm_name %s", i, g_invokeSensorNameStr[i], mtk_ccm_name);
+		printk("[camdebug] g_invokeSensorNameStr[%d] %s mtk_ccm_name %s \n", i, g_invokeSensorNameStr[i], mtk_ccm_name);
 			if (DUAL_CAMERA_NONE_SENSOR != g_invokeSocketIdx[i]) {
 				err = g_pSensorFunc->SensorFeatureControl(g_invokeSocketIdx[i], SENSOR_FEATURE_CHECK_SENSOR_ID, (MUINT8 *)&sensorID, &retLen);
 				if (sensorID == 0) {    /* not implement this feature ID */
