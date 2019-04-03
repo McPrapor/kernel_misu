@@ -693,6 +693,7 @@
 	        reg = <0x3e>;
 
 /*        	i2c-pwr-supply = <&regulators_supply>; */
+/*
 	        regulators {
         	        tps65132_pos: pos-boost {
 	                        regulator-name  = "tps65132_pos";
@@ -714,7 +715,7 @@
                         	ti,en-gpio = <&pio 32 0>;
                 	};
         	};
-
+*/
 	};
 };
 
