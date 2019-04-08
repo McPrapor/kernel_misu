@@ -2947,7 +2947,10 @@ bool _hwPowerDown(KD_REGULATOR_TYPE_T type)
 	}
 		if (regulator_disable(reg) != 0) {
 			PK_DBG("[_hwPowerDown]fail to regulator_disable, powertype: %d\n\n", type);
-			return ret;
+#ifdef CONFIG_V36BML_CAMERA
+                        if (type != VCAMAF)
+#endif
+				return ret;
 		}
 	ret = true;
     } else {
