@@ -39,7 +39,7 @@
 #include "s5k5e8yxv36mipiraw_Sensor.h"
 
 /****************************Modify following Strings for debug****************************/
-#define PFX "s5k5e8yx_camera_sensor"
+#define PFX "S5K5E8YX_camera_sensor"
 #define LOG_1 LOG_INF("s5k5e8yx,MIPI 2LANE\n")
 #define LOG_2 LOG_INF("preview 1280*960@30fps,864Mbps/lane; video 1280*960@30fps,864Mbps/lane; capture 5M@30fps,864Mbps/lane\n")
 /****************************   Modify end    *******************************************/
