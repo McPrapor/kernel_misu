@@ -201,6 +201,7 @@ extern int TPS65132_write_bytes(unsigned char addr, unsigned char value);
 //#define GPIO_65132_ENN  (GPIO83 | 0x80000000)
 //#define GPIO_65132_ENP  (GPIO86 | 0x80000000)
 //#define GPIO146         146
+#define GPIO146_RST         (GPIO146 | 0x80000000)
 
 
 #define REGFLAG_DELAY             							0XFEFF
@@ -228,9 +229,9 @@ static LCM_UTIL_FUNCS lcm_util = {0};
 
 //#define SET_RESET_PIN(v)    								(lcm_util.set_reset_pin((v)))
 static int SET_RESET_PIN(int v){
- mt_set_gpio_mode(GPIO146, GPIO_MODE_00);
- mt_set_gpio_dir(GPIO146, GPIO_DIR_OUT);
- mt_set_gpio_out(GPIO146, v);
+ mt_set_gpio_mode(GPIO146_RST, GPIO_MODE_00);
+ mt_set_gpio_dir(GPIO146_RST, GPIO_DIR_OUT);
+ mt_set_gpio_out(GPIO146_RST, v);
     return 0;
 }
 #define SET_GPIO_OUT(gpio_num,val)    						(lcm_util.set_gpio_out((gpio_num),(val)))

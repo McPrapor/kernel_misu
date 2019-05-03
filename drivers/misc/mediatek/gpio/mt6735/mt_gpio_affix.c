@@ -13,12 +13,10 @@ void mt_gpio_pin_decrypt(unsigned long *cipher)
 {
         /* just for debug, find out who used pin number directly */
         if ((*cipher & (0x80000000)) == 0) {
-                if ((unsigned int)(*cipher) != 146) { // v36bml_dugl lcm spams this
                         GPIOERR("GPIO%u HARDCODE warning!!!\n", (unsigned int)(*cipher));
                         GPIOERR("Pin magic number is %lx\n",*cipher);
                         dump_stack();
                         /* return; */
-                }
         }
         /* GPIOERR("Pin magic number is %x\n",*cipher); */
         *cipher &= ~(0x80000000);

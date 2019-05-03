@@ -182,6 +182,7 @@ extern int TPS65132_write_byte(kal_uint8 addr, kal_uint8 value);
 #define FRAME_HEIGHT 										(1280)
 #define GPIO_65132_ENP	GPIO_LCD_BIAS_ENP_PIN
 #define GPIO_65132_ENN	GPIO_LCD_BIAS_ENN_PIN
+#define GPIO146_RST	(GPIO146 | 0x80000000)
 //#define GPIO146		GPIO_LCM_RST
 //COMPAT!!!
 
@@ -206,9 +207,9 @@ static LCM_UTIL_FUNCS lcm_util = {0};
 
 //#define SET_RESET_PIN(v)    								(lcm_util.set_reset_pin((v)))
 static int SET_RESET_PIN(int v){
- mt_set_gpio_mode(GPIO146, GPIO_MODE_00);
- mt_set_gpio_dir(GPIO146, GPIO_DIR_OUT);
- mt_set_gpio_out(GPIO146, v);
+ mt_set_gpio_mode(GPIO146_RST, GPIO_MODE_00);
+ mt_set_gpio_dir(GPIO146_RST, GPIO_DIR_OUT);
+ mt_set_gpio_out(GPIO146_RST, v);
 	return 0;
 }
 #define SET_GPIO_OUT(gpio_num,val)    						(lcm_util.set_gpio_out((gpio_num),(val)))
