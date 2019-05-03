@@ -200,6 +200,8 @@ static struct mt_gpio_obj_t *mt_gpio = &mt_gpio_obj;
 #else
 int mt_set_gpio_dir(unsigned long pin, unsigned long dir)
 {
+	printk("[pindebug] gpio dir %lu \n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio dir 0x%lx\n", pin);
 	/* int ret=0; */
 	if (dir >= GPIO_DIR_MAX) {
 		GPIOERR("Parameter dir error: %d\n", (int)dir);
@@ -218,6 +220,8 @@ EXPORT_SYMBOL(mt_get_gpio_dir);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_pull_enable(unsigned long pin, unsigned long enable)
 {
+	printk("[pindebug] gpio pull en %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio pull en 0x%lx\n", pin);
 	if (enable >= GPIO_PULL_EN_MAX) {
 		GPIOERR("Parameter enable error: %d\n", (int)enable);
 		return -ERINVAL;
@@ -235,6 +239,8 @@ EXPORT_SYMBOL(mt_get_gpio_pull_enable);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_smt(unsigned long pin, unsigned long enable)
 {
+	printk("[pindebug] gpio smt %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio smt 0x%lx\n", pin);
 	if (enable >= GPIO_SMT_MAX) {
 		GPIOERR("Parameter enable error: %d\n", (int)enable);
 		return -ERINVAL;
@@ -251,6 +257,8 @@ EXPORT_SYMBOL(mt_get_gpio_smt);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_ies(unsigned long pin, unsigned long enable)
 {
+	printk("[pindebug] gpio ies %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio ies 0x%lx\n", pin);
 	if (enable >= GPIO_IES_MAX) {
 		GPIOERR("Parameter enable error: %d\n", (int)enable);
 		return -ERINVAL;
@@ -267,6 +275,8 @@ EXPORT_SYMBOL(mt_get_gpio_ies);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_pull_select(unsigned long pin, unsigned long select)
 {
+	printk("[pindebug] gpio pull sel %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio pull sel 0x%lx\n", pin);
 	if (select >= GPIO_PULL_MAX) {
 		GPIOERR("Parameter select error: %d\n", (int)select);
 		return -ERINVAL;
@@ -283,6 +293,8 @@ EXPORT_SYMBOL(mt_set_gpio_pull_select);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_inversion(unsigned long pin, unsigned long enable)
 {
+	printk("[pindebug] gpio inver %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio inver 0x%lx\n", pin);
 	if (enable >= GPIO_DATA_INV_MAX) {
 		GPIOERR("Parameter enable error: %d\n", (int)enable);
 		return -ERINVAL;
@@ -299,6 +311,8 @@ EXPORT_SYMBOL(mt_get_gpio_inversion);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_out(unsigned long pin, unsigned long output)
 {
+	printk("[pindebug] gpio out %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio out 0x%lx\n", pin);
 	if (output >= GPIO_OUT_MAX) {
 		GPIOERR("Parameter output error: %d\n", (int)output);
 		return -ERINVAL;
@@ -321,6 +335,8 @@ EXPORT_SYMBOL(mt_get_gpio_in);
 /*---------------------------------------------------------------------------*/
 int mt_set_gpio_mode(unsigned long pin, unsigned long mode)
 {
+	printk("[pindebug] gpio mode %lu\n", pin - 0x80000000);
+	printk("[pinhexdebug] gpio mode 0x%lx\n", pin);
 	if (mode >= GPIO_MODE_MAX) {
 		GPIOERR("Parameter mode error: %d\n", (int)mode);
 		return -ERINVAL;
