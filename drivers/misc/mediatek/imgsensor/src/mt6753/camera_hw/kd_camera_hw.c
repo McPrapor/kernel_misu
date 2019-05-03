@@ -384,7 +384,7 @@ u32 pinSet[3][8] = {
 					goto _kdCISModulePowerOn_exit_;
 				}
 			} else {
-#if 0
+#if 1
 				ISP_MCLK1_EN(0);
 				if (currSensorName && (0 == strcmp(SENSOR_DRVNAME_OV13850V36_MIPI_RAW, currSensorName))) {
                                         printk("[camdebug] ov13850 poweroff\n");
