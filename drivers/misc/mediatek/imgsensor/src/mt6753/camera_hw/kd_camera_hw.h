@@ -65,10 +65,12 @@
 #define GPIO_OUT_ONE 1
 #define GPIO_OUT_ZERO 0
 
+/*
 #ifdef CONFIG_V36BML_CAMERA
 #define SUPPORT_I2C_BUS_NUM1        0
 #define SUPPORT_I2C_BUS_NUM2        0
 #endif
+*/
 #endif /* End of #if defined CONFIG_MTK_LEGACY */
 
 
