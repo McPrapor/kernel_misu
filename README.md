@@ -29,8 +29,7 @@ Front Camera | 5MP, Int. 5MP
 
 ## Works
  * hx8394f_hd720_dsi_vdo_truly_v36 lcm
- * himax 852xes touchpad(no dt2w)
- * bq24158 charger
+ * hx8394d_hd720_dsi_vdo_truly_v36 lcm
  * tps65132 pmic
  * mt6311 pmic
  * headphones detection, keys, sound
@@ -43,21 +42,22 @@ Front Camera | 5MP, Int. 5MP
  * fm radio
  * bma253 acceleration sensor 
  * cm36686 alsps sensor
+ * cameras (ov13850, s5k5e8)
  
 -------------
 ## Testing...
+ * himax 852xes touchpad(no dt2w)
  * notification leds
+ * cameras (ov5670, s5k3l2)
  
 -------------
 ## Broken/Bugs
- * hx8394d_hd720_dsi_vdo_truly_v36 lcm
  * SGM3785 flashlight
  * LM3642 led torch
  * ramconsole bad addresing
  * hall_ak8789 magnetometer
  * SENTRAL iio sensor hub needs new sensor drivers support
- * cameras (ov5670, s5k3l2)
  * battery meter tables are broken
- * himax 852xes DT2W
+ * bq24158 charger
 
 -------------
