@@ -467,7 +467,7 @@ u32 pinSet[3][8] = {
                                                 goto _kdCISModulePowerOn_exit_;
                                         }
 				}
-                                if (currSensorName && ((0 == strcmp(SENSOR_DRVNAME_OV5670V36_MIPI_RAW, currSensorName))))
+                                else if (currSensorName && ((0 == strcmp(SENSOR_DRVNAME_OV5670V36_MIPI_RAW, currSensorName))))
 				{
                                         printk("[camdebug] %s poweroff\n", currSensorName);
                                         // sub rst gpio 4 low 
@@ -481,10 +481,12 @@ u32 pinSet[3][8] = {
                                                         pinSet[pinSetIdx][IDX_PS_CMPDN + IDX_PS_OFF]);
                                         }
                                         //AF_VCC
+/*
 	                                if(TRUE != _hwPowerDown(VCAMAF)){
         	                                PK_DBG("[CAMERA SENSOR] Fail to disable analog power (VCAM_AF), power id = %d \n", VCAMAF);
-//                	                        goto _kdCISModulePowerOn_exit_;
+                	                        goto _kdCISModulePowerOn_exit_;
 					}
+*/
                                         //VCAM_IO
                                         if(TRUE != _hwPowerDown(VCAMIO)){
                                                 PK_DBG("[CAMERA SENSOR] Fail to disable digital power (VCAM_IO), power id = %d \n", VCAMIO);
