@@ -1,4 +1,3 @@
-
 /* drivers/input/misc/hall_sensor.c - Ak8789 Hall sensor driver
  *
  * Copyright (C) 2013 HTC Corporation.
@@ -25,18 +24,15 @@
 #include <linux/delay.h>
 #include <linux/gpio.h>
 #include <linux/platform_device.h>
-//#include <linux/ak8789.h>
-#include "ak8789.h"
+#include <linux/ak8789.h>
 #include <linux/input/mt.h>
 #include <linux/irq.h>
 #include <linux/io.h>
 #include <linux/slab.h>
-//#include <linux/hall_sensor.h>
-#include "hall_sensor.h"
+#include <linux/hall_sensor.h>
 //#include <linux/xlog.h>
 #include <linux/of.h>
 #include <linux/of_irq.h>
-//#include <mach/mt_gpio.h>
 #include <mt-plat/mt_gpio.h>
 
 #define DRIVER_NAME "HL"
@@ -45,7 +41,7 @@
 #define HALL_N_POLE             251     /* HALL Sen    sor N pole*/
 #endif
 #ifndef HALL_S_POLE
-#define HALL_S_POLE             252     /* HALL Sen    sor N pole*/
+#define HALL_S_POLE             252     /* HALL Sen    sor S pole*/
 #endif
 
 struct ak_hall_data {
@@ -333,8 +329,6 @@ static int hall_sensor_probe(struct platform_device *pdev)
 	struct device_node *node = NULL;
 	unsigned int irq;
 	int ret = 0;
-	int gpiocp = -1;
-	int gpiocps = -1;
 	struct ak_hall_data * hl;
 	struct hall_platform_data *pdata;
 	printk("%s:\n", __func__);
@@ -348,11 +342,13 @@ static int hall_sensor_probe(struct platform_device *pdev)
 
 	HL_LOG("[HL]++++++++++++++++++");
 	hl->hall_enable = 1;
-	if (pdev->dev.of_node) {
 		pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
+	if (pdev->dev.of_node) {
+//		pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
 		if (!pdata)
 		{
 			HL_ERR("[HL]platform_data alloc memory fail");
+			kfree(pdata);
 			goto err_alloc_mem_failed;
 		}
 
@@ -365,31 +361,24 @@ static int hall_sensor_probe(struct platform_device *pdev)
 			hl->att_used   = pdata->att_used;
 			hl->gpio_att   = pdata->gpio_att;
 			hl->gpio_att_s = pdata->gpio_att_s;
-			if (pdata->gpio_att) {
-				gpiocp = pdata->gpio_att;
-			}
-			if (pdata->gpio_att_s) {
-				gpiocps = pdata->gpio_att_s;
-			}
-			kfree(pdata);
 		}
 	}
 	hl->irq_enable = 1;
 
 	ret = hall_input_register(hl);
-	if (ret) {
+	if (ret)
 		goto err_input_register_device_failed;
-	}
-/*	if (gpio_is_valid(pdata->gpio_att)) { */
-	if (gpio_is_valid(gpiocp)) {
+
+	if (gpio_is_valid(pdata->gpio_att)) {
 		mt_set_gpio_dir(hl->gpio_att, 0);//in
 		mt_set_gpio_mode(hl->gpio_att, 0);//gpio
 	}
 	if (hl->att_used > 1){
-/*		if (gpio_is_valid(pdata->gpio_att_s)){ */
-		if (gpio_is_valid(gpiocps)){ 
-			mt_set_gpio_dir(hl->gpio_att_s, 0);//in
-			mt_set_gpio_mode(hl->gpio_att_s, 0);//gpio
+		if (pdata) {
+			if (gpio_is_valid(pdata->gpio_att_s)){
+				mt_set_gpio_dir(hl->gpio_att_s, 0);//in
+				mt_set_gpio_mode(hl->gpio_att_s, 0);//gpio
+			}
 		}
 	}
 	platform_set_drvdata(pdev, hl);
@@ -473,22 +462,18 @@ static int hall_sensor_probe(struct platform_device *pdev)
 	g_hl = hl;
 
 	HL_LOG("[HL]------------------");
-//	kfree(pdata);
+	kfree(pdata);
 	return 0;
 err_request_irq_failed:
 err_device_init_wq_pole:
 	wake_lock_destroy(&hl->wake_lock);
-/*
-err_request_gpio_att_or_gpio_att_s_irq_failed:
-*/
+
+//err_request_gpio_att_or_gpio_att_s_irq_failed:
+
 err_input_register_device_failed:
 err_alloc_pdata_mem_failed:
-//	if (pdev->dev.of_node) {
-//		if (pdata) {
-/* black magic go away in the future plz */
-//			kfree(pdata);
-//		}
-//	}
+	if (pdev->dev.of_node)
+		kfree(pdata);
 err_alloc_mem_failed:
 	kfree(hl);
 	printk("%s:fail-----\n", __func__);
