@@ -43,21 +43,20 @@ Front Camera | 5MP, Int. 5MP
  * bma253 acceleration sensor 
  * cm36686 alsps sensor
  * cameras (ov13850, s5k5e8)
+ * himax 852xes touchpad(no dt2w)
+ * notification leds
  
 -------------
 ## Testing...
- * himax 852xes touchpad(no dt2w)
- * notification leds
  * cameras (ov5670, s5k3l2)
+ * SGM3785 flashlight
+ * LM3642 led torch
+ * bq24158 charger
+ * battery meter tables
  
 -------------
 ## Broken/Bugs
- * SGM3785 flashlight
- * LM3642 led torch
- * ramconsole bad addresing
  * hall_ak8789 magnetometer
  * SENTRAL iio sensor hub needs new sensor drivers support
- * battery meter tables are broken
- * bq24158 charger
 
 -------------
