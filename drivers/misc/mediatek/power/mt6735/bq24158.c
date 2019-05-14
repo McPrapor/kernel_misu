@@ -93,6 +93,7 @@ int bq24158_read_byte(kal_uint8 cmd, kal_uint8 *returnData)
     char     readData = 0;
     int      ret=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     mutex_lock(&bq24158_i2c_access);
     
     //new_client->addr = ((new_client->addr) & I2C_MASK_FLAG) | I2C_WR_FLAG;    
@@ -124,6 +125,7 @@ int bq24158_write_byte(kal_uint8 cmd, kal_uint8 writeData)
     char    write_data[2] = {0};
     int     ret=0;
     
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     mutex_lock(&bq24158_i2c_access);
     
     write_data[0] = cmd;
@@ -155,6 +157,7 @@ kal_uint32 bq24158_read_interface (kal_uint8 RegNum, kal_uint8 *val, kal_uint8 M
     kal_uint8 bq24158_reg = 0;
     int ret = 0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
    battery_xlog_printk(BAT_LOG_FULL,"--------------------------------------------------\n");
 
     ret = bq24158_read_byte(RegNum, &bq24158_reg);
@@ -174,6 +177,7 @@ kal_uint32 bq24158_config_interface (kal_uint8 RegNum, kal_uint8 val, kal_uint8 
     kal_uint8 bq24158_reg = 0;
     int ret = 0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     if(!charging_init_flag)bq24158_write_byte(0x06,0x7A);
     //battery_xlog_printk(BAT_LOG_FULL,"--------------------------------------------------\n");
 
@@ -207,6 +211,7 @@ kal_uint32 bq24158_config_interface_liao (kal_uint8 RegNum, kal_uint8 val)
 {   
     int ret = 0;
     
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret = bq24158_write_byte(RegNum, val);
 
     return ret;
@@ -223,6 +228,7 @@ void bq24158_set_tmr_rst(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON0), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON0_TMR_RST_MASK),
@@ -235,6 +241,7 @@ kal_uint32 bq24158_get_otg_status(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON0), 
                                     (&val),
                                     (kal_uint8)(CON0_OTG_MASK),
@@ -247,6 +254,7 @@ void bq24158_set_en_stat(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON0), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON0_EN_STAT_MASK),
@@ -259,6 +267,7 @@ kal_uint32 bq24158_get_chip_status(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON0), 
                                     (&val),
                                     (kal_uint8)(CON0_STAT_MASK),
@@ -272,6 +281,7 @@ kal_uint32 bq24158_get_boost_status(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON0), 
                                     (&val),
                                     (kal_uint8)(CON0_BOOST_MASK),
@@ -285,6 +295,7 @@ kal_uint32 bq24158_get_fault_status(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON0), 
                                     (&val),
                                     (kal_uint8)(CON0_FAULT_MASK),
@@ -299,6 +310,7 @@ void bq24158_set_input_charging_current(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_LIN_LIMIT_MASK),
@@ -310,6 +322,7 @@ void bq24158_set_v_low(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_LOW_V_MASK),
@@ -321,6 +334,7 @@ void bq24158_set_te(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_TE_MASK),
@@ -332,6 +346,7 @@ void bq24158_set_ce(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_CE_MASK),
@@ -343,6 +358,7 @@ void bq24158_set_hz_mode(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_HZ_MODE_MASK),
@@ -354,6 +370,7 @@ void bq24158_set_opa_mode(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON1), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON1_OPA_MODE_MASK),
@@ -367,6 +384,7 @@ void bq24158_set_oreg(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON2), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON2_OREG_MASK),
@@ -378,6 +396,7 @@ void bq24158_set_otg_pl(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON2), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON2_OTG_PL_MASK),
@@ -389,6 +408,7 @@ void bq24158_set_otg_en(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON2), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON2_OTG_EN_MASK),
@@ -403,6 +423,7 @@ kal_uint32 bq24158_get_vender_code(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON3), 
                                     (&val),
                                     (kal_uint8)(CON3_VENDER_CODE_MASK),
@@ -416,6 +437,7 @@ kal_uint32 bq24158_get_pn(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON3), 
                                     (&val),
                                     (kal_uint8)(CON3_PIN_MASK),
@@ -429,6 +451,7 @@ kal_uint32 bq24158_get_revision(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON3), 
                                     (&val),
                                     (kal_uint8)(CON3_REVISION_MASK),
@@ -443,6 +466,7 @@ void bq24158_set_reset(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON4), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON4_RESET_MASK),
@@ -454,6 +478,7 @@ void bq24158_set_iocharge(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON4), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON4_I_CHR_MASK),
@@ -465,6 +490,7 @@ void bq24158_set_iterm(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON4), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON4_I_TERM_MASK),
@@ -478,6 +504,7 @@ void bq24158_set_dis_vreg(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON5), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON5_DIS_VREG_MASK),
@@ -489,6 +516,7 @@ void bq24158_set_io_level(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON5), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON5_IO_LEVEL_MASK),
@@ -501,6 +529,7 @@ kal_uint32 bq24158_get_dpm_status(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON5), 
                                     (&val),
                                     (kal_uint8)(CON5_SP_STATUS_MASK),
@@ -514,6 +543,7 @@ kal_uint32 bq24158_get_en_level(void)
     kal_uint32 ret=0;
     kal_uint8 val=0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_read_interface(     (kal_uint8)(bq24158_CON5), 
                                     (&val),
                                     (kal_uint8)(CON5_EN_LEVEL_MASK),
@@ -526,6 +556,7 @@ void bq24158_set_vdpm(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON5), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON5_VSP_MASK),
@@ -539,6 +570,7 @@ void bq24158_set_i_safe(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON6), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON6_ISAFE_MASK),
@@ -550,6 +582,7 @@ void bq24158_set_v_safe(kal_uint32 val)
 {
     kal_uint32 ret=0;    
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     ret=bq24158_config_interface(   (kal_uint8)(bq24158_CON6), 
                                     (kal_uint8)(val),
                                     (kal_uint8)(CON6_VSAFE_MASK),
@@ -565,6 +598,7 @@ void bq24158_set_v_safe(kal_uint32 val)
 void bq24158_dump_register(void)
 {
     int i=0;
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     for (i=0;i<bq24158_REG_NUM;i++)
     {
         bq24158_read_byte(i, &bq24158_reg[i]);
@@ -577,6 +611,7 @@ int bq24158_dump_register_htc(char *buf, int size)
     int i=0;
 	int len = 0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     for (i=0;i<bq24158_REG_NUM;i++)
     {
         bq24158_read_byte(i, &bq24158_reg[i]);
@@ -615,6 +650,7 @@ static int bq24158_driver_probe(struct i2c_client *client, const struct i2c_devi
 {             
     int err=0; 
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     battery_xlog_printk(BAT_LOG_CRTI,"[bq24158_driver_probe] \n");
 
     if (!(new_client = kmalloc(sizeof(struct i2c_client), GFP_KERNEL))) {
@@ -645,6 +681,7 @@ exit:
 kal_uint8 g_reg_value_bq24158=0;
 static ssize_t show_bq24158_access(struct device *dev,struct device_attribute *attr, char *buf)
 {
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     battery_xlog_printk(BAT_LOG_FULL,"[show_bq24158_access] 0x%x\n", g_reg_value_bq24158);
     return sprintf(buf, "%u\n", g_reg_value_bq24158);
 }
@@ -655,6 +692,7 @@ static ssize_t store_bq24158_access(struct device *dev,struct device_attribute *
     unsigned int reg_value = 0;
     unsigned int reg_address = 0;
     
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     battery_xlog_printk(BAT_LOG_FULL,"[store_bq24158_access] \n");
     
     if(buf != NULL && size != 0)
@@ -683,6 +721,7 @@ static int bq24158_user_space_probe(struct platform_device *dev)
 {    
     int ret_device_file = 0;
 
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     battery_xlog_printk(BAT_LOG_CRTI,"******** bq24158_user_space_probe!! ********\n" );
     
     ret_device_file = device_create_file(&(dev->dev), &dev_attr_bq24158_access);
@@ -710,6 +749,7 @@ static int __init bq24158_init(void)
     int ret=0;
     
 //    battery_xlog_printk(BAT_LOG_CRTI,"[bq24158_init] init start. ch=%d\n", BQ24158_BUSNUM);
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     battery_xlog_printk(BAT_LOG_CRTI,"[bq24158_init] init start.\n");
     
 //    i2c_register_board_info(BQ24158_BUSNUM, &i2c_bq24158, 1);
@@ -740,6 +780,7 @@ static int __init bq24158_init(void)
 
 static void __exit bq24158_exit(void)
 {
+    printk("[bq24158] debug %s\n", __FUNCTION__);
     i2c_del_driver(&bq24158_driver);
 }
 
