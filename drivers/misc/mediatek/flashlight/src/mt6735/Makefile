@@ -20,6 +20,10 @@ endif
 #ifeq ($(wildcard $(srctree)/arch/arm/mach-$(MTK_PLATFORM)/$(ARCH_MTK_PROJECT)/flashlight),)
 custom_kernel_flashlight := $(addsuffix /, $(shell echo $(CONFIG_CUSTOM_KERNEL_FLASHLIGHT)))
 
+ifeq ($(strip $(CONFIG_FLASHLIGHT_SGM3785)),y)
+ccflags-y += -DSGM_FLASH_LIGHT
+endif
+
 ifneq ($(wildcard $(srctree)/drivers/misc/mediatek/flashlight/src/$(MTK_PLATFORM)/$(ARCH_MTK_PROJECT)/constant_flashlight),)
 obj-y				+= $(ARCH_MTK_PROJECT)/$(custom_kernel_flashlight)
 else
