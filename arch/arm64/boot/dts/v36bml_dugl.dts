@@ -679,8 +679,8 @@
 
 /* bq24158 power charger */
 &i2c1 {
-	swithing_charger@6a {
-		compatible = "mediatek,swithing_charger";
+	bq24158@6a {
+		compatible = "mediatek,bq24158";
 		reg = <0x6a>;
 		status = "okay";
 	};
