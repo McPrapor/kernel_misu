@@ -70,7 +70,7 @@ int gpio_number   = (124 | 0x80000000);
 int gpio_off_mode = GPIO_MODE_00;
 int gpio_on_mode  = GPIO_MODE_00;
 
-int GPIO_HTC_AICL = (168| 0x80000000);
+int GPIO_HTC_AICL = (121| 0x80000000);
 #endif
 int gpio_off_dir  = GPIO_DIR_OUT;
 int gpio_off_out  = GPIO_OUT_ONE;
