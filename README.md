@@ -53,10 +53,10 @@ Front Camera | 5MP, Int. 5MP
  * LM3642 led torch
  * bq24158 charger
  * battery meter tables
+ * hall_ak8789 magnetometer
  
 -------------
 ## Broken/Bugs
- * hall_ak8789 magnetometer
  * SENTRAL iio sensor hub needs new sensor drivers support
 
 -------------
