@@ -498,10 +498,6 @@ typedef enum {
 /* structure */
 /* ============================================================ */
 
-typedef struct {
-    char *buf;
-    int size;
-} sCHR_REG_DUMP, *pCHR_REG_DUMP;
 
 /* ============================================================ */
 /* typedef */
