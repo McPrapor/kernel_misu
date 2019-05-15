@@ -18,6 +18,7 @@ obj-$(CONFIG_BOSCH_BMA253)  += bma253_bosch.o
 #obj-$(CONFIG_INPUT_LSM6DS3_I2C) += lsm6ds3_i2c.o
 EXTRA_CFLAGS += -fno-pic
 obj-$(CONFIG_SENTRAL_IIO) += sentral-iio.o
+obj-$(CONFIG_AK8789_HALLSENSOR) += hall_sensor.o hall_sensor_notify.o
 
 sentral-iio-objs += sentral-core.o
 sentral-iio-objs += sentral-warmstart.o

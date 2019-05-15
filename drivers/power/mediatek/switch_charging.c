@@ -39,11 +39,6 @@
 #include <mach/mt_charging.h>
 #include <mt-plat/mt_boot.h>
 
-#ifdef CONFIG_V36BML_BATTERY
-#define HIGH_BATTERY_VOLTAGE_SUPPORT
-#endif
-
-
 #if defined(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT)
 #include <linux/mutex.h>
 #include <linux/wakelock.h>

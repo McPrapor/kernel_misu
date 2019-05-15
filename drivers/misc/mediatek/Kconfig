@@ -198,10 +198,6 @@ config YULONG_BATTERY_3000MA
            macro for projects with battery capacity
 #yulong end
 
-config AK8789_HALLSENSOR
-        bool "AK8789 hall sensor"
-        default n
-
 source "drivers/misc/mediatek/gpt/Kconfig"
 source "drivers/misc/mediatek/uart/Kconfig"
 source "drivers/misc/mediatek/irtx/Kconfig"

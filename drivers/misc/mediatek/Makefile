@@ -172,9 +172,6 @@ obj-$(CONFIG_MTK_DYNAMIC_BOOST) += dynamic_boost/
 
 obj-$(CONFIG_MTK_RRC)	+= rrc/
 
-#for hall sensor
-obj-y   += hall_sensor/
-
 # Crypto performance tools (disable by default)
 obj-n += crypto/
 

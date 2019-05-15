@@ -32,7 +32,7 @@ kal_bool chargin_hw_init_done = KAL_FALSE;
 static int bq24158_driver_probe(struct i2c_client *client, const struct i2c_device_id *id);
 #ifdef CONFIG_OF
 static const struct of_device_id bq24158_of_match[] = { 
-            {.compatible = "mediatek,bq24158",},
+            {.compatible = "mediatek,swithing_charger",},
                     {}, 
 };
 

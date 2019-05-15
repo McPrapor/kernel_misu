@@ -15,6 +15,10 @@ config HUB_SENTRAL_MFG
         help
           sentral sensor hub MFG flag
 
+config AK8789_HALLSENSOR
+        bool "AK8789 hall sensor"
+        default n
+
 #config SENSORS_AK09916
 #        tristate "AK09916 compass support"
 #        default n

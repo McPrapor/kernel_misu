@@ -679,8 +679,8 @@
 
 /* bq24158 power charger */
 &i2c1 {
-	bq24158@6a {
-		compatible = "mediatek,bq24158";
+	swithing_charger@6a {
+		compatible = "mediatek,swithing_charger";
 		reg = <0x6a>;
 		status = "okay";
 	};
@@ -728,28 +728,6 @@
 	};
 };
 
-/* ak8789 */
-/ {
-	        hall_ak8789 {
-        	        compatible = "hall_sensor,ak8789";
-                	hall,att_used = <0x2>;
-	                hall,att_gpio = <0x3>;
-        	        hall,att_gpio_s = <0x1>;
-	        };
-};
-&hall_1 {
-        compatible = "mediatek, HALL_1-eint";
-        interrupt-parent = <&eintc>;
-        interrupts = <0x1 0x8>;
-        debounce = <0x1 0x0>;
-};
-&hall_2 {
-        compatible = "mediatek, HALL_2-eint";
-        interrupt-parent = <&eintc>;
-        interrupts = <0x3 0x8>;
-        debounce = <0x3 0x0>;
-};
-
 /* SENtral sensor hub and sensors: ak8789, bma253, cm36686 */
 &htc_sensor_hub {
                                 compatible = "mediatek, HTC_SENSOR_HUB-eint";
@@ -774,6 +752,29 @@
                 g_sensor_bma253,negate_z = <0x0>;
         };
 };
+*/
+/* ak8789 */
+/*
+/ {
+        hall_ak8789 {
+                compatible = "hall_sensor,ak8789";
+                hall,att_used = <0x2>;
+                hall,att_gpio = <0x3>;
+                hall,att_gpio_s = <0x1>;
+        };
+};
+                        &hall_1 {
+                                compatible = "mediatek, HALL_1-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x1 0x8>;
+                                debounce = <0x1 0x0>;
+                        };
+                        &hall_2 {
+                                compatible = "mediatek, HALL_2-eint";
+                                interrupt-parent = <&eintc>;
+                                interrupts = <0x3 0x8>;
+                                debounce = <0x3 0x0>;
+                        };
 */
 /* cm3886 proximity alsps */
 /* see sensor hub */

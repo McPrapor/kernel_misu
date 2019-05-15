@@ -20,7 +20,7 @@
 #ifndef _bq24158_SW_H_
 #define _bq24158_SW_H_
 
-#define HIGH_BATTERY_VOLTAGE_SUPPORT
+//#define HIGH_BATTERY_VOLTAGE_SUPPORT
 #include "mt_spm.h"
 
 #define bq24158_CON0      0x00

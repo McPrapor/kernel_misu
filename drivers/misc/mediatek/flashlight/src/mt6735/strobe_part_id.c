@@ -17,27 +17,24 @@
 #include <linux/time.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
-#include "mt_typedefs.h"
+#include "kd_camera_typedef.h"
 #ifdef CONFIG_COMPAT
 #include <linux/fs.h>
 #include <linux/compat.h>
 #endif
 #include "kd_flashlight.h"
 
-int strobe_getPartId(int sensorDev)
+int strobe_getPartId(int sensorDev, int strobeId)
 {
-	// return 1 or 2 (backup flash part). Other numbers are invalid.
-	if(sensorDev == e_CAMERA_MAIN_SENSOR)
-	{
+	/* return 1 or 2 (backup flash part). Other numbers are invalid. */
+	if (sensorDev == e_CAMERA_MAIN_SENSOR && strobeId == 1)
 		return 1;
-	}
-	else if(sensorDev == e_CAMERA_SUB_SENSOR)
-	{
+	else if (sensorDev == e_CAMERA_MAIN_SENSOR && strobeId == 2)
 		return 1;
-	}
-	else //e_CAMERA_MAIN_2_SENSOR
-	{
-		return 200;
-	}
-	return 100;
+	else if (sensorDev == e_CAMERA_SUB_SENSOR && strobeId == 1)
+		return 1;
+	else if (sensorDev == e_CAMERA_SUB_SENSOR && strobeId == 2)
+		return 1;
+	/*  else  sensorDev == e_CAMERA_MAIN_2_SENSOR */
+	return 200;
 }

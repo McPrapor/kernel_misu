@@ -15,18 +15,3 @@ config CPY83_S00_FLASHLIGHT
   default n
   help
     CONFIG_CPY83_S00_FLASHLIGHT
-
-config HTC_FLASHLIGHT_COMMON
-        tristate "Common flashlight API for camera"
-        help
-          Say Y here to enable the common API for front flashlight utilization
-
-config FLASHLIGHT_SY7803
-        tristate "SILERGY SY7803 flashlight"
-        help
-          Say Y here to enable the SILERGY SY7803 flashlight
-
-config FLASHLIGHT_SGM3785
-        tristate "SGMICRO SGM3785 flashlight"
-        help
-          Say Y here to enable the SILERGY SGM3785 flashlight
