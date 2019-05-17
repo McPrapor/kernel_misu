@@ -30,7 +30,9 @@
 #include <linux/version.h>
 #include <mt-plat/upmu_common.h>
 //#include <mach/mt6333.h>
-
+//HTC_START
+#include <linux/htc_flashlight.h>
+//HTC_END
 #include "kd_flashlight.h"
 /******************************************************************************
  * Debug configuration
@@ -42,15 +44,15 @@
 // ANDROID_LOG_INFO
 // ANDROID_LOG_DEBUG
 // ANDROID_LOG_VERBOSE
-#define TAG_NAME "[strobe_main_sid2_part1.c]"
+#define TAG_NAME "strobe_main_sid1_part1"
 #define PK_DBG_NONE(fmt, arg...)    do {} while (0)
-#define PK_DBG_FUNC(fmt, arg...)    pr_debug(TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
-#define PK_WARN(fmt, arg...)        pr_warning(TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
-#define PK_NOTICE(fmt, arg...)      pr_notice(TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
-#define PK_INFO(fmt, arg...)        pr_info(TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
-#define PK_TRC_FUNC(f)              pr_debug(TAG_NAME "<%s>\n", __FUNCTION__)
-#define PK_TRC_VERBOSE(fmt, arg...) pr_debug(TAG_NAME fmt, ##arg)
-#define PK_ERROR(fmt, arg...)       pr_err(TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
+#define PK_DBG_FUNC(fmt, arg...)    printk(KERN_INFO TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
+#define PK_WARN(fmt, arg...)        printk(KERN_WARNING TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
+#define PK_NOTICE(fmt, arg...)      printk(KERN_NOTICE TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
+#define PK_INFO(fmt, arg...)        printk(KERN_INFO TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
+#define PK_TRC_FUNC(f)              printk(TAG_NAME "<%s>\n", __FUNCTION__);
+#define PK_TRC_VERBOSE(fmt, arg...) printk(TAG_NAME fmt, ##arg)
+#define PK_ERROR(fmt, arg...)       printk(KERN_ERR TAG_NAME "%s: " fmt, __FUNCTION__ ,##arg)
 
 
 #define DEBUG_LEDS_STROBE
@@ -64,6 +66,9 @@
 	#define PK_ERR(a,...)
 #endif
 
+
+#define HTC_TORCH_CURRENT_MAX 250
+
 /******************************************************************************
  * local variables
 ******************************************************************************/
@@ -76,32 +81,89 @@ Functions
 *****************************************************************************/
 static void work_timeOutFunc(struct work_struct *data);
 
-//extern int flashEnable_sky81296_2(void);
-//extern int flashDisable_sky81296_2(void);
-//extern int setDuty_sky81296_2(int duty);
-//int init_sky81296();
-
-
+//HTC_START
+int gFlashDuty1=0;
+int gbFlashOn1=0;
+//extern int gFlashDuty2;
+//extern int gbFlashOn2;
+static int htc_flash_ind[10] = {150,175,200,220,275,350,425,500,575,650};
+//HTC_END
 
 static int FL_Enable(void)
 {
-//    flashEnable_sky81296_1();
-    PK_DBG("FL_Enable-");
 
+//HTC_START
+#if defined(CONFIG_HTC_FLASHLIGHT_COMMON)
+  gbFlashOn1 = 1;
+    //    if(gbFlashOn2==0){
+    /*
+    if(htc_flash_ind[gFlashDuty1] <=  HTC_TORCH_CURRENT_MAX)
+      htc_torch_main(htc_flash_ind[gFlashDuty1],0);
+    else
+      htc_flash_main(htc_flash_ind[gFlashDuty1],0);
+
+    PK_DBG(" %d:0\n",htc_flash_ind[gFlashDuty1]);
+    */
+
+  if(gFlashDuty1 == 0){
+      htc_torch_main(htc_flash_ind[gFlashDuty1],0);
+  } else{
+      if(gFlashDuty1 > 9){
+          gFlashDuty1 = 9;
+      }
+      PK_DBG("##### duty value  = %d  current value = %d \n",gFlashDuty1,htc_flash_ind[gFlashDuty1]);
+      htc_flash_main(htc_flash_ind[gFlashDuty1],0);
+  }
+    //}
+    //	else{
+    //		htc_flash_main(htc_flash_ind[gFlashDuty1], htc_flash_ind[gFlashDuty2]);
+    //		PK_DBG(" %d:%d\n",htc_flash_ind[gFlashDuty1], htc_flash_ind[gFlashDuty2]);
+    //	}
+#endif
+//HTC_END
     return 0;
 }
 
 static int FL_Disable(void)
 {
-  //  flashDisable_sky81296_1();
+	//HTC_START
+	#if defined(CONFIG_HTC_FLASHLIGHT_COMMON)
 
+	if (gbFlashOn1==0){
+	  //		PK_DBG("skip %d %d\n",gbFlashOn1, gbFlashOn2);
+	  PK_DBG("skip %d\n",gbFlashOn1);
+	  return 0;
+	}
+	gbFlashOn1 = 0;
+	//gbFlashOn2 = 0;
+	htc_flash_main(0,0);
+	PK_DBG(" 0 0\n");
+
+	#endif
+	//HTC_END
     return 0;
 }
 
 static int FL_dim_duty(kal_uint32 duty)
 {
-    //setDuty_sky81296_1(duty);
+    //HTC_START
+    gFlashDuty1 = duty;
+	PK_DBG("%d->%d\n",gFlashDuty1, htc_flash_ind[gFlashDuty1]);
+    //HTC_END
     return 0;
+}
+
+
+static int FL_getPreOnTime(int duty)
+{
+    //return FL_getPreOnTime_6332_2(duty);
+     return 0;
+}
+
+static int FL_preOn(void)
+{
+    //return FL_preOn_6332_2();
+     return 0;
 }
 
 /*
@@ -138,7 +200,8 @@ static int detLowPowerStart(void)
 {
 
 //	g_lowPowerLevel=LOW_BATTERY_LEVEL_0;
-	return 0;
+    return 0;
+
 }
 
 
@@ -171,7 +234,7 @@ static enum hrtimer_restart ledTimeOutCallback(struct hrtimer *timer)
 
 static void timerInit(void)
 {
-	//ktime_t ktime;
+
 
 
 	//mt6333_set_rg_chrwdt_en(0);
@@ -196,7 +259,7 @@ static void timerInit(void)
 
 }
 
-
+static int gGetPreOnDuty=0;
 static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
 {
 	int temp;
@@ -204,11 +267,11 @@ static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
 	int ior_shift;
 	int iow_shift;
 	int iowr_shift;
-	//kal_uint8 valTemp;
+	kdStrobeDrvArg kdArg;
 	ior_shift = cmd - (_IOR(FLASHLIGHT_MAGIC,0, int));
 	iow_shift = cmd - (_IOW(FLASHLIGHT_MAGIC,0, int));
 	iowr_shift = cmd - (_IOWR(FLASHLIGHT_MAGIC,0, int));
-	PK_DBG("constant_flashlight_ioctl() line=%d ior_shift=%d, iow_shift=%d iowr_shift=%d arg=%d\n",__LINE__, ior_shift, iow_shift, iowr_shift, (int)arg);
+	PK_DBG("constant_flashlight_ioctl() line=%d ior_shift=%d, iow_shift=%d iowr_shift=%d arg=%lu\n",__LINE__, ior_shift, iow_shift, iowr_shift, arg);
     switch(cmd)
     {
 
@@ -217,6 +280,27 @@ static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
 			g_timeOutTimeMs=arg;
 		break;
 
+		case FLASH_IOC_PRE_ON:
+    		PK_DBG("FLASH_IOC_PRE_ON\n");
+			FL_preOn();
+    		break;
+
+		 case FLASH_IOC_GET_PRE_ON_TIME_MS_DUTY:
+            PK_DBG("FLASH_IOC_GET_PRE_ON_TIME_MS_DUTY: %d\n",(int)arg);
+            gGetPreOnDuty = arg;
+            break;
+
+        case FLASH_IOC_GET_PRE_ON_TIME_MS:
+    		PK_DBG("FLASH_IOC_GET_PRE_ON_TIME_MS: %d\n",(int)arg);
+    		temp = FL_getPreOnTime(gGetPreOnDuty);
+    		kdArg.arg = temp;
+            if(copy_to_user((void __user *) arg , (void*)&kdArg , sizeof(kdStrobeDrvArg)))
+            {
+                PK_DBG(" ioctl copy to user failed\n");
+				PK_DBG(" arg = %lx",arg);
+                return -1;
+            }
+    		break;
 
     	case FLASH_IOC_SET_DUTY :
     		PK_DBG("FLASHLIGHT_DUTY: %d\n",(int)arg);
@@ -224,10 +308,7 @@ static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
     		break;
 
 
-    	case FLASH_IOC_SET_STEP:
-    		PK_DBG("FLASH_IOC_SET_STEP: %d\n",(int)arg);
 
-    		break;
 
     	case FLASH_IOC_SET_ONOFF :
     		PK_DBG("FLASHLIGHT_ONOFF: %d\n",(int)arg);
@@ -279,7 +360,6 @@ static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
             PK_DBG("FLASH_IOC_GET_REG: %d\n",(int)arg);
 
             //i4RetValue = valTemp;
-            //PK_DBG("FLASH_IOC_GET_REG: v=%d\n",valTemp);
             break;
 
         case FLASH_IOC_HAS_LOW_POWER_DETECT:
@@ -370,7 +450,7 @@ static FLASHLIGHT_FUNCTION_STRUCT	constantFlashlightFunc=
 
 
 
-MUINT32 strobeInit_main_sid2_part1(PFLASHLIGHT_FUNCTION_STRUCT *pfFunc)
+MUINT32 strobeInit_main_sid1_part1(PFLASHLIGHT_FUNCTION_STRUCT *pfFunc)
 {
     if (pfFunc != NULL)
     {

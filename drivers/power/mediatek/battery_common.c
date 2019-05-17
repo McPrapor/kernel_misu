@@ -74,6 +74,9 @@
 #include <mach/mt_charging.h>
 #include <mach/mt_pmic.h>
 
+#ifdef CONFIG_V36BML_BATTERY
+#define HIGH_BATTERY_VOLTAGE_SUPPORT
+#endif
 
 #if defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 #include <mach/diso.h>

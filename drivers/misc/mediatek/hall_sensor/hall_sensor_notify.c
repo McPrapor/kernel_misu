@@ -8,7 +8,7 @@
  * for more details.
  */
 
-#include "hall_sensor.h"
+#include <linux/hall_sensor.h>
 
 BLOCKING_NOTIFIER_HEAD(hallsensor_notifier_list);
 int hallsensor_register_notifier(struct notifier_block *nb)
