@@ -1081,10 +1081,10 @@ to make keypad work without such a hack */
 };
 / {
 	cust_accel@0 {
-                compatible = "mediatek,bma250";
+                compatible = "mediatek,bma253_new";
                 i2c_num = <2>;
                 i2c_addr = <0x18 0 0 0>;
-                direction = <5>;
+                direction = <1>;
                 power_id = <0xffff>;
                 power_vol = <0>;
                 firlen = <0>;
@@ -1149,26 +1149,6 @@ to make keypad work without such a hack */
                 status = "okay";
         };
 };
-
-/*
-front s5k5e8xyv36
-GPIO4 GPIO_CAMERA_CMRST out low
-GPIO122 GPIO_CAMERA_CMPDN out high
-
-rear ov13850v36
-GPIO46 GPIO_CAMERA_CMRST out low
-GPIO7 GPIO_CAMERA_CMPDN out high
-
-GPIO32 GPIO_CAMERA_RDN0_A out -
-GPIO33 GPIO_CAMERA_RDP0_A out -
-GPIO34 GPIO_CAMERA_RDN1_A out -
-GPIO35 GPIO_CAMERA_RDP1_A out -
-GPIO36 GPIO_CAMERA_RCN_A out -
-GPIO37 GPIO_CAMERA_RCP_A out -
-
-?GPIO66 GPIO_OVP_DET ?
-
-*/
 
 &pio {
 	camera_pins_cam0_rst0: cam0@0 {
@@ -1237,34 +1217,9 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 	camera_pins_default: camdefault {};
 };
 
-/*
-front s5k5e8xyv36
-GPIO4 GPIO_CAMERA_CMRST out low
-GPIO122 GPIO_CAMERA_CMPDN out high
-
-rear ov13850v36
-GPIO46 GPIO_CAMERA_CMRST out low
-GPIO7 GPIO_CAMERA_CMPDN out high
-
-GPIO32 GPIO_CAMERA_RDN0_A out -
-GPIO33 GPIO_CAMERA_RDP0_A out -
-GPIO34 GPIO_CAMERA_RDN1_A out -
-GPIO35 GPIO_CAMERA_RDP1_A out -
-GPIO36 GPIO_CAMERA_RCN_A out -
-GPIO37 GPIO_CAMERA_RCP_A out -
-
-?GPIO66 GPIO_OVP_DET ?
-
-*/
-
 &kd_camera_hw1 {
 	pinctrl-names =  "default", "cam0_rst0", "cam0_rst1", "cam0_pnd0", "cam0_pnd1",
-		"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1"
-/*		,
-            "cam_rdn0_a", "cam_rdp0_a", "cam_rdn1_a", "cam_rdp1_a", 
-            "cam_rcn_a", "cam_rcp_a"
-*/
-;
+		"cam1_rst0", "cam1_rst1", "cam1_pnd0", "cam1_pnd1";
 	pinctrl-0 = <&camera_pins_default>;
 	pinctrl-1 = <&camera_pins_cam0_rst0>;
 	pinctrl-2 = <&camera_pins_cam0_rst1>;
@@ -1274,14 +1229,6 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 	pinctrl-6 = <&camera_pins_cam1_rst1>;
 	pinctrl-7 = <&camera_pins_cam1_pnd0>;
 	pinctrl-8 = <&camera_pins_cam1_pnd1>;
-/*	
-        pinctrl-9 = <&camera_pins_cam_rdn0_a>;
-        pinctrl-10 = <&camera_pins_cam_rdp0_a>;
-        pinctrl-11 = <&camera_pins_cam_rdn1_a>;
-        pinctrl-12 = <&camera_pins_cam_rdp1_a>;
-        pinctrl-13 = <&camera_pins_cam_rcn_a>;
-        pinctrl-14 = <&camera_pins_cam_rcp_a>;
-*/
         vcama-supply = <&mt_pmic_vcama_ldo_reg>;
         vcama_main2-supply = <&mt_pmic_vcama_ldo_reg>;
         vcama_sub-supply = <&mt_pmic_vcama_ldo_reg>;
@@ -1334,21 +1281,6 @@ GPIO37 GPIO_CAMERA_RCP_A out -
 		};
 	};
 };
-
-/*
-                chip->gpio_enm = (GPIO60 | 0x80000000);
-                chip->gpio_enf = (GPIO43 | 0x80000000);
-GPIO42 GPIO_FLT_ENM out low
-
-42 00001110 00111110 - gpio_flt_enm
-43 00000110 00000110 - gpio_flt_enf
-
-46 01001110 01111110 - gpio_camera_cmrst
-47
-48
-
-60 00000110 00110110 - 
-*/
 
 &camera_gpio_flashlight {
 	pinctrl-names = "default", "flash_strobe0", "flash_strobe1", "flash_torch0", "flash_torch1";
