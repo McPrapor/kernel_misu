@@ -50,8 +50,11 @@
 /***************************************************************************** 
  * GLobal Variable
  *****************************************************************************/
+#ifdef CONFIG_MTK_LEGACY
 static struct i2c_board_info __initdata tps65132_board_info = {I2C_BOARD_INFO(I2C_ID_NAME, TPS_ADDR)};
-static struct i2c_client *tps65132_i2c_client = NULL;
+#endif
+static struct i2c_client *tps65132_i2c_client;
+//static struct i2c_client *tps65132_i2c_client = NULL;
 
 /***************************************************************************** 
  * Function Prototype
@@ -140,9 +143,10 @@ EXPORT_SYMBOL_GPL(tps65132_write_bytes);
 
 static int __init tps65132_iic_init(void)
 {
-
+#if defined(CONFIG_MTK_LEGACY)
     printk( "*********hx8394d tps65132_iic_init\n");
     i2c_register_board_info(TPS_I2C_BUSNUM, &tps65132_board_info, 1);
+#endif
     printk( "*********hx8394d tps65132_iic_init2\n");
     i2c_add_driver(&tps65132_iic_driver);
     printk( "*********hx8394d tps65132_iic_init success\n");	
@@ -180,8 +184,10 @@ extern int TPS65132_write_byte(kal_uint8 addr, kal_uint8 value);
 
 #define FRAME_WIDTH  										(720)
 #define FRAME_HEIGHT 										(1280)
-#define GPIO_65132_ENP	GPIO_LCD_BIAS_ENP_PIN
-#define GPIO_65132_ENN	GPIO_LCD_BIAS_ENN_PIN
+//#define GPIO_65132_ENP	GPIO_LCD_BIAS_ENP_PIN
+//#define GPIO_65132_ENN	GPIO_LCD_BIAS_ENN_PIN
+#define CUST_GPIO_65132_ENP  (GPIO86 | 0x80000000)
+#define CUST_GPIO_65132_ENN  (GPIO83 | 0x80000000)
 #define GPIO146_RST	(GPIO146 | 0x80000000)
 //#define GPIO146		GPIO_LCM_RST
 //COMPAT!!!
@@ -730,50 +736,55 @@ static void lcm_init(void)
     cmd=0x00;
     data=0x0E;
 
-    mt_set_gpio_mode(GPIO_65132_ENP, GPIO_MODE_00);//sophiarui
-    mt_set_gpio_dir(GPIO_65132_ENP, GPIO_DIR_OUT);
-    mt_set_gpio_out(GPIO_65132_ENP, GPIO_OUT_ONE);
+    mt_set_gpio_mode(CUST_GPIO_65132_ENP, GPIO_MODE_00);//sophiarui
+    mt_set_gpio_dir(CUST_GPIO_65132_ENP, GPIO_DIR_OUT);
+    mt_set_gpio_out(CUST_GPIO_65132_ENP, GPIO_OUT_ONE);
     MDELAY(15);
-    mt_set_gpio_mode(GPIO_65132_ENN, GPIO_MODE_00);//sophiarui
-    mt_set_gpio_dir(GPIO_65132_ENN, GPIO_DIR_OUT);
-    mt_set_gpio_out(GPIO_65132_ENN, GPIO_OUT_ONE);
+    mt_set_gpio_mode(CUST_GPIO_65132_ENN, GPIO_MODE_00);//sophiarui
+    mt_set_gpio_dir(CUST_GPIO_65132_ENN, GPIO_DIR_OUT);
+    mt_set_gpio_out(CUST_GPIO_65132_ENN, GPIO_OUT_ONE);
     MDELAY(7);
 #ifdef BUILD_LK
-printf("%s: xutao: ret_code: %d\n", __func__);
+    printf("%s: xutao: ret_code: %d\n", __func__);
 
-ret=TPS65132_write_byte(cmd,data);
-if(ret)    	
-printf("[LK]TM050-----tps6132----cmd=%0x--i2c write error----\n",cmd);    	
-else
-printf("[LK]TM050----tps6132----cmd=%0x--i2c write success----\n",cmd);  
-		
+    ret=TPS65132_write_byte(cmd,data);
+    if(ret)    	
+        printf("[LK]TM050-----tps6132----cmd=%0x--i2c write error----\n",cmd);    	
+    else
+        printf("[LK]TM050----tps6132----cmd=%0x--i2c write success----\n",cmd);	
 #else
-ret=TPS65132_write_bytes(cmd,data);
-if(ret<0)
-printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
-else
-printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
+#ifdef CONFIG_MTK_LEGACY
+    ret=TPS65132_write_bytes(cmd,data);
+#endif
+    if(ret<0)
+        printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
+    else
+        printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
 #endif
 
-cmd=0x01;
-data=0x0E;
+    cmd=0x01;
+    data=0x0E;
 #ifdef BUILD_LK
-ret=TPS65132_write_byte(cmd,data);
-if(ret)    	
-printf("[LK]TM050-----tps6132----cmd=%0x--i2c write error----\n",cmd);    	
-else
-printf("[LK]TM050----tps6132----cmd=%0x--i2c write success----\n",cmd); 
+    ret=TPS65132_write_byte(cmd,data);
+    if(ret)    	
+        printf("[LK]TM050-----tps6132----cmd=%0x--i2c write error----\n",cmd);    	
+    else
+        printf("[LK]TM050----tps6132----cmd=%0x--i2c write success----\n",cmd); 
 
-TPS65132_write_byte(0x03, 0x33);//VSP/VSN FLOATING //0x03--- 0x40 ---tablet
-TPS65132_write_byte(0xFF, 0x80);  
+    TPS65132_write_byte(0x03, 0x33);//VSP/VSN FLOATING //0x03--- 0x40 ---tablet
+    TPS65132_write_byte(0xFF, 0x80);  
 #else
-ret=TPS65132_write_bytes(cmd,data);
-if(ret<0)
-printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
-else
-printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
-TPS65132_write_bytes(0x03, 0x33);
-TPS65132_write_bytes(0xFF, 0x80);
+#ifdef CONFIG_MTK_LEGACY
+    ret=TPS65132_write_bytes(cmd,data);
+#endif
+    if(ret<0)
+        printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write error-----\n",cmd);
+    else
+        printk("[KERNEL]TM050-----tps6132---cmd=%0x-- i2c write success-----\n",cmd);
+#ifdef CONFIG_MTK_LEGACY
+    TPS65132_write_bytes(0x03, 0x33);
+    TPS65132_write_bytes(0xFF, 0x80);
+#endif
 #endif
 
     MDELAY(20);
@@ -845,13 +856,13 @@ static void lcm_suspend(void)
 
     SET_RESET_PIN(0);	
     MDELAY(15);	
-    mt_set_gpio_mode(GPIO_65132_ENN, GPIO_MODE_00);
-    mt_set_gpio_dir(GPIO_65132_ENN, GPIO_DIR_OUT);
-    mt_set_gpio_out(GPIO_65132_ENN, GPIO_OUT_ZERO);
+    mt_set_gpio_mode(CUST_GPIO_65132_ENN, GPIO_MODE_00);
+    mt_set_gpio_dir(CUST_GPIO_65132_ENN, GPIO_DIR_OUT);
+    mt_set_gpio_out(CUST_GPIO_65132_ENN, GPIO_OUT_ZERO);
     MDELAY(7);
-    mt_set_gpio_mode(GPIO_65132_ENP, GPIO_MODE_00);
-    mt_set_gpio_dir(GPIO_65132_ENP, GPIO_DIR_OUT);
-    mt_set_gpio_out(GPIO_65132_ENP, GPIO_OUT_ZERO);
+    mt_set_gpio_mode(CUST_GPIO_65132_ENP, GPIO_MODE_00);
+    mt_set_gpio_dir(CUST_GPIO_65132_ENP, GPIO_DIR_OUT);
+    mt_set_gpio_out(CUST_GPIO_65132_ENP, GPIO_OUT_ZERO);
     MDELAY(7);
  
     //SET_GPIO_OUT(GPIO_LCM_PWR_EN,0);//Disable LCM Power
