@@ -45,18 +45,19 @@ Front Camera | 5MP, Int. 5MP
  * cameras (ov13850, s5k5e8)
  * himax 852xes touchpad(no dt2w)
  * notification leds
+ * SGM3785 flashlight
+ * LM3642 led torch
+ * bq24158 charger
  
 -------------
 ## Testing...
  * cameras (ov5670, s5k3l2)
- * SGM3785 flashlight
- * LM3642 led torch
- * bq24158 charger
- * battery meter tables
  * hall_ak8789 magnetometer
  
 -------------
 ## Broken/Bugs
+ * fast charging
+ * battery meter tables
  * SENTRAL iio sensor hub needs new sensor drivers support
 
 -------------
