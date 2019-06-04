@@ -22,11 +22,7 @@
 
 #define POWER_INT0_VOLT 3400
 #define POWER_INT1_VOLT 3250
-#ifdef CONFIG_V36BML_BATTERY
-#define POWER_INT2_VOLT 3000
-#else
 #define POWER_INT2_VOLT 3100
-#endif
 
 #if defined(CONFIG_ARCH_MT6753)
 #define POWER_BAT_OC_CURRENT_H    4670
@@ -44,16 +40,10 @@
 //#define DLPT_POWER_OFF_EN
 //end removed by liuwenbo@yulong.com for suddenly power off with low battery voltage
 #define POWEROFF_BAT_CURRENT 3000
-#ifdef CONFIG_V36BML_BATTERY
-#define DLPT_POWER_OFF_THD 50
-#else
 #define DLPT_POWER_OFF_THD 100
-#endif
 
 //#define BATTERY_MODULE_INIT
-#ifndef CONFIG_V36BML_BATTERY
 #define MTK_BQ24296_SUPPORT //add by liuwenbo@yulong.com 2015.05.04 to support bq24296
-#endif
 
 /* ADC Channel Number */
 enum {

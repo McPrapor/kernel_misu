@@ -34,10 +34,10 @@
 #include <mt-plat/battery_meter.h>
 #include <mt-plat/battery_common.h>
 #include <mt-plat/battery_meter_hal.h>
-
 #include <mach/mt_battery_meter.h>
 #include <mach/mt_battery_meter_table.h>
 #include <mach/mt_pmic.h>
+
 
 #include <mt-plat/upmu_common.h>
 
@@ -258,37 +258,6 @@ unsigned int g_fg_battery_id = 0;
 extern int get_device_info(char* buf);
 /*add end gy sunxiaogang@yulong.com*/
 #ifdef MTK_GET_BATTERY_ID_BY_AUXADC
-#ifdef CONFIG_V36BML_BATTERY
-void fgauge_get_profile_id(void)
-{
-	int id_volt = 0;
-	int id = 0;
-	int ret = 0;
-
-	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
-        id_volt = id_volt/1000;
-	if (ret != 0)
-		bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]id_volt read fail\n");
-	else
-		bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]id_volt = %d\n", id_volt);
-
-	if ((sizeof(g_battery_id_voltage) / sizeof(signed int)) != TOTAL_BATTERY_NUMBER) {
-		bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]error! voltage range incorrect!\n");
-		return;
-	}
-
-	for (id = 0; id < TOTAL_BATTERY_NUMBER; id++) {
-		if (id_volt < g_battery_id_voltage[id]) {
-			g_fg_battery_id = id;
-			break;
-		} else if (g_battery_id_voltage[id] == -1) {
-			g_fg_battery_id = TOTAL_BATTERY_NUMBER - 1;
-		}
-	}
-
-	bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]Battery id (%d)\n", g_fg_battery_id);
-}
-#else
 void fgauge_get_profile_id(void)
 {
 	int id_volt = 0;
@@ -336,7 +305,6 @@ void fgauge_get_profile_id(void)
 	/*add end by sunxiaogang@yulong.com*/
 	bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]Battery id (%d)\n", g_fg_battery_id);
 }
-#endif
 #elif defined(MTK_GET_BATTERY_ID_BY_GPIO)
 void fgauge_get_profile_id(void)
 {
@@ -364,8 +332,6 @@ int __batt_meter_init_cust_data_from_cust_header(void)
 	batt_meter_cust_data.bat_ntc = 10;
 #elif (BAT_NTC_47 == 1)
 	batt_meter_cust_data.bat_ntc = 47;
-#elif (BAT_NTC_100 == 1)
-	batt_meter_cust_data.bat_ntc = 100;
 #endif
 
 #if defined(RBAT_PULL_UP_R)
@@ -868,23 +834,18 @@ int BattThermistorConverTemp(int Res)
 	int i = 0;
 	int RES1 = 0, RES2 = 0;
 	int TBatt_Value = -200, TMP1 = 0, TMP2 = 0;
-#ifdef CONFIG_V36BML_BATTERY
-	int TABLE_SIZE = NTC_TABLE_SIZE - 1;
-#else
-	int TABLE_SIZE = 16;
-#endif
 
 	BATT_TEMPERATURE *batt_temperature_table = Batt_Temperature_Table[g_fg_battery_id];
 
 	if (Res >= batt_temperature_table[0].TemperatureR) {
 		TBatt_Value = -20;
-	} else if (Res <= batt_temperature_table[TABLE_SIZE].TemperatureR) {
+	} else if (Res <= batt_temperature_table[16].TemperatureR) {
 		TBatt_Value = 60;
 	} else {
 		RES1 = batt_temperature_table[0].TemperatureR;
 		TMP1 = batt_temperature_table[0].BatteryTemp;
 
-		for (i = 0; i <= TABLE_SIZE; i++) {
+		for (i = 0; i <= 16; i++) {
 			if (Res < batt_temperature_table[i].TemperatureR) {
 				RES1 = batt_temperature_table[i].TemperatureR;
 				TMP1 = batt_temperature_table[i].BatteryTemp;
@@ -1514,11 +1475,6 @@ void fgauge_construct_battery_profile_init(void)
 	BATTERY_PROFILE_STRUCT_P temp_profile_p, profile_p[PROFILE_SIZE];
 	int i, j, saddles, profile_index;
 	signed int low_p = 0, high_p = 0, now_p = 0, low_vol = 0, high_vol = 0;
-#ifdef CONFIG_V36BML_BATTERY
-	int TABLE_SIZE = ZCV_TABLE_SIZE;
-#else
-	int TABLE_SIZE = 51;
-#endif
 
 	profile_p[0] = fgauge_get_profile(batt_meter_cust_data.temperature_t0);
 	profile_p[1] = fgauge_get_profile(batt_meter_cust_data.temperature_t1);
@@ -1526,8 +1482,8 @@ void fgauge_construct_battery_profile_init(void)
 	profile_p[3] = fgauge_get_profile(batt_meter_cust_data.temperature_t3);
 	saddles = fgauge_get_saddles();
 	temp_profile_p =
-	    (BATTERY_PROFILE_STRUCT_P) kmalloc(TABLE_SIZE * sizeof(*temp_profile_p), GFP_KERNEL);
-	memset(temp_profile_p, 0, TABLE_SIZE * sizeof(*temp_profile_p));
+	    (BATTERY_PROFILE_STRUCT_P) kmalloc(51 * sizeof(*temp_profile_p), GFP_KERNEL);
+	memset(temp_profile_p, 0, 51 * sizeof(*temp_profile_p));
 	for (i = 0; i < PROFILE_SIZE; i++) {
 		profile_index = 0;
 		for (j = 0; j * 2 <= 100; j++) {
@@ -2702,11 +2658,9 @@ signed int fgauge_update_dod(void)
 	signed int FG_dod_1 = 0;
 	int adjust_coulomb_counter = batt_meter_cust_data.car_tune_value;
 #ifdef Q_MAX_BY_CURRENT
-#ifndef CONFIG_V36BML_BATTERY
 	signed int C_0mA = 0;
 	signed int C_400mA = 0;
 	signed int C_FGCurrent = 0;
-#endif
 #endif
 
 	if (gFG_DOD0 > 100) {
