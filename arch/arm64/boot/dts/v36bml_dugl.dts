@@ -1081,8 +1081,8 @@ to make keypad work without such a hack */
 };
 / {
 	cust_accel@0 {
-/*                compatible = "mediatek,bma250"; */
-                compatible = "mediatek,bma253_new";
+                compatible = "mediatek,bma250";
+/*                compatible = "mediatek,bma253_new"; */
                 i2c_num = <2>;
                 i2c_addr = <0x18 0 0 0>;
                 direction = <5>;

@@ -1106,10 +1106,15 @@ static void pchr_turn_on_charging(void)
 		/*add end by sunxiaogang@yulong.com 2015.07.20*/
 		/* Set Charging Current */
 		if (get_usb_current_unlimited()) {
-			if (batt_cust_data.ac_charger_input_current != 0)
+			if (batt_cust_data.ac_charger_input_current != 0) {
+				printk("[chrdebug] batt_cust_data.ac_charger_input_current != 0 g_temp_input_CC_value = batt_cust_data.ac_charger_input_current %d\n", batt_cust_data.ac_charger_input_current);
 				g_temp_input_CC_value = batt_cust_data.ac_charger_input_current;
+			}
 			else
+			{
+				printk("[chrdebug] batt_cust_data.ac_charger_input_current == 0 g_temp_input_CC_value = batt_cust_data.ac_charger_current %d\n", batt_cust_data.ac_charger_current);
 				g_temp_input_CC_value = batt_cust_data.ac_charger_current;
+			}
 
 			g_temp_CC_value = batt_cust_data.ac_charger_current;
 			battery_log(BAT_LOG_FULL,
