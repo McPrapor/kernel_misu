@@ -137,6 +137,7 @@ static void __init_charging_varaibles(void)
 {
 	static int init_flag;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	if (init_flag == 0) {
 		init_flag = 1;
 		charging_full_current = batt_cust_data.charging_full_current;
@@ -153,6 +154,7 @@ void BATTERY_SetUSBState(int usb_state_value)
 #if defined(CONFIG_POWER_EXT)
 	battery_log(BAT_LOG_CRTI, "[BATTERY_SetUSBState] in FPGA/EVB, no service\r\n");
 #else
+printk("[linchr] %s\n", __FUNCTION__);
 	if ((usb_state_value < USB_SUSPEND) || ((usb_state_value > USB_CONFIGURED))) {
 		battery_log(BAT_LOG_CRTI,
 			    "[BATTERY] BAT_SetUSBState Fail! Restore to default value\r\n");
@@ -172,12 +174,14 @@ void BATTERY_SetUSBState(int usb_state_value)
 #if defined(CONFIG_MTK_HAFG_20)
 unsigned int get_cv_voltage(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	return g_cv_voltage;
 }
 #endif
 
 unsigned int get_charging_setting_current(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	return g_temp_CC_value;
 }
 
@@ -191,6 +195,7 @@ static void mtk_ta_decrease(void)
 {
 	kal_bool ta_current_pattern = KAL_FALSE;	/* FALSE = decrease */
 
+printk("[linchr] %s\n", __FUNCTION__);
 	/* if(BMT_status.charger_exist == KAL_TRUE) */
 	if (ta_cable_out_occur == KAL_FALSE) {
 		battery_charging_control(CHARGING_CMD_SET_TA_CURRENT_PATTERN, &ta_current_pattern);
@@ -206,6 +211,7 @@ static void mtk_ta_increase(void)
 {
 	kal_bool ta_current_pattern = KAL_TRUE;	/* TRUE = increase */
 
+printk("[linchr] %s\n", __FUNCTION__);
 	/* if(BMT_status.charger_exist == KAL_TRUE) */
 	if (ta_cable_out_occur == KAL_FALSE) {
 		battery_charging_control(CHARGING_CMD_SET_TA_CURRENT_PATTERN, &ta_current_pattern);
@@ -221,6 +227,7 @@ static void mtk_ta_reset_vchr(void)
 {
 	CHR_CURRENT_ENUM chr_current = CHARGE_CURRENT_70_00_MA;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_SET_CURRENT, &chr_current);
 	msleep(250);		/* reset Vchr to 5V */
 
@@ -238,6 +245,7 @@ static void mtk_ta_init(void)
 	ta_check_ta_control = KAL_FALSE;
 	ta_cable_out_occur = KAL_FALSE;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_RESET_WATCH_DOG_TIMER, NULL);
 	battery_charging_control(CHARGING_CMD_INIT, NULL);
 
@@ -248,6 +256,7 @@ int ta_get_charger_voltage(void)
 	int voltage = 0;
 	int i;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	for (i = 0; i < 10; i++)
 		voltage = voltage + battery_meter_get_charger_voltage();
 
@@ -264,6 +273,7 @@ static void mtk_ta_detector(void)
 	unsigned int retransmit_count = 0;
 	unsigned int charging_enable = true;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "mtk_ta_detector() start\n");
 
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
@@ -309,6 +319,7 @@ static void mtk_tuning_voltage(int curr_level, int target_level)
 	int exec_level = 0;
 	CHR_CURRENT_ENUM chr_current = CHARGE_CURRENT_70_00_MA;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	/* if(BMT_status.charger_exist == KAL_TRUE) */
 	if (ta_cable_out_occur == KAL_FALSE) {
 		battery_log(BAT_LOG_CRTI, "mtk_tuning_voltage() start\n");
@@ -357,6 +368,7 @@ static void select_v_chr_candidate(int curr_vbat, int ta_v_chr_candidate[])
 {
 	battery_log(BAT_LOG_CRTI, "select_v_chr_candidate() start\n");
 
+printk("[linchr] %s\n", __FUNCTION__);
 	if (curr_vbat > 4200)
 		ta_v_chr_candidate[0] = 4600;
 	else if (curr_vbat > 4000)
@@ -386,6 +398,7 @@ static void mtk_ta_vchr_select(int i, int ta_v_chr_candidate[], int ta_charging_
 	kal_bool retransmit = KAL_TRUE;
 	unsigned int retransmit_count = 0;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	current_vchr = battery_meter_get_charger_voltage();
 	if (ta_current_level != 5000 && current_vchr >= 4900) {	/* pattern error before, so reset vchr to 5V */
 		battery_log(BAT_LOG_CRTI,
@@ -448,6 +461,7 @@ static void mtk_ta_BJT_check(void)
 	int watt = 0;
 	int i = 0, cnt = 0;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	for (i = 0; i < 3; i++) {
 		vchr = battery_meter_get_charger_voltage();
 		curr_vbat = battery_meter_get_battery_voltage(KAL_TRUE);
@@ -479,6 +493,7 @@ static void mtk_ta_BJT_check(void)
 
 static void battery_pump_express_charger_check(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	if (ta_check_chr_type == KAL_TRUE && BMT_status.charger_type == STANDARD_CHARGER) {
 		mutex_lock(&ta_mutex);
 		wake_lock(&TA_charger_suspend_lock);
@@ -513,6 +528,7 @@ static void battery_pump_express_algorithm_start(void)
 	int ta_cv_vchr;
 	unsigned int cv_voltage;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	if (batt_cust_data.high_battery_voltage_support)
 		cv_voltage = 4350;
 	else
@@ -615,6 +631,7 @@ static BATTERY_VOLTAGE_ENUM select_jeita_cv(void)
 {
 	BATTERY_VOLTAGE_ENUM cv_voltage;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	if (g_temp_status == TEMP_ABOVE_POS_60) {
 		cv_voltage = JEITA_TEMP_ABOVE_POS_60_CV_VOLTAGE;
 	} else if (g_temp_status == TEMP_POS_45_TO_POS_60) {
@@ -642,6 +659,7 @@ PMU_STATUS do_jeita_state_machine(void)
 {
 	BATTERY_VOLTAGE_ENUM cv_voltage;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	/* JEITA battery temp Standard */
 	if (BMT_status.temperature >= TEMP_POS_60_THRESHOLD) {
 		battery_log(BAT_LOG_CRTI,
@@ -748,6 +766,7 @@ PMU_STATUS do_jeita_state_machine(void)
 
 static void set_jeita_charging_current(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 #ifdef CONFIG_USB_IF
 	if (BMT_status.charger_type == STANDARD_HOST)
 		return;
@@ -764,6 +783,7 @@ static void set_jeita_charging_current(void)
 
 bool get_usb_current_unlimited(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	if (BMT_status.charger_type == STANDARD_HOST || BMT_status.charger_type == CHARGING_HOST)
 		return usb_unlimited;
 	else
@@ -772,17 +792,20 @@ bool get_usb_current_unlimited(void)
 
 void set_usb_current_unlimited(bool enable)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	usb_unlimited = enable;
 }
 
 void select_charging_curret_bcct(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	/* done on set_bat_charging_current_limit */
 }
 
 
 unsigned int set_bat_charging_current_limit(int current_limit)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] set_bat_charging_current_limit (%d)\r\n",
 		    current_limit);
 
@@ -849,6 +872,7 @@ void set_bat_sw_cv_charging_current_limit(int current_limit)
 {
 	battery_log(BAT_LOG_CRTI, "[BATTERY] set_bat_sw_cv_charging_current_limit (%d)\r\n",
 		    current_limit);
+printk("[linchr] %s\n", __FUNCTION__);
 
 	if (current_limit <= CHARGE_CURRENT_70_00_MA)
 		ulc_cv_charging_current = CHARGE_CURRENT_0_00_MA;
@@ -890,6 +914,7 @@ void set_bat_sw_cv_charging_current_limit(int current_limit)
 
 void select_charging_curret(void)
 {
+printk("[linchr] %s\n", __FUNCTION__);
 	if (g_ftm_battery_flag) {
 		battery_log(BAT_LOG_CRTI, "[BATTERY] FTM charging : %d\r\n",
 			    charging_level_data[0]);
@@ -957,6 +982,7 @@ static unsigned int charging_full_check(void)
 {
 	unsigned int status = KAL_FALSE;
 
+printk("[linchr] %s\n", __FUNCTION__);
 #if defined(POST_TIME_ENABLE)
 	static unsigned int post_charging_time;
 
@@ -1016,6 +1042,7 @@ static void charging_current_calibration(void)
 #else
 	bat_isense_offset = 0;
 #endif
+printk("[linchr] %s\n", __FUNCTION__);
 
 	battery_meter_sync(bat_isense_offset);
 }
@@ -1025,6 +1052,7 @@ static void pchr_sw_cv_charing_current_check(void)
 	kal_bool charging_enable = KAL_TRUE;
 	unsigned int csdac_full_flag = KAL_TRUE;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_SET_CURRENT, &ulc_cv_charging_current);
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
 
@@ -1062,6 +1090,7 @@ static void pchr_turn_on_charging(void)
 #endif
 	unsigned int charging_enable = KAL_TRUE;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "[BATTERY] pchr_turn_on_charging()!\r\n");
 
 	if (BMT_status.bat_charging_state == CHR_ERROR) {
@@ -1159,6 +1188,7 @@ PMU_STATUS BAT_PreChargeModeAction(void)
 	battery_log(BAT_LOG_CRTI, "[BATTERY] Pre-CC mode charge, timer=%d on %d !!\n\r",
 		    BMT_status.PRE_charging_time, BMT_status.total_charging_time);
 
+printk("[linchr] %s\n", __FUNCTION__);
 	BMT_status.PRE_charging_time += BAT_TASK_PERIOD;
 	BMT_status.CC_charging_time = 0;
 	BMT_status.TOPOFF_charging_time = 0;
@@ -1207,6 +1237,7 @@ PMU_STATUS BAT_ConstantCurrentModeAction(void)
 	ulc_cv_charging_current_flag = KAL_FALSE;
 	ulc_cv_charging_current = g_temp_CC_value;
 
+printk("[linchr] %s\n", __FUNCTION__);
 	if (BMT_status.bat_vol > v_cc2topoff_threshold)
 		BMT_status.bat_charging_state = CHR_TOP_OFF;
 
@@ -1240,6 +1271,7 @@ PMU_STATUS BAT_TopOffModeAction(void)
 	else
 		cv_voltage = 4200;
 
+printk("[linchr] %s cv_voltage %d\n", __FUNCTION__, cv_voltage);
 
 	battery_log(BAT_LOG_CRTI, "[BATTERY] Top Off mode charge, timer=%d on %d !!\n\r",
 		    BMT_status.TOPOFF_charging_time, BMT_status.total_charging_time);
@@ -1274,6 +1306,7 @@ PMU_STATUS BAT_BatteryFullAction(void)
 	unsigned int charging_enable = KAL_FALSE;
 
 	battery_log(BAT_LOG_CRTI, "[BATTERY] Battery full !!\n\r");
+printk("[linchr] %s cv_voltage %d\n", __FUNCTION__, cv_voltage);
 
 	BMT_status.bat_full = KAL_TRUE;
 	BMT_status.total_charging_time = 0;
@@ -1312,6 +1345,7 @@ PMU_STATUS BAT_BatteryHoldAction(void)
 	unsigned int charging_enable;
 
 	battery_log(BAT_LOG_CRTI, "[BATTERY] Hold mode !!\n\r");
+printk("[linchr] %s cv_voltage %d\n", __FUNCTION__, cv_voltage);
 
 	if (BMT_status.bat_vol < batt_cust_data.talking_recharge_voltage
 	    || g_call_state == CALL_IDLE) {
@@ -1332,6 +1366,7 @@ PMU_STATUS BAT_BatteryStatusFailAction(void)
 	unsigned int charging_enable;
 
 	battery_log(BAT_LOG_CRTI, "[BATTERY] BAD Battery status... Charging Stop !!\n\r");
+printk("[linchr] %s cv_voltage %d\n", __FUNCTION__, cv_voltage);
 
 #if defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
 	if ((g_temp_status == TEMP_ABOVE_POS_60) || (g_temp_status == TEMP_BELOW_NEG_10))
@@ -1364,6 +1399,7 @@ void mt_battery_charging_algorithm(void)
 #if defined(CONFIG_MTK_PUMP_EXPRESS_SUPPORT)
 	battery_pump_express_charger_check();
 #endif
+printk("[linchr] %s cv_voltage %d\n", __FUNCTION__, cv_voltage);
 	switch (BMT_status.bat_charging_state) {
 	case CHR_PRE:
 		BAT_PreChargeModeAction();

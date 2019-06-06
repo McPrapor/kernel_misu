@@ -2507,7 +2507,6 @@ void mt_battery_GetBatteryData(void)
 static PMU_STATUS mt_battery_CheckBatteryTemp(void)
 {
 	PMU_STATUS status = PMU_STATUS_OK;
-
 #if defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
 
 	battery_log(BAT_LOG_CRTI, "[BATTERY] support JEITA, temperature=%d\n",
@@ -2542,6 +2541,7 @@ static PMU_STATUS mt_battery_CheckBatteryTemp(void)
 
 #endif
 
+printk("[btrdebug] %s return status = %d temp = %d\n", __FUNCTION__, status, BMT_status.temperature);
 	return status;
 }
 
