@@ -23,8 +23,8 @@
 #include <linux/completion.h>
 #include <asm/uaccess.h>
 
-//#include <linux/htc_flags.h>
-#include "htc_flags.h"
+#include <linux/htc_flags.h>
+//#include "htc_flags.h"
 #include <linux/slab.h>
 
 

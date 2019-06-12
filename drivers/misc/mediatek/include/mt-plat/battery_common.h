@@ -3,6 +3,7 @@
 
 #include <linux/ioctl.h>
 #include <mt-plat/charging.h>
+#include <mt-plat/mt_typedefs.h>
 #include <linux/time.h>
 /*****************************************************************************
  *  BATTERY VOLTAGE
@@ -95,6 +96,28 @@ typedef enum {
 	DURATION_NUM
 } BATTERY_TIME_ENUM;
 
+#ifdef CONFIG_V36BML_BATTERY
+extern int g_chg_limit_reason;
+extern int g_ftm_charger_ctrl_stat;
+
+typedef enum {
+    AICL_START = 1,
+    AICL_CHECKING = 2,
+    AICL_STOP = 3,
+    AICL_PENDGIN = 4,
+    AICL_COMPLETE =5,
+    AICL_DONE = 6,
+    AICL_MAX
+} AICL_STATUS;
+
+/* for htc_extension */
+#define HTC_EXT_UNKNOWN_USB_CHARGER             (1<<0)
+#define HTC_EXT_CHG_UNDER_RATING                (1<<1)
+#define HTC_EXT_CHG_SAFTY_TIMEOUT               (1<<2)
+#define HTC_EXT_CHG_FULL_EOC_STOP               (1<<3)
+#define HTC_EXT_BAD_CABLE_USED          (1<<4)
+#endif
+
 /*****************************************************************************
 *   JEITA battery temperature standard
     charging info ,like temperatue, charging current, re-charging voltage, CV threshold would be reconfigurated.
@@ -141,6 +164,16 @@ typedef enum {
 #define TEMP_NEG_10_THRES_PLUS_X_DEGREE  0
 #endif
 
+#ifdef CONFIG_V36BML_BATTERY
+/* limited charge reason */
+#define HTC_BATT_CHG_LIMIT_BIT_TALK                             (1)
+#define HTC_BATT_CHG_LIMIT_BIT_NAVI                             (1<<1)
+#define HTC_BATT_CHG_LIMIT_BIT_THRML                    (1<<2)
+#define HTC_BATT_CHG_LIMIT_BIT_KDDI                             (1<<3)
+extern int g_chg_limit_reason;
+extern int g_ftm_charger_ctrl_stat;
+#endif
+
 /*****************************************************************************
  *  Normal battery temperature state
  ****************************************************************************/
@@ -175,6 +208,65 @@ typedef unsigned char  BOOL;
 /*****************************************************************************
  *  structure
  ****************************************************************************/
+#ifdef CONFIG_V36BML_BATTERY
+typedef struct { 
+        kal_bool bat_exist;
+        kal_bool bat_full;
+        INT32 bat_charging_state;
+        UINT32 bat_vol;
+        kal_bool bat_in_recharging_state;
+        kal_uint32 Vsense;
+        kal_bool charger_exist;
+        UINT32 charger_vol;
+        INT32 charger_protect_status;
+        INT32 ICharging;
+        INT32 IBattery;
+        INT32 temperature;
+        INT32 temperature_now;
+        INT32 temperatureR;
+        INT32 temperatureV;
+        UINT32 total_charging_time;
+        UINT32 PRE_charging_time;
+        UINT32 CC_charging_time;
+        UINT32 TOPOFF_charging_time;
+        UINT32 POSTFULL_charging_time;
+        UINT32 charger_type;
+        INT32 SOC;
+        INT32 UI_SOC;
+        INT32 PRE_UI_SOC;
+        INT32 UI_SOC2;
+        UINT32 nPercent_ZCV;
+        UINT32 nPrecent_UI_SOC_check_point;
+        UINT32 ZCV;
+        UINT32 full_level;
+        /* HTC debug flags */
+        kal_bool keep_charger_on;
+        kal_bool test_power_monitor;
+        kal_bool force_ac_charger;
+        kal_bool flag_enable_bms_charger_log;
+        kal_bool is_warm;
+        kal_bool is_overload;
+        kal_bool flag_disable_safety_timer;
+        kal_bool flag_disable_temp_protection;
+        kal_bool flag_pa_fake_batt_temp;
+        kal_int32 htc_extension;
+//#ifdef HTC_ENABLE_AICL
+#if 1
+        UINT32 htc_acil_state;
+        UINT32 avg_charger_vol;
+#endif
+} PMU_ChargerStruct;
+
+typedef struct {
+    kal_bool bIs_charging;
+    kal_bool bIs_cnt_rst;
+    kal_uint32 uiTotal_time;
+    kal_int32 iUI_SOC;
+    kal_int32 iSOC;
+    kal_int32 iGap;
+}sSync_uisoc, *pSync_uisoc;
+
+#else
 typedef struct {
 	kal_bool bat_exist;
 	kal_bool bat_full;
@@ -203,6 +295,7 @@ typedef struct {
 	unsigned int nPrecent_UI_SOC_check_point;
 	unsigned int ZCV;
 } PMU_ChargerStruct;
+#endif
 
 struct battery_custom_data {
 	/* mt_charging.h */
@@ -325,6 +418,9 @@ extern void charging_suspend_enable(void);
 extern void charging_suspend_disable(void);
 extern kal_bool bat_is_charger_exist(void);
 extern kal_bool bat_is_charging_full(void);
+#ifdef CONFIG_V36BML_BATTERY
+extern void bat_set_ui_percentage(kal_int32 uiSoc);
+#endif
 extern unsigned int bat_get_ui_percentage(void);
 extern unsigned int get_charging_setting_current(void);
 extern unsigned int bat_is_recharging_phase(void);

@@ -47,6 +47,9 @@
 #include <linux/platform_device.h>
 #include <linux/seq_file.h>
 #include <linux/scatterlist.h>
+#include <linux/htc_flags.h>
+#include <mt-plat/charging.h>
+#include <mt-plat/mt_gpio_core.h>
 #ifdef CONFIG_OF
 #include <linux/of.h>
 #include <linux/of_irq.h>
@@ -76,6 +79,9 @@
 
 #ifdef CONFIG_V36BML_BATTERY
 #define HIGH_BATTERY_VOLTAGE_SUPPORT
+#ifndef strict_strtoul
+#define strict_strtoul    kstrtoul
+#endif
 #endif
 
 #if defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
@@ -128,6 +134,18 @@ int g_battery_tt_check_flag = 0;
 /*
  *  Global Variable
  */
+#ifdef CONFIG_V36BML_BATTERY
+#define Q_MAX_SPEC 2200   // 2200mAh
+//extern void dodprint(void);
+static kal_int32 g_co_soc=100;
+kal_int32 g_recalc_co_soc = KAL_FALSE;
+extern kal_uint32 temp_avg_voltage[];
+//static int charger_ctrl_stat = -1;
+int is_ovp = 0;
+int g_ftm_charger_ctrl_stat = 0;
+int g_chg_limit_reason;
+static int charger_ctrl_stat = -1;
+#endif
 
 struct wake_lock battery_suspend_lock;
 struct wake_lock battery_fg_lock;
@@ -337,6 +355,7 @@ void charging_suspend_enable(void)
 	unsigned int charging_enable = true;
 
 	suspend_discharging = 0;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
 }
 
@@ -345,11 +364,13 @@ void charging_suspend_disable(void)
 	unsigned int charging_enable = false;
 
 	suspend_discharging = 1;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
 }
 
 int read_tbat_value(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return BMT_status.temperature;
 }
 
@@ -357,6 +378,7 @@ int get_charger_detect_status(void)
 {
 	kal_bool chr_status;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_GET_CHARGER_DET_STATUS, &chr_status);
 	return chr_status;
 }
@@ -366,6 +388,7 @@ kal_bool bat_is_ext_power(void)
 {
 	kal_bool pwr_src = 0;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_GET_POWER_SOURCE, &pwr_src);
 	battery_log(BAT_LOG_FULL, "[BAT_IS_EXT_POWER] is_ext_power = %d\n", pwr_src);
 	return pwr_src;
@@ -376,6 +399,7 @@ kal_bool bat_is_ext_power(void)
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
 bool __attribute__((weak)) mt_usb_is_device(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return 1;
 }
 
@@ -385,6 +409,7 @@ kal_bool upmu_is_chr_det(void)
 	unsigned int tmp32;
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (battery_charging_control == NULL)
 		battery_charging_control = chr_control_interface;
 
@@ -428,6 +453,7 @@ EXPORT_SYMBOL(upmu_is_chr_det);
 
 void wake_up_bat(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] wake_up_bat. \r\n");
 
 	chr_wake_up_bat = KAL_TRUE;
@@ -445,6 +471,7 @@ EXPORT_SYMBOL(wake_up_bat);
 #ifdef FG_BAT_INT
 void wake_up_bat2(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] wake_up_bat2. \r\n");
 
 	wake_lock(&battery_fg_lock);
@@ -461,6 +488,7 @@ EXPORT_SYMBOL(wake_up_bat2);
 
 void wake_up_bat3(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] wake_up_bat3. \r\n");
 
 	bat_thread_timeout = KAL_TRUE;
@@ -479,6 +507,7 @@ static ssize_t bat_log_write(struct file *filp, const char __user *buff, size_t 
 {
 	char proc_bat_data;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((len <= 0) || copy_from_user(&proc_bat_data, buff, 1)) {
 		battery_log(BAT_LOG_FULL, "bat_log_write error.\n");
 		return -EFAULT;
@@ -506,6 +535,7 @@ int init_proc_log(void)
 {
 	int ret = 0;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if 1
 	proc_create("batdrv_log", 0644, NULL, &bat_proc_fops);
 	battery_log(BAT_LOG_CRTI, "proc_create bat_proc_fops\n");
@@ -531,6 +561,7 @@ static int wireless_get_property(struct power_supply *psy,
 	int ret = 0;
 	struct wireless_data *data = container_of(psy, struct wireless_data, psy);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
 		val->intval = data->WIRELESS_ONLINE;
@@ -548,6 +579,7 @@ static int ac_get_property(struct power_supply *psy,
 	int ret = 0;
 	struct ac_data *data = container_of(psy, struct ac_data, psy);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
 		val->intval = data->AC_ONLINE;
@@ -565,6 +597,7 @@ static int usb_get_property(struct power_supply *psy,
 	int ret = 0;
 	struct usb_data *data = container_of(psy, struct usb_data, psy);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (psp) {
 	case POWER_SUPPLY_PROP_ONLINE:
 #if defined(CONFIG_POWER_EXT)
@@ -592,6 +625,7 @@ static int battery_get_property(struct power_supply *psy,
 	int ret = 0;
 	struct battery_data *data = container_of(psy, struct battery_data, psy);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
 		val->intval = data->BAT_STATUS;
@@ -772,6 +806,7 @@ static struct battery_data battery_main = {
 static ssize_t show_ADC_Charger_Voltage(struct device *dev, struct device_attribute *attr,
 					char *buf)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] show_ADC_Charger_Voltage : %d\n", BMT_status.charger_vol);
 	return sprintf(buf, "%d\n", BMT_status.charger_vol);
 }
@@ -779,6 +814,7 @@ static ssize_t show_ADC_Charger_Voltage(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Charger_Voltage(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -794,6 +830,7 @@ static ssize_t show_ADC_Channel_0_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 0));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_0_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -801,6 +838,7 @@ static ssize_t show_ADC_Channel_0_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_0_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -816,6 +854,7 @@ static ssize_t show_ADC_Channel_1_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 1));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_1_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -823,6 +862,7 @@ static ssize_t show_ADC_Channel_1_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_1_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -838,6 +878,7 @@ static ssize_t show_ADC_Channel_2_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 2));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_2_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -845,6 +886,7 @@ static ssize_t show_ADC_Channel_2_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_2_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -860,6 +902,7 @@ static ssize_t show_ADC_Channel_3_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 3));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_3_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -867,6 +910,7 @@ static ssize_t show_ADC_Channel_3_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_3_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -882,6 +926,7 @@ static ssize_t show_ADC_Channel_4_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 4));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_4_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -889,6 +934,7 @@ static ssize_t show_ADC_Channel_4_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_4_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -904,6 +950,7 @@ static ssize_t show_ADC_Channel_5_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 5));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_5_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -911,6 +958,7 @@ static ssize_t show_ADC_Channel_5_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_5_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -926,6 +974,7 @@ static ssize_t show_ADC_Channel_6_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 6));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_6_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -933,6 +982,7 @@ static ssize_t show_ADC_Channel_6_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_6_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -948,6 +998,7 @@ static ssize_t show_ADC_Channel_7_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 7));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_7_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -955,6 +1006,7 @@ static ssize_t show_ADC_Channel_7_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_7_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -970,6 +1022,7 @@ static ssize_t show_ADC_Channel_8_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 8));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_8_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -977,6 +1030,7 @@ static ssize_t show_ADC_Channel_8_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_8_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -992,6 +1046,7 @@ static ssize_t show_ADC_Channel_9_Slope(struct device *dev, struct device_attrib
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 9));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_9_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -999,6 +1054,7 @@ static ssize_t show_ADC_Channel_9_Slope(struct device *dev, struct device_attrib
 static ssize_t store_ADC_Channel_9_Slope(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1014,6 +1070,7 @@ static ssize_t show_ADC_Channel_10_Slope(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 10));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_10_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1021,6 +1078,7 @@ static ssize_t show_ADC_Channel_10_Slope(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_10_Slope(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1037,6 +1095,7 @@ static ssize_t show_ADC_Channel_11_Slope(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 11));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_11_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1044,6 +1103,7 @@ static ssize_t show_ADC_Channel_11_Slope(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_11_Slope(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1060,6 +1120,7 @@ static ssize_t show_ADC_Channel_12_Slope(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 12));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_12_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1067,6 +1128,7 @@ static ssize_t show_ADC_Channel_12_Slope(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_12_Slope(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1083,6 +1145,7 @@ static ssize_t show_ADC_Channel_13_Slope(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_slop + 13));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_13_Slope : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1090,6 +1153,7 @@ static ssize_t show_ADC_Channel_13_Slope(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_13_Slope(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1107,6 +1171,7 @@ static ssize_t show_ADC_Channel_0_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 0));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_0_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1114,6 +1179,7 @@ static ssize_t show_ADC_Channel_0_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_0_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1131,12 +1197,14 @@ static ssize_t show_ADC_Channel_1_Offset(struct device *dev, struct device_attri
 
 	ret_value = (*(adc_cali_offset + 1));
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_1_Offset : %d\n", ret_value);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return sprintf(buf, "%u\n", ret_value);
 }
 
 static ssize_t store_ADC_Channel_1_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1153,6 +1221,7 @@ static ssize_t show_ADC_Channel_2_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 2));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_2_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1160,6 +1229,7 @@ static ssize_t show_ADC_Channel_2_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_2_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1176,6 +1246,7 @@ static ssize_t show_ADC_Channel_3_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 3));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_3_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1183,6 +1254,7 @@ static ssize_t show_ADC_Channel_3_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_3_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1199,6 +1271,7 @@ static ssize_t show_ADC_Channel_4_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 4));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_4_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1206,6 +1279,7 @@ static ssize_t show_ADC_Channel_4_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_4_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1222,6 +1296,7 @@ static ssize_t show_ADC_Channel_5_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 5));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_5_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1229,6 +1304,7 @@ static ssize_t show_ADC_Channel_5_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_5_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1245,6 +1321,7 @@ static ssize_t show_ADC_Channel_6_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 6));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_6_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1252,6 +1329,7 @@ static ssize_t show_ADC_Channel_6_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_6_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1268,6 +1346,7 @@ static ssize_t show_ADC_Channel_7_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 7));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_7_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1275,6 +1354,7 @@ static ssize_t show_ADC_Channel_7_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_7_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1291,6 +1371,7 @@ static ssize_t show_ADC_Channel_8_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 8));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_8_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1298,6 +1379,7 @@ static ssize_t show_ADC_Channel_8_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_8_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1314,6 +1396,7 @@ static ssize_t show_ADC_Channel_9_Offset(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 9));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_9_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1321,6 +1404,7 @@ static ssize_t show_ADC_Channel_9_Offset(struct device *dev, struct device_attri
 static ssize_t store_ADC_Channel_9_Offset(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1337,6 +1421,7 @@ static ssize_t show_ADC_Channel_10_Offset(struct device *dev, struct device_attr
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 10));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_10_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1344,6 +1429,7 @@ static ssize_t show_ADC_Channel_10_Offset(struct device *dev, struct device_attr
 static ssize_t store_ADC_Channel_10_Offset(struct device *dev, struct device_attribute *attr,
 					   const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1360,6 +1446,7 @@ static ssize_t show_ADC_Channel_11_Offset(struct device *dev, struct device_attr
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 11));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_11_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1367,6 +1454,7 @@ static ssize_t show_ADC_Channel_11_Offset(struct device *dev, struct device_attr
 static ssize_t store_ADC_Channel_11_Offset(struct device *dev, struct device_attribute *attr,
 					   const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1383,6 +1471,7 @@ static ssize_t show_ADC_Channel_12_Offset(struct device *dev, struct device_attr
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 12));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_12_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1390,6 +1479,7 @@ static ssize_t show_ADC_Channel_12_Offset(struct device *dev, struct device_attr
 static ssize_t store_ADC_Channel_12_Offset(struct device *dev, struct device_attribute *attr,
 					   const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1406,6 +1496,7 @@ static ssize_t show_ADC_Channel_13_Offset(struct device *dev, struct device_attr
 	int ret_value = 1;
 
 	ret_value = (*(adc_cali_offset + 13));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_13_Offset : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1413,6 +1504,7 @@ static ssize_t show_ADC_Channel_13_Offset(struct device *dev, struct device_attr
 static ssize_t store_ADC_Channel_13_Offset(struct device *dev, struct device_attribute *attr,
 					   const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1429,6 +1521,7 @@ static ssize_t show_ADC_Channel_Is_Calibration(struct device *dev, struct device
 	int ret_value = 2;
 
 	ret_value = g_ADC_Cali;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] ADC_Channel_Is_Calibration : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1436,6 +1529,7 @@ static ssize_t show_ADC_Channel_Is_Calibration(struct device *dev, struct device
 static ssize_t store_ADC_Channel_Is_Calibration(struct device *dev, struct device_attribute *attr,
 						const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1451,6 +1545,7 @@ static ssize_t show_Power_On_Voltage(struct device *dev, struct device_attribute
 	int ret_value = 1;
 
 	ret_value = 3400;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Power_On_Voltage : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1458,6 +1553,7 @@ static ssize_t show_Power_On_Voltage(struct device *dev, struct device_attribute
 static ssize_t store_Power_On_Voltage(struct device *dev, struct device_attribute *attr,
 				      const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1472,6 +1568,7 @@ static ssize_t show_Power_Off_Voltage(struct device *dev, struct device_attribut
 	int ret_value = 1;
 
 	ret_value = 3400;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Power_Off_Voltage : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1479,6 +1576,7 @@ static ssize_t show_Power_Off_Voltage(struct device *dev, struct device_attribut
 static ssize_t store_Power_Off_Voltage(struct device *dev, struct device_attribute *attr,
 				       const char *buf, size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1494,6 +1592,7 @@ static ssize_t show_Charger_TopOff_Value(struct device *dev, struct device_attri
 	int ret_value = 1;
 
 	ret_value = 4110;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Charger_TopOff_Value : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1502,6 +1601,7 @@ static ssize_t store_Charger_TopOff_Value(struct device *dev, struct device_attr
 					  const char *buf, size_t size)
 {
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -1517,6 +1617,7 @@ static ssize_t show_FG_Battery_CurrentConsumption(struct device *dev, struct dev
 	int ret_value = 8888;
 
 	ret_value = battery_meter_get_battery_current();
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] FG_Battery_CurrentConsumption : %d/10 mA\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1525,6 +1626,7 @@ static ssize_t store_FG_Battery_CurrentConsumption(struct device *dev,
 						   struct device_attribute *attr, const char *buf,
 						   size_t size)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
 	return size;
 }
@@ -1541,6 +1643,7 @@ static ssize_t show_FG_SW_CoulombCounter(struct device *dev, struct device_attri
 	signed int ret_value = 7777;
 
 	ret_value = battery_meter_get_car();
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[EM] FG_SW_CoulombCounter : %d\n", ret_value);
 	return sprintf(buf, "%u\n", ret_value);
 }
@@ -1549,6 +1652,7 @@ static ssize_t store_FG_SW_CoulombCounter(struct device *dev, struct device_attr
 					  const char *buf, size_t size)
 {
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -1559,6 +1663,7 @@ static DEVICE_ATTR(FG_SW_CoulombCounter, 0664, show_FG_SW_CoulombCounter,
 static ssize_t show_Charging_CallState(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	battery_log(BAT_LOG_CRTI, "call state = %d\n", g_call_state);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return sprintf(buf, "%u\n", g_call_state);
 }
 
@@ -1571,6 +1676,7 @@ static ssize_t store_Charging_CallState(struct device *dev, struct device_attrib
 	rv = kstrtouint(buf, 0, &g_call_state);
 	if (rv != 0)
 		return -EINVAL;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "call state = %d\n", g_call_state);
 	return size;
 }
@@ -1581,6 +1687,7 @@ static DEVICE_ATTR(Charging_CallState, 0664, show_Charging_CallState, store_Char
 static ssize_t show_V_0Percent_Tracking(struct device *dev, struct device_attribute *attr,
 					char *buf)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "V_0Percent_Tracking = %d\n", V_0Percent_Tracking);
 	return sprintf(buf, "%u\n", V_0Percent_Tracking);
 }
@@ -1595,6 +1702,7 @@ static ssize_t store_V_0Percent_Tracking(struct device *dev, struct device_attri
 	if (rv != 0)
 		return -EINVAL;
 	battery_log(BAT_LOG_CRTI, "V_0Percent_Tracking = %d\n", V_0Percent_Tracking);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -1608,6 +1716,7 @@ static ssize_t show_Charger_Type(struct device *dev, struct device_attribute *at
 	chr_ype = BMT_status.charger_exist ? BMT_status.charger_type : CHARGER_UNKNOWN;
 
 	battery_log(BAT_LOG_CRTI, "CHARGER_TYPE = %d\n", chr_ype);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return sprintf(buf, "%u\n", chr_ype);
 }
 
@@ -1615,6 +1724,7 @@ static ssize_t store_Charger_Type(struct device *dev, struct device_attribute *a
 				  const char *buf, size_t size)
 {
 	battery_log(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -1649,6 +1759,7 @@ static ssize_t show_Pump_Express(struct device *dev, struct device_attribute *at
 #endif
 
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "Pump express = %d\n", is_ta_connect);
 	return sprintf(buf, "%u\n", is_ta_connect);
 }
@@ -1662,6 +1773,7 @@ static ssize_t store_Pump_Express(struct device *dev, struct device_attribute *a
 	rv = kstrtouint(buf, 0, &is_ta_connect);
 	if (rv != 0)
 		return -EINVAL;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "Pump express= %d\n", is_ta_connect);
 	return size;
 }
@@ -1683,6 +1795,7 @@ static void mt_battery_update_EM(struct battery_data *bat_data)
 	bat_data->status_smb = g_status_smb;
 	bat_data->capacity_smb = g_capacity_smb;
 	bat_data->present_smb = g_present_smb;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "status_smb = %d, capacity_smb = %d, present_smb = %d\n",
 		    bat_data->status_smb, bat_data->capacity_smb, bat_data->present_smb);
 	if ((BMT_status.UI_SOC == 100) && (BMT_status.charger_exist == KAL_TRUE))
@@ -1697,7 +1810,235 @@ static void mt_battery_update_EM(struct battery_data *bat_data)
 #endif
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+void htc_battery_check_overload(void)
+{
+    static kal_int32 pre_state = CHR_PRE;
 
+    if( pre_state ^ BMT_status.bat_charging_state )
+        htc_battery_meter_overload(TRUE, &BMT_status.is_overload);
+
+    if( BMT_status.bat_charging_state == CHR_CC )
+    {
+        if(g_recalc_co_soc == KAL_TRUE)
+            htc_battery_meter_overload(TRUE, &BMT_status.is_overload);
+        else
+            htc_battery_meter_overload(FALSE, &BMT_status.is_overload);
+    }
+
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        battery_xlog_printk(BAT_LOG_FULL, "[%s] overload = %d\n", __FUNCTION__, BMT_status.is_overload);
+    pre_state = BMT_status.bat_charging_state;
+}
+
+kal_int32 htc_battery_calc_co(kal_int32 soc,kal_int32 ui_soc,kal_bool is_charging)
+{
+        kal_int32 k;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        if (is_charging)
+                k =(soc==100?100:(100*(100-ui_soc)/(100-soc)));
+        else
+                k = (soc==0?100:(100*ui_soc/soc));
+
+        if (k<=0) k = 100;
+
+        return k;
+
+}
+
+void htc_battery_calc_co_soc(kal_int32 soc,kal_int32 ui_soc,kal_bool is_charging)
+{
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        g_co_soc=htc_battery_calc_co(soc,ui_soc,is_charging);
+}
+#if 0
+static kal_int32 htc_battery_calc_pressure(kal_int32 soc,kal_int32 ui_soc,kal_bool is_charging)
+{
+        kal_int32 pressure;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        if ((is_charging>0&&soc==100)||
+                (is_charging<=0&&soc==0)){
+                return 1000;
+        }else{
+                return htc_battery_calc_co(soc,ui_soc,is_charging);
+        }
+
+}
+#endif
+#define TMPDIS
+#ifndef TMPDIS
+static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
+{
+        static kal_int32 pre_charging_status = -1;
+        static kal_int32 pre_soc = -2;
+
+        kal_int32 is_charging=pUisoc_data->bIs_charging;
+        kal_int32 soc = pUisoc_data->iSOC;
+        kal_int32 ui_soc = pUisoc_data->iUI_SOC;
+        kal_int32 rc;
+
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        if ((pre_charging_status!=is_charging)||(g_recalc_co_soc == KAL_TRUE)){
+                htc_battery_calc_co_soc(soc,ui_soc,is_charging);
+                g_recalc_co_soc = KAL_FALSE;
+        }
+        battery_xlog_printk(BAT_LOG_FULL,"Cov = %d\n",g_co_soc);
+
+        if (is_charging)
+                rc = 100-g_co_soc+(g_co_soc*soc)/100;
+        else
+                rc = (g_co_soc*soc+99)/100;
+
+        pre_charging_status = is_charging;
+        pre_soc = soc;
+
+        if (rc<0) rc = 0;
+        if (rc>100)rc =100;
+
+        return rc;
+}
+static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)
+{
+        static kal_int32 time_cnt = 0;
+        static kal_int32 display_100Percent_count = 0;
+        kal_int32 ui_soc = htc_battery_adjust_ui_soc(pUisoc_data);
+//        kal_int32 pressure=1;
+        kal_int32 update_cycle = 60/BAT_TASK_PERIOD;
+
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        battery_xlog_printk(BAT_LOG_CRTI,"Suggested ui_soc = %d, UI_SOC = %d, time_cnt = %d\n",
+            ui_soc, pUisoc_data->iUI_SOC, time_cnt);
+
+        if(fg_wake_up_bat == KAL_TRUE && !pUisoc_data->bIs_charging)
+                time_cnt = update_cycle;
+
+        if (pUisoc_data->bIs_cnt_rst)
+                time_cnt = 0;
+
+        if (++time_cnt < update_cycle)
+                return;
+        time_cnt = 0;
+if( pUisoc_data->bIs_charging ){
+        if( pUisoc_data->iUI_SOC < ui_soc ){
+                pUisoc_data->iUI_SOC++;
+        }
+        if (pUisoc_data->iUI_SOC >= 99 && (htc_battery_meter_get_battery_current_imm(FALSE) > Q_MAX_SPEC/10
+        || BMT_status.bat_vol < 4330))
+                {
+                        pUisoc_data->iUI_SOC = 99;
+                } else if(pUisoc_data->iUI_SOC >= 100)
+                {
+                        pUisoc_data->iUI_SOC = 100;
+                }else if(htc_battery_meter_get_battery_current_imm(TRUE) <= Q_MAX_SPEC/10
+                && BMT_status.bat_vol >= 4330)
+                {
+                        display_100Percent_count++;
+                        if(display_100Percent_count >= 2)
+                                {
+                                        pUisoc_data->iUI_SOC++;
+                                        display_100Percent_count = 0;
+                                }
+                }
+    }else{
+        if( pUisoc_data->iUI_SOC > ui_soc ){
+                pUisoc_data->iUI_SOC--;
+        }
+    }
+}
+#endif
+#ifndef TMPDIS
+static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
+{
+    static kal_bool pre_is_charging = KAL_FALSE;
+    kal_bool bIs_charging = (BMT_status.charger_exist == KAL_TRUE? (!BMT_status.is_overload): FALSE) &&
+            (BMT_status.bat_charging_state == CHR_CC) && BMT_status.bat_exist;
+
+    kal_bool bIs_chr_chg = pre_is_charging != bIs_charging;
+    sSync_uisoc sUisoc_data;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+    if( bIs_charging )                     /* charging */
+        bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_CHARGING;
+        else
+        bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_NOT_CHARGING;
+
+    sUisoc_data.bIs_cnt_rst = bIs_chr_chg;
+    sUisoc_data.bIs_charging = bIs_charging;
+    sUisoc_data.iUI_SOC = BMT_status.UI_SOC;
+    sUisoc_data.iSOC = BMT_status.SOC;
+        if( BMT_status.bat_full )
+                sUisoc_data.iSOC = 100;
+        htc_battery_ui_soc_sync(&sUisoc_data);
+        if (BMT_status.bat_in_recharging_state == KAL_TRUE)
+                sUisoc_data.iUI_SOC = 100;
+        bat_set_ui_percentage(sUisoc_data.iUI_SOC);
+
+    pre_is_charging = bIs_charging;
+}
+#endif
+#if 0
+static void htc_battery_update(struct battery_data *bat_data)
+{
+    struct power_supply *bat_psy = &bat_data->psy;
+
+    bat_data->BAT_TECHNOLOGY = POWER_SUPPLY_TECHNOLOGY_LION;
+
+        if (BMT_status.temperature_now >= 48)
+            bat_data->BAT_HEALTH = POWER_SUPPLY_HEALTH_OVERHEAT;
+        else if (g_batt_temp_status == TEMP_POS_LOW)
+                bat_data->BAT_HEALTH = POWER_SUPPLY_HEALTH_COLD;
+        else
+            bat_data->BAT_HEALTH = POWER_SUPPLY_HEALTH_GOOD;
+
+    bat_data->BAT_batt_vol = BMT_status.bat_vol;
+    bat_data->BAT_batt_temp = BMT_status.temperature * 10;
+    bat_data->BAT_PRESENT = BMT_status.bat_exist;
+
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+    mt_battery_update_EM(bat_data);
+
+    if (BMT_status.is_overload) {
+        bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_CHARGING;
+    }
+
+    if (cmd_discharging == 1) {
+        bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_CMD_DISCHARGING;
+    }
+    if (adjust_power != -1) {
+        bat_data->adjust_power = adjust_power;
+        battery_xlog_printk(BAT_LOG_CRTI, "adjust_power=(%d)\n", adjust_power);
+    }
+        if (BMT_status.bat_full)
+                BMT_status.htc_extension |= HTC_EXT_CHG_FULL_EOC_STOP;
+        else
+                BMT_status.htc_extension &= ~HTC_EXT_CHG_FULL_EOC_STOP;
+#if 0
+        if (BMT_status.charger_type == NONSTANDARD_CHARGER)
+                BMT_status.htc_extension |= HTC_EXT_UNKNOWN_USB_CHARGER;
+        else
+                BMT_status.htc_extension &= ~HTC_EXT_UNKNOWN_USB_CHARGER;
+#endif
+    power_supply_changed(bat_psy);
+}
+#endif
+/* HTC added this function  ++ */
+#if 0
+static kal_bool htc_battery_100percent_early()
+{
+        static kal_uint32 uiCount = 0;
+        kal_int32 iBatt_cur;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        if(BMT_status.bat_vol > 4330){
+                battery_log(BAT_LOG_CRTI, "[%s] i_bat=(%d), uiCount=(%d)\n", __FUNCTION__, iBatt_cur, uiCount);
+                iBatt_cur = htc_battery_meter_get_battery_current_imm(TRUE);
+                if(iBatt_cur < (kal_int32)(Q_MAX_SPEC))  //1.0C
+                        uiCount ++;
+                else uiCount = 0;
+        }
+        return ((uiCount >= 6)? TRUE:FALSE);
+}
+#endif
+/* HTC added this function  -- */
+#endif
 static kal_bool mt_battery_100Percent_tracking_check(void)
 {
 	kal_bool resetBatteryMeter = KAL_FALSE;
@@ -1723,6 +2064,7 @@ static kal_bool mt_battery_100Percent_tracking_check(void)
 #endif
 
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.bat_full == KAL_TRUE) {	/* charging full first, UI tracking to 100% */
 		if (BMT_status.UI_SOC >= 100) {
 			BMT_status.UI_SOC = 100;
@@ -1838,6 +2180,7 @@ static kal_bool mt_battery_0Percent_tracking_check(void)
 //begin TFS_258277 modify by sunxiaogang@yulong.com to optimize low power and full capacity battery curve 2015-06-25
 	static unsigned int timer_counter = 0;
 	unsigned int NUM_COUNT = 0;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if(BMT_status.bat_vol > 3400)
 	{
 		NUM_COUNT = V_0PERCENT_TRACKING_TIME/BAT_TASK_PERIOD;
@@ -1888,6 +2231,7 @@ static void mt_battery_Sync_UI_Percentage_to_Real(void)
 {
 	static unsigned int timer_counter;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((BMT_status.UI_SOC > BMT_status.SOC) && ((BMT_status.UI_SOC != 1))) {
 #if !defined(SYNC_UI_SOC_IMM)
 		/* reduce after xxs */
@@ -1951,6 +2295,7 @@ static void battery_update(struct battery_data *bat_data)
 	bat_data->BAT_PRESENT = BMT_status.bat_exist;
 	//bat_data->BAT_Factory_Type = g_fg_battery_id;
 	/*add begin by sunxiaogang@yulong.com 2015.05.11 for battery type detect*/
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (g_fg_battery_id)
 	{
 		case 0: bat_data->BAT_Factory_Type = FACTORY_CPCC;  break;
@@ -2057,10 +2402,19 @@ static void battery_update(struct battery_data *bat_data)
 		battery_log(BAT_LOG_CRTI, "current_now=(%d)\n", current_now);
 	}
 
+#ifdef CONFIG_V36BML_BATTERY
+	printk("[btrcmndebug] voltage_now %d BMT_status.bat_vol %d will put bat_vol value\n", voltage_now, BMT_status.bat_vol);
+	if (BMT_status.bat_vol >= 0) {
+		if (bat_data->voltage_now > BMT_status.bat_vol * 1000 || bat_data->BAT_STATUS == POWER_SUPPLY_STATUS_CHARGING) {
+			bat_data->voltage_now = BMT_status.bat_vol * 1000;
+		}
+	}
+#else
 	if (voltage_now != -1) {
 		bat_data->voltage_now = voltage_now;
 		battery_log(BAT_LOG_CRTI, "voltage_now=(%d)\n", voltage_now);
 	}
+#endif
 
 #ifdef DLPT_POWER_OFF_EN
 	/*extern int dlpt_check_power_off(void);*/
@@ -2098,12 +2452,14 @@ void update_charger_info(int wireless_state)
 
 	wake_up_bat();
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 }
 
 static void wireless_update(struct wireless_data *wireless_data)
 {
 	struct power_supply *wireless_psy = &wireless_data->psy;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.charger_exist == KAL_TRUE || g_wireless_state) {
 		if ((BMT_status.charger_type == WIRELESS_CHARGER) || g_wireless_state) {
 			wireless_data->WIRELESS_ONLINE = 1;
@@ -2122,6 +2478,7 @@ static void ac_update(struct ac_data *ac_data)
 {
 	struct power_supply *ac_psy = &ac_data->psy;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.charger_exist == KAL_TRUE) {
 #if !defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 		if ((BMT_status.charger_type == NONSTANDARD_CHARGER) ||
@@ -2153,6 +2510,7 @@ static void usb_update(struct usb_data *usb_data)
 {
 	struct power_supply *usb_psy = &usb_data->psy;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.charger_exist == KAL_TRUE) {
 		if ((BMT_status.charger_type == STANDARD_HOST) ||
 		    (BMT_status.charger_type == CHARGING_HOST)) {
@@ -2175,6 +2533,7 @@ static void usb_update(struct usb_data *usb_data)
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
 kal_bool pmic_chrdet_status(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (upmu_is_chr_det() == KAL_TRUE)
 		return KAL_TRUE;
 	/*else {*/
@@ -2188,23 +2547,42 @@ kal_bool pmic_chrdet_status(void)
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
 kal_bool bat_is_charger_exist(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return get_charger_detect_status();
 }
 
 
 kal_bool bat_is_charging_full(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((BMT_status.bat_full == KAL_TRUE) && (BMT_status.bat_in_recharging_state == KAL_FALSE))
 		return KAL_TRUE;
 	else
 		return KAL_FALSE;
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+void bat_set_ui_percentage(kal_int32 uiSoc)
+{
+    BMT_status.UI_SOC = uiSoc<0?0:uiSoc;
+        if(BMT_status.UI_SOC - BMT_status.PRE_UI_SOC >= 2 && BMT_status.PRE_UI_SOC != 0)
+                        BMT_status.UI_SOC = BMT_status.PRE_UI_SOC + 1;
+
+    /* set RTC SOC to 1 to avoid SOC jump in charger boot. */
+    if( BMT_status.UI_SOC < 1 ){
+        set_rtc_spare_fg_value(1);
+    } else {
+        set_rtc_spare_fg_value(BMT_status.UI_SOC);
+    }
+        BMT_status.PRE_UI_SOC = BMT_status.UI_SOC;
+}
+#endif
 
 unsigned int bat_get_ui_percentage(void)
 {
 	/* for plugging out charger in recharge phase, using SOC as UI_SOC */
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(CONFIG_POWER_EXT)
 	battery_log(BAT_LOG_CRTI, "[BATTERY] bat_get_ui_percentage return 100 !!\n\r");
 	return 100;
@@ -2219,6 +2597,7 @@ unsigned int bat_get_ui_percentage(void)
 /* Full state --> recharge voltage --> full state */
 unsigned int bat_is_recharging_phase(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return BMT_status.bat_in_recharging_state || BMT_status.bat_full == KAL_TRUE;
 }
 
@@ -2229,12 +2608,14 @@ int get_bat_charging_current_level(void)
 
 	battery_charging_control(CHARGING_CMD_GET_CURRENT, &charging_current);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return charging_current;
 }
 
 
 PMU_STATUS do_batt_temp_state_machine(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.temperature == batt_cust_data.err_charge_temperature)
 		return PMU_STATUS_FAIL;
 
@@ -2296,6 +2677,7 @@ unsigned long BAT_Get_Battery_Voltage(int polling_mode)
 	ret_val = battery_meter_get_battery_voltage(KAL_FALSE);
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret_val;
 }
 
@@ -2310,6 +2692,7 @@ static void mt_battery_average_method_init(BATTERY_AVG_ENUM type, unsigned int *
 
 	static unsigned char index;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	/* reset charging current window while plug in/out { */
 	if (type == BATTERY_AVG_CURRENT) {
 		if (BMT_status.charger_exist == KAL_TRUE) {
@@ -2388,6 +2771,7 @@ static unsigned int mt_battery_average_method(BATTERY_AVG_ENUM type, unsigned in
 {
 	unsigned int avgdata;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	mt_battery_average_method_init(type, bufferdata, data, sum);
 
 	*sum -= bufferdata[batteryIndex];
@@ -2398,6 +2782,43 @@ static unsigned int mt_battery_average_method(BATTERY_AVG_ENUM type, unsigned in
 	battery_log(BAT_LOG_FULL, "bufferdata[%d]= (%d)\n", batteryIndex, bufferdata[batteryIndex]);
 	return avgdata;
 }
+
+#ifdef CONFIG_V36BML_BATTERY
+kal_uint16 htc_charging_avg_voltage_check(void)
+{
+        kal_int32 charger_vol_sum = 0;
+        kal_int32 batteryIndex = 0;
+printk("[btrdebug] %s\n", __FUNCTION__);
+        battery_log(BAT_LOG_CRTI,"wxx_dumpReg:");
+        battery_charging_control(CHARGING_CMD_DUMP_REGISTER, NULL);
+        do{
+                charger_vol_sum += battery_meter_get_charger_voltage();
+                batteryIndex++ ;
+                msleep(100);
+printk("[btrdebug] %s batteryIndex %d charger_vol_sum %d\n", __FUNCTION__, batteryIndex, charger_vol_sum);
+        }while( (batteryIndex < BATTERY_AVERAGE_SIZE) && (BMT_status.charger_exist == KAL_TRUE));
+
+        if(batteryIndex < BATTERY_AVERAGE_SIZE) {
+printk("[btrdebug] %s batteryIndex %d < BATTERY_AVERAGE_SIZE %d return 0\n", __FUNCTION__, batteryIndex, BATTERY_AVERAGE_SIZE);
+                return 0;
+	}
+
+printk("[btrdebug] %s BMT_status.avg_charger_vol(%d)\n", __FUNCTION__, BMT_status.avg_charger_vol);
+        BMT_status.avg_charger_vol = charger_vol_sum / BATTERY_AVERAGE_SIZE;
+printk("[btrdebug] %s BMT_status.avg_charger_vol(%d) = charger_vol_sum(%d) / BATTERY_AVERAGE_SIZE(%d) return 1\n", __FUNCTION__, BMT_status.avg_charger_vol, batteryIndex, BATTERY_AVERAGE_SIZE);
+
+        return 1;
+}
+EXPORT_SYMBOL(htc_charging_avg_voltage_check);
+
+kal_uint16 htc_battery_get_AICL_status(void)
+{
+        return ((BMT_status.htc_acil_state == AICL_DONE) ? 1 : 0);
+}
+EXPORT_SYMBOL(htc_battery_get_AICL_status);
+
+#endif
+
 
 void mt_battery_GetBatteryData(void)
 {
@@ -2410,6 +2831,7 @@ void mt_battery_GetBatteryData(void)
 	static unsigned char batteryIndex;
 	static signed int previous_SOC = -1;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	bat_vol = battery_meter_get_battery_voltage(KAL_TRUE);
 	Vsense = battery_meter_get_VSense();
 	if (upmu_is_chr_det() == KAL_TRUE)
@@ -2468,7 +2890,9 @@ void mt_battery_GetBatteryData(void)
 					      &temperature_sum, batteryIndex);
 	}
 
-
+#ifdef CONFIG_V36BML_BATTERY
+	BMT_status.temperature_now = temperature;
+#endif
 	BMT_status.Vsense = Vsense;
 	BMT_status.charger_vol = charger_vol;
 	BMT_status.temperatureV = temperatureV;
@@ -2493,12 +2917,20 @@ void mt_battery_GetBatteryData(void)
 	if (g_battery_soc_ready == KAL_FALSE)
 		g_battery_soc_ready = KAL_TRUE;
 
+/*
 	battery_log(BAT_LOG_CRTI,
 	"AvgVbat=(%d,%d),AvgI=(%d,%d),VChr=%d,AvgT=(%d,%d),SOC=(%d,%d),UI_SOC=%d,ZCV=%d bcct:%d:%d I:%d\n",
 		BMT_status.bat_vol, bat_vol, BMT_status.ICharging, ICharging,
 		BMT_status.charger_vol, BMT_status.temperature, temperature,
 		previous_SOC, BMT_status.SOC, BMT_status.UI_SOC, BMT_status.ZCV,
 		g_bcct_flag, get_usb_current_unlimited(), get_bat_charging_current_level());
+ */
+        printk("[btrcmndebug] AvgVbat=(%d),bat_vol=(%d),AvgI=(%d),I=(%d),VChr=(%d),AvgT=(%d),T=(%d),is_warm=(%d),pre_SOC=(%d),SOC=(%d),UI_SOC=(%d),ZCV=(%d),"
+                            "bat_charging_state=(0x%x),ftm_chg_ctrl=(%d),chg_ctrl=(%d),overload=(%d)\n",
+                            BMT_status.bat_vol, bat_vol, BMT_status.ICharging, ICharging,
+                            BMT_status.charger_vol, BMT_status.temperature, temperature, BMT_status.is_warm,
+                            previous_SOC, BMT_status.SOC, BMT_status.UI_SOC, BMT_status.ZCV, BMT_status.bat_charging_state,
+                            g_ftm_charger_ctrl_stat, charger_ctrl_stat, BMT_status.is_overload);
 
 }
 
@@ -2518,9 +2950,14 @@ static PMU_STATUS mt_battery_CheckBatteryTemp(void)
 	}
 #else
 
-
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (batt_cust_data.mtk_temperature_recharge_support) {
+//#ifdef CONFIG_V36BML_BATTERY
+#if 0
+		if (do_batt_temp_state_machine(BMT_status.temperature_now) == PMU_STATUS_FAIL) {
+#else
 		if (do_batt_temp_state_machine() == PMU_STATUS_FAIL) {
+#endif
 			battery_log(BAT_LOG_CRTI, "[BATTERY] Batt temp check : fail\n");
 			status = PMU_STATUS_FAIL;
 		}
@@ -2604,6 +3041,7 @@ static PMU_STATUS mt_battery_CheckChargingTime(void)
 {
 	PMU_STATUS status = PMU_STATUS_OK;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((g_battery_thermal_throttling_flag == 2) || (g_battery_thermal_throttling_flag == 3)) {
 		battery_log(BAT_LOG_FULL,
 			    "[TestMode] Disable Safety Timer. bat_tt_enable=%d, bat_thr_test_mode=%d, bat_thr_test_value=%d\n",
@@ -2628,6 +3066,7 @@ static PMU_STATUS mt_battery_CheckCallState(void)
 {
 	PMU_STATUS status = PMU_STATUS_OK;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((g_call_state == CALL_ACTIVE)
 	    && (BMT_status.bat_vol > batt_cust_data.v_cc2topoff_thres))
 		status = PMU_STATUS_FAIL;
@@ -2638,6 +3077,7 @@ static PMU_STATUS mt_battery_CheckCallState(void)
 
 static void mt_battery_CheckBatteryStatus(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "[mt_battery_CheckBatteryStatus] cmd_discharging=(%d)\n",
 		    cmd_discharging);
 	if (cmd_discharging == 1) {
@@ -2695,11 +3135,13 @@ static void mt_battery_notify_TotalChargingTime_check(void)
 		    "[BATTERY] BATTERY_NOTIFY_CASE_0005_TOTAL_CHARGINGTIME (%x)\n",
 		    g_BatteryNotifyCode);
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 }
 
 
 static void mt_battery_notify_VBat_check(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(BATTERY_NOTIFY_CASE_0004_VBAT)
 	if (BMT_status.bat_vol > 4350)
 		/* if(BMT_status.bat_vol > 3800) //test */
@@ -2719,6 +3161,7 @@ static void mt_battery_notify_VBat_check(void)
 
 static void mt_battery_notify_ICharging_check(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(BATTERY_NOTIFY_CASE_0003_ICHARGING)
 	if ((BMT_status.ICharging > 1000) && (BMT_status.total_charging_time > 300)) {
 		g_BatteryNotifyCode |= 0x0004;
@@ -2737,6 +3180,7 @@ static void mt_battery_notify_ICharging_check(void)
 
 static void mt_battery_notify_VBatTemp_check(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(BATTERY_NOTIFY_CASE_0002_VBATTEMP)
 
 	if (BMT_status.temperature >= batt_cust_data.max_charge_temperature) {
@@ -2774,6 +3218,7 @@ static void mt_battery_notify_VCharger_check(void)
 	unsigned int v_charger_max = DISO_data.hv_voltage;
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if !defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 	if (BMT_status.charger_vol > batt_cust_data.v_charger_max) {
 #else
@@ -2795,6 +3240,7 @@ static void mt_battery_notify_VCharger_check(void)
 
 static void mt_battery_notify_UI_test(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (g_BN_TestMode == 0x0001) {
 		g_BatteryNotifyCode = 0x0001;
 		battery_log(BAT_LOG_CRTI, "[BATTERY_TestMode] BATTERY_NOTIFY_CASE_0001_VCHARGER\n");
@@ -2823,6 +3269,7 @@ void mt_battery_notify_check(void)
 {
 	g_BatteryNotifyCode = 0x0000;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (g_BN_TestMode == 0x0000) {	/* for normal case */
 		battery_log(BAT_LOG_FULL, "[BATTERY] mt_battery_notify_check\n");
 
@@ -2843,6 +3290,7 @@ void mt_battery_notify_check(void)
 
 static void mt_battery_thermal_check(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if ((g_battery_thermal_throttling_flag == 1) || (g_battery_thermal_throttling_flag == 3)) {
 		if (battery_cmd_thermal_test_mode == 1) {
 			BMT_status.temperature = battery_cmd_thermal_test_mode_value;
@@ -2899,16 +3347,19 @@ static void mt_battery_thermal_check(void)
 static void mt_battery_update_status(void)
 {
 #if defined(CONFIG_POWER_EXT)
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] CONFIG_POWER_EXT, no update Android.\n");
 #else
 	{
 		if (skip_battery_update == KAL_FALSE) {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 			battery_log(BAT_LOG_FULL, "mt_battery_update_status.\n");
 			usb_update(&usb_main);
 			ac_update(&ac_main);
 			wireless_update(&wireless_main);
 			battery_update(&battery_main);
 		} else {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 			battery_log(BAT_LOG_FULL, "skip mt_battery_update_status.\n");
 			skip_battery_update = KAL_FALSE;
 		}
@@ -2960,11 +3411,14 @@ CHARGER_TYPE mt_charger_type_detection(void)
 #endif
 	mutex_unlock(&charger_type_mutex);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return BMT_status.charger_type;
 }
 
 CHARGER_TYPE mt_get_charger_type(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(CONFIG_POWER_EXT) || defined(CONFIG_MTK_FPGA)
 	return STANDARD_HOST;
 #else
@@ -2982,6 +3436,7 @@ static void mt_battery_charger_detect_check(void)
 */
 		unsigned int pwr;
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (upmu_is_chr_det() == KAL_TRUE) {
 		wake_lock(&battery_suspend_lock);
 
@@ -3071,6 +3526,7 @@ static void mt_battery_charger_detect_check(void)
 
 static void mt_kpoc_power_off_check(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #ifdef CONFIG_MTK_KERNEL_POWER_OFF_CHARGING
 	battery_log(BAT_LOG_FULL,
 		    "[mt_kpoc_power_off_check] , chr_vol=%d, boot_mode=%d\r\n",
@@ -3089,11 +3545,13 @@ static void mt_kpoc_power_off_check(void)
 void update_battery_2nd_info(int status_smb, int capacity_smb, int present_smb)
 {
 #if defined(CONFIG_POWER_VERIFY)
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[update_battery_smb_info] no support\n");
 #else
 	g_status_smb = status_smb;
 	g_capacity_smb = capacity_smb;
 	g_present_smb = present_smb;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI,
 		    "[update_battery_smb_info] get status_smb=%d,capacity_smb=%d,present_smb=%d\n",
 		    status_smb, capacity_smb, present_smb);
@@ -3105,6 +3563,7 @@ void update_battery_2nd_info(int status_smb, int capacity_smb, int present_smb)
 
 void do_chrdet_int_task(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (g_bat_init_flag == KAL_TRUE) {
 #if !defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 		if (upmu_is_chr_det() == KAL_TRUE) {
@@ -3208,12 +3667,50 @@ void do_chrdet_int_task(void)
 
 }
 
+#ifdef CONFIG_HTC_LIMIT_POWER
+#define LIMITED_POWER_STAGE_ONE_TEMPERATURE  0
+#define LIMITED_POWER_STAGE_TWO_TEMPERATURE  -10
+#define LIMITED_POWER_RELEASE_TEMPERATURE  2
+#define LIMITED_POWER_STAGE_ONE_POWER_6795  1675
+#define LIMITED_POWER_STAGE_ONE_POWER_6796T  1977
+#define LIMITED_POWER_STAGE_TWO_POWER  725
 
+extern int mt_cpufreq_thermal_protect(unsigned int limited_power);
+static int batt_low_temp_protect_en = 0;
+
+void htc_battery_limited_power(void)
+{
+        kal_int32 temperature;
+
+        temperature = battery_meter_get_battery_temperature();
+        battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_limited_power = %d degC+++\n", temperature);
+
+        if (temperature <= LIMITED_POWER_STAGE_TWO_TEMPERATURE) {
+                mt_cpufreq_thermal_protect(LIMITED_POWER_STAGE_TWO_POWER);
+                batt_low_temp_protect_en = 1;
+        } else if (temperature <= LIMITED_POWER_STAGE_ONE_TEMPERATURE) {
+                mt_cpufreq_thermal_protect(LIMITED_POWER_STAGE_ONE_POWER_6795);
+                batt_low_temp_protect_en = 1;
+        } else if (batt_low_temp_protect_en && (temperature >= LIMITED_POWER_RELEASE_TEMPERATURE)) {
+                mt_cpufreq_thermal_protect(0);
+                batt_low_temp_protect_en = 0;
+                battery_xlog_printk(BAT_LOG_CRTI, "release cpufreq limit\n");
+        }
+
+        battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_limited_power---\n");
+
+        return;
+}
+#endif
 
 void BAT_thread(void)
 {
 	static kal_bool battery_meter_initilized = KAL_FALSE;
+printk("[btrcmndebug] %s start BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_status.bat_vol);
 	if (battery_meter_initilized == KAL_FALSE) {
+#ifdef CONFIG_V36BML_BATTERY
+//		mt_battery_charger_detect_check();
+#endif
 		battery_meter_initial();	/* move from battery_probe() to decrease booting time */
 		BMT_status.nPercent_ZCV = battery_meter_get_battery_nPercent_zcv();
 		battery_meter_initilized = KAL_TRUE;
@@ -3229,9 +3726,11 @@ void BAT_thread(void)
 		BMT_status.temperature = battery_meter_get_battery_temperature();
 		battery_update(&battery_main);
 #endif
-
 	}
 
+#ifdef CONFIG_V36BML_BATTERY
+//	dodprint();
+#endif
 
 	mt_battery_charger_detect_check();
 	mt_battery_GetBatteryData();
@@ -3246,8 +3745,17 @@ void BAT_thread(void)
 		mt_battery_charging_algorithm();
 	}
 
-	mt_battery_update_status();
-	mt_kpoc_power_off_check();
+#ifdef CONFIG_V36BML_BATTERY
+//    htc_battery_check_overload();
+
+//    htc_battery_sync_ui_soc(&battery_main);
+#endif
+        mt_battery_update_status();
+        mt_kpoc_power_off_check();
+#ifdef CONFIG_HTC_LIMIT_POWER
+//        htc_battery_limited_power();
+#endif
+printk("[btrcmndebug] %s end BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_status.bat_vol);
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
@@ -3273,6 +3781,7 @@ int bat_thread_kthread(void *x)
 #endif
 
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	/* Run on a process content */
 	while (1) {
 		mutex_lock(&bat_mutex);
@@ -3326,6 +3835,7 @@ int bat_thread_kthread(void *x)
 
 void bat_thread_wakeup(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "******** battery : bat_thread_wakeup  ********\n");
 
 	bat_thread_timeout = KAL_TRUE;
@@ -3349,6 +3859,7 @@ static long adc_cali_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 	int adc_in_data[2] = { 1, 1 };
 	int adc_out_data[2] = { 1, 1 };
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	mutex_lock(&bat_mutex);
 
 	switch (cmd) {
@@ -3525,11 +4036,13 @@ static long adc_cali_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 
 static int adc_cali_open(struct inode *inode, struct file *file)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return 0;
 }
 
 static int adc_cali_release(struct inode *inode, struct file *file)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return 0;
 }
 
@@ -3545,6 +4058,7 @@ static const struct file_operations adc_cali_fops = {
 void check_battery_exist(void)
 {
 #if defined(CONFIG_DIS_CHECK_BATTERY)
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[BATTERY] Disable check battery exist.\n");
 #else
 	unsigned int baton_count = 0;
@@ -3552,6 +4066,7 @@ void check_battery_exist(void)
 	unsigned int battery_status;
 	unsigned int i;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	for (i = 0; i < 3; i++) {
 		battery_charging_control(CHARGING_CMD_GET_BATTERY_STATUS, &battery_status);
 		baton_count += battery_status;
@@ -3591,6 +4106,7 @@ void charger_plug_out_sw_mode(void)
 	kal_bool enable;
 	unsigned int charging_enable;
 	signed int VCharger = 0;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (BMT_status.charger_exist == KAL_TRUE) {
 		if (chargin_hw_init_done && upmu_is_chr_det() == KAL_TRUE) {
 
@@ -3638,6 +4154,7 @@ void hv_sw_mode(void)
 	kal_bool hv_status;
 	unsigned int charging_enable;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (upmu_is_chr_det() == KAL_TRUE)
 		check_battery_exist();
 
@@ -3686,6 +4203,7 @@ int charger_hv_detect_sw_thread_handler(void *unused)
 	hv_voltage = DISO_data.hv_voltage;
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	do {
 
 		if (BMT_status.charger_exist == KAL_TRUE)
@@ -3741,6 +4259,7 @@ int charger_hv_detect_sw_thread_handler(void *unused)
 	hv_voltage = DISO_data.hv_voltage;
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	do {
 #ifdef CONFIG_MTK_BQ25896_SUPPORT
 		/*this annoying SW workaround wakes up bat_thread. 10 secs is set instead of 1 sec*/
@@ -3795,6 +4314,7 @@ enum hrtimer_restart charger_hv_detect_sw_workaround(struct hrtimer *timer)
 	charger_hv_detect_flag = KAL_TRUE;
 	wake_up_interruptible(&charger_hv_detect_waiter);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "[charger_hv_detect_sw_workaround]\n");
 
 	return HRTIMER_NORESTART;
@@ -3805,6 +4325,7 @@ void charger_hv_detect_sw_workaround_init(void)
 	ktime_t ktime;
 
 	ktime = ktime_set(0, BAT_MS_TO_NS(2000));
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	hrtimer_init(&charger_hv_detect_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	charger_hv_detect_timer.function = charger_hv_detect_sw_workaround;
 	hrtimer_start(&charger_hv_detect_timer, ktime, HRTIMER_MODE_REL);
@@ -3820,10 +4341,500 @@ void charger_hv_detect_sw_workaround_init(void)
 	check_battery_exist();
 	battery_log(BAT_LOG_CRTI, "charger_hv_detect_sw_workaround_init : done\n");
 }
+#ifdef CONFIG_V36BML_BATTERY
+/* HTC feature start */
+void htc_battery_para_init(void)
+{
+printk("[btrcmndebug] %s\n", __FUNCTION__);
+        BMT_status.test_power_monitor =
+                (get_kernel_flag() & KERNEL_FLAG_TEST_PWR_SUPPLY) ? KAL_TRUE : KAL_FALSE;
 
+        BMT_status.keep_charger_on =
+                (get_kernel_flag() & KERNEL_FLAG_KEEP_CHARG_ON) ? KAL_TRUE  : KAL_FALSE;
+
+        BMT_status.force_ac_charger =
+                (get_kernel_flag() &KERNEL_FLAG_ENABLE_FAST_CHARGE) ? KAL_TRUE : KAL_FALSE;
+
+        BMT_status.flag_enable_bms_charger_log =
+                (get_kernel_flag() & KERNEL_FLAG_ENABLE_BMS_CHARGER_LOG) ? KAL_TRUE : KAL_FALSE;
+
+        BMT_status.flag_disable_safety_timer=
+                (get_kernel_flag() & KERNEL_FLAG_DISABLE_SAFETY_TIMER) ? KAL_TRUE : KAL_FALSE;
+
+        BMT_status.flag_disable_temp_protection=
+                (get_kernel_flag() & KERNEL_FLAG_DISABLE_TBATT_PROTECT) ? KAL_TRUE : KAL_FALSE;
+
+        BMT_status.flag_pa_fake_batt_temp=
+                (get_kernel_flag() & KERNEL_FLAG_FOR_PA_TEST) ? KAL_TRUE : KAL_FALSE;
+}
+
+#if 0
+static ssize_t htc_battery_show_batt_attr(struct device *dev,
+                    struct device_attribute *attr,
+                    char *buf)
+{
+        int res, len = 0;
+    char *cChr_type[] = {"CHARGER_UNKNOWN", "STANDARD_HOST", "CHARGING_HOST", "NONSTANDARD_CHARGER",
+        "STANDARD_CHARGER", "APPLE_2_1A_CHARGER", "APPLE_1_0A_CHARGER", "APPLE_0_5A_CHARGER", "WIRELESS_CHARGER"};
+    char *cBat_chr_state[] = {"CHR_PRE", "CHR_CC", "CHR_TOP_OFF",
+                "CHR_POST_FULL", "CHR_BATFULL", "CHR_ERROR", "CHR_HOLD"};
+    sCHR_REG_DUMP dump_reg;
+
+        len += scnprintf(buf + len, PAGE_SIZE - len,
+                        "percentage:\t%d;\n"
+                        "percentage_raw:\t%d;\n"
+                        "batt_id:\t%d;\n"
+                        "batt_full:\t%d;\n"
+                        "batt_in_recharging_state:\t%d;\n"
+                        "overload:\t%d;\n"
+                        "batt_vol:\t%d;\n"
+                        "batt_curr:\t%d;\n"
+                        "batt_temp:\t%d;\n",
+                        BMT_status.UI_SOC,
+                        BMT_status.SOC,
+                        fgauge_get_battery_id(),
+                        BMT_status.bat_full,
+                        BMT_status.bat_in_recharging_state,
+                        BMT_status.is_overload,
+                        BMT_status.bat_vol,
+                        htc_battery_meter_get_battery_current_imm(TRUE),
+                        htc_battery_meter_get_battery_temperature_imm(1)
+                );
+
+
+    len += htc_battery_meter_show_attr(buf + len, PAGE_SIZE - len);
+
+    len += htc_battery_meter_show_attr(buf + len, PAGE_SIZE - len);
+
+        len += scnprintf(buf + len, PAGE_SIZE - len,
+                        "charging_source:\t%s;\n"
+                        "batt_charging_state:\t%s;\n"
+                        "charger_vol:\t%d;\n"
+                        "total_charging_time:\t%d;\n"
+                        "pre_charging_time:\t%d;\n"
+                        "cc_charging_time:\t%d;\n"
+                        "topoff_charging_time:\t%d;\n"
+                        "postfull_charging_time:\t%d;\n",
+                        cChr_type[BMT_status.charger_type < 9? BMT_status.charger_type : CHARGER_UNKNOWN],
+                        cBat_chr_state[(BMT_status.bat_charging_state & 0x7) < 7? (BMT_status.bat_charging_state & 0x7) : (CHR_ERROR & 0x7)],
+                        battery_meter_get_charger_voltage(),
+                        BMT_status.total_charging_time,
+                        BMT_status.PRE_charging_time,
+                        BMT_status.CC_charging_time,
+                        BMT_status.TOPOFF_charging_time,
+                        BMT_status.POSTFULL_charging_time
+                );
+#if 1
+//#ifdef HTC_ENABLE_AICL
+        len += scnprintf(buf + len, PAGE_SIZE - len,
+                "AICL_state:\t%d;\n"
+                "Vcharger0:\t%d;\n"
+                "Vcharger1:\t%d;\n"
+                "Vcharger2:\t%d;\n"
+                "bat_vot_aicl:\t%d;\n"
+                "BadCable_Vchr1:\t%d;\n"
+                "BadCable_Vchr2:\t%d;\n"
+                "BadCable_R:\t%d;\n",
+                BMT_status.htc_acil_state,
+                temp_avg_voltage[0],
+                temp_avg_voltage[1],
+                BMT_status.avg_charger_vol,
+                temp_avg_voltage[2],
+                temp_avg_voltage[3],
+                temp_avg_voltage[4],
+                temp_avg_voltage[5]
+        );
+#endif
+
+    dump_reg.buf = buf + len;
+    dump_reg.size = PAGE_SIZE - len;
+    res = battery_charging_control(CHARGING_CMD_HTC_DUMP_REGISTER, (void*)&dump_reg);
+    len += dump_reg.size;
+
+        return len;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_set_full_level(struct device *dev,
+                struct device_attribute *attr,
+                const char *buf, size_t count)
+{
+        int rc = 0;
+        unsigned long percent = 100;
+
+        rc = strict_strtoul(buf, 10, &percent);
+        if (rc)
+                return rc;
+
+
+                return rc;
+
+        if (percent > 100 || percent == 0)
+                return -EINVAL;
+
+        battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_set_full_level\n");
+        BMT_status.full_level = (int)percent;
+
+    return count;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_charger_stat(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", charger_ctrl_stat);
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_charger_switch(struct device *dev,
+                struct device_attribute *attr,
+                const char *buf, size_t count)
+{
+        unsigned long enable = 0;
+        kal_uint32 charging_enable;
+        int rc = 0;
+
+        rc = strict_strtoul(buf, 10, &enable);
+        if (rc)
+                return rc;
+
+        battery_xlog_printk(BAT_LOG_CRTI, "Set charger_control:%lu", enable);
+        if (enable >= END_CHARGER)
+                return -EINVAL;
+
+        /* FIXME: There is no enable power path way */
+        if (enable == STOP_CHARGER || enable == DISABLE_PWRSRC) {
+                charging_enable = KAL_FALSE;
+        } else if (enable == ENABLE_CHARGER || enable == ENABLE_PWRSRC) {
+                charging_enable = KAL_TRUE;
+        }
+
+        battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
+        charger_ctrl_stat = enable;
+    return count;
+}
+#endif
+
+/*
+ * 0x1/0x0 for SIM1 phone call enable/disable
+ * 0x3/0x2 for SIM2 phone call enable/disable
+ */
+#if 0
+static ssize_t htc_battery_set_phone_call(struct device *dev,
+                struct device_attribute *attr,
+                const char *buf, size_t count)
+{
+        unsigned long enable = 0;
+        static unsigned int flag[] = {0, 0};  // for SIM1 & SIM2;
+
+        int rc = 0;
+        rc = strict_strtoul(buf, 10, &enable);
+        if (rc)
+                return rc;
+
+        if(enable & 0x2) flag[1] = (enable & 0x1);
+        else flag[0] = (enable & 0x1);
+
+        battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_set_phone_call: %lu\n", enable);
+
+        if ( flag[0] || flag[1] )
+                g_chg_limit_reason |= HTC_BATT_CHG_LIMIT_BIT_TALK;
+        else
+                g_chg_limit_reason &= ~HTC_BATT_CHG_LIMIT_BIT_TALK;
+
+    return count;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_set_play_music(struct device *dev,
+                struct device_attribute *attr,
+                const char *buf, size_t count)
+{
+        battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_set_play_music\n");
+    return count;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_rt_vol(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", battery_meter_get_battery_voltage(KAL_TRUE));
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_rt_current(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", (htc_battery_meter_get_battery_current_imm(TRUE))/10);
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_rt_temp(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", battery_meter_get_battery_temperature());
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_rt_id(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", fgauge_get_battery_id());
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_rt_id_mv(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", fgauge_get_battery_id_mv());
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_ftm_charger_stat(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", g_ftm_charger_ctrl_stat);
+
+    return i;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_ftm_charger_switch(struct device *dev,
+                struct device_attribute *attr,
+                const char *buf, size_t count)
+{
+        unsigned long enable = 0;
+        int rc = 0;
+
+        rc = strict_strtoul(buf, 10, &enable);
+        if (rc)
+                return rc;
+
+        battery_xlog_printk(BAT_LOG_CRTI, "Set ftm_charger_control:%lu", enable);
+        if (enable >= FTM_END_CHARGER)
+                return -EINVAL;
+
+        g_ftm_charger_ctrl_stat = enable;
+        wake_up_bat();
+
+    return count;
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_over_vchg(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+#if 0
+//        #if defined(A51BML_BATT) || defined(A51CML_BATT)
+        int charger_voltage = battery_meter_get_charger_voltage();
+        if(BMT_status.charger_protect_status == charger_OVER_VOL)
+                {
+                        if( charger_voltage > 4300 && charger_voltage < 6200 )
+                                {
+                                        is_ovp = 0;
+                                        BMT_status.charger_protect_status = 0;
+                                        BMT_status.bat_charging_state = CHR_PRE;
+                                }
+                }else{
+                        if(charger_voltage > 6200)
+                                {
+                                        is_ovp = 1;
+                                        BMT_status.bat_charging_state = CHR_ERROR;
+                                        BMT_status.charger_protect_status = charger_OVER_VOL;
+                                }
+                }
+#elif defined(CONFIG_V36BML_BATTERY)
+//        #elif defined(V36BML_BATT)
+        int charger_voltage = battery_meter_get_charger_voltage();
+//        if(!mt_get_gpio_in_base(GPIO66) &&
+//                (mt_get_gpio_in_base(GPIO125) || charger_voltage > 6200))
+        if(!mt_get_gpio_in_base((66 | 0x80000000)) &&
+                (mt_get_gpio_in_base((125 | 0x80000000)) || charger_voltage > 6200))
+        {
+                is_ovp = 1;
+                BMT_status.bat_charging_state = CHR_ERROR;
+                BMT_status.charger_protect_status = charger_OVER_VOL;
+        }else if(BMT_status.charger_protect_status == charger_OVER_VOL){
+                is_ovp = 0;
+                BMT_status.charger_protect_status = 0;
+                BMT_status.bat_charging_state = CHR_PRE;
+        }
+        battery_log(BAT_LOG_CRTI,"[%s]charger_voltage=%d,is_ovp=%d\n",__FUNCTION__,charger_voltage,is_ovp);
+#else
+        if(!mt_get_gpio_in_base(GPIO125) && battery_meter_get_charger_voltage() < 1200)
+        {
+                        msleep(50);
+                        if(!mt_get_gpio_in_base(GPIO125) && battery_meter_get_charger_voltage() < 1200)
+                                {
+                                        is_ovp = 1;
+                                        BMT_status.bat_charging_state = CHR_ERROR;
+                                        BMT_status.charger_protect_status = charger_OVER_VOL;
+                                }
+        } else {
+                if(BMT_status.charger_protect_status == charger_OVER_VOL)
+                        {
+                                is_ovp = 0;
+                                BMT_status.charger_protect_status = 0;
+                                BMT_status.bat_charging_state = CHR_PRE;
+                        }
+        }
+#endif
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", is_ovp);
+
+        return i;
+                 
+}
+#endif
+
+#if 0
+static ssize_t htc_battery_overload(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+    int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n", BMT_status.is_overload);
+
+    return i;
+}
+
+static ssize_t htc_battery_show_htc_extension_attr(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+        int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i,"%d\n", BMT_status.htc_extension);
+
+        return i;
+}
+
+static ssize_t htc_battery_show_cc_attr(struct device *dev,
+                struct device_attribute *attr,
+                char *buf)
+{
+        int i = 0;
+
+        i += scnprintf(buf + i, PAGE_SIZE - i, "cc:%d\n", htc_battery_meter_get_car());
+
+        return i;
+}
+
+static ssize_t htc_battery_show_socbyv(struct device *dev,
+        struct device_attribute *attr,
+        char *buf)
+{
+        int i = 0;
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n",htc_battery_get_socbyv());
+        return i;
+}
+
+static ssize_t htc_battery_show_socbyc(struct device *dev,
+        struct device_attribute *attr,
+        char *buf)
+{
+        int i = 0;
+        i += scnprintf(buf + i, PAGE_SIZE - i, "%d\n",htc_battery_get_socbyc());
+        return i;
+}
+#endif
+#if 0
+static struct device_attribute htc_battery_attrs[] = {
+        __ATTR(batt_attr_text, S_IRUGO, htc_battery_show_batt_attr, NULL),
+        __ATTR(full_level, S_IWUSR | S_IWGRP, NULL, htc_battery_set_full_level),
+        __ATTR(charger_control, S_IWUSR | S_IWGRP, htc_battery_charger_stat, htc_battery_charger_switch),
+        __ATTR(phone_call, S_IWUSR | S_IWGRP, NULL, htc_battery_set_phone_call),
+        __ATTR(play_music, S_IWUSR | S_IWGRP, NULL, htc_battery_set_play_music),
+        __ATTR(batt_vol_now, S_IRUGO, htc_battery_rt_vol, NULL),
+        __ATTR(batt_current_now, S_IRUGO, htc_battery_rt_current, NULL),
+        __ATTR(batt_temp_now, S_IRUGO, htc_battery_rt_temp, NULL),
+        __ATTR(batt_id, S_IRUGO, htc_battery_rt_id, NULL),
+        __ATTR(batt_id_now, S_IRUGO, htc_battery_rt_id_mv, NULL),
+        __ATTR(ftm_charger_control, S_IWUSR | S_IWGRP | S_IRUGO, htc_battery_ftm_charger_stat,
+                htc_battery_ftm_charger_switch),
+        __ATTR(over_vchg, S_IRUGO, htc_battery_over_vchg, NULL),
+        __ATTR(overload, S_IRUGO, htc_battery_overload, NULL),
+        __ATTR(htc_extension, S_IRUGO, htc_battery_show_htc_extension_attr, NULL),
+        __ATTR(batt_power_meter, S_IRUGO, htc_battery_show_cc_attr, NULL),
+        __ATTR(soc_by_v, S_IRUGO, htc_battery_show_socbyv, NULL),
+        __ATTR(soc_by_c, S_IRUGO, htc_battery_show_socbyc, NULL),
+};
+#endif
+
+#if 0
+static int htc_battery_create_attrs(struct device *dev)
+{
+    int i = 0, rc = 0;
+
+    for (i = 0; i < ARRAY_SIZE(htc_battery_attrs); i++) {
+        rc = device_create_file(dev, &htc_battery_attrs[i]);
+        if (rc)
+            goto htc_attrs_failed;
+    }
+
+    goto succeed;
+
+htc_attrs_failed:
+    while (i--)
+        device_remove_file(dev, &htc_battery_attrs[i]);
+succeed:
+    return rc;
+}
+#endif
+/* HTC feature end */
+#endif
 
 enum hrtimer_restart battery_kthread_hrtimer_func(struct hrtimer *timer)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	bat_thread_wakeup();
 
 	return HRTIMER_NORESTART;
@@ -3838,6 +4849,7 @@ void battery_kthread_hrtimer_init(void)
 #else
 	ktime = ktime_set(1, 0);
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	hrtimer_init(&battery_kthread_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	battery_kthread_timer.function = battery_kthread_hrtimer_func;
 	hrtimer_start(&battery_kthread_timer, ktime, HRTIMER_MODE_REL);
@@ -3848,6 +4860,7 @@ void battery_kthread_hrtimer_init(void)
 
 static void get_charging_control(void)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control = chr_control_interface;
 }
 
@@ -3858,6 +4871,7 @@ static irqreturn_t diso_auxadc_irq_thread(int irq, void *dev_id)
 			      (DISO_data.diso_state.pre_vusb_state << 1) |
 			      (DISO_data.diso_state.pre_vdc_state << 2)) & 0x7;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI,
 		    "[DISO]auxadc IRQ threaded handler triggered, pre_diso_state is %s\n",
 		    DISO_state_s[pre_diso_state]);
@@ -3903,6 +4917,7 @@ static irqreturn_t diso_auxadc_irq_thread(int irq, void *dev_id)
 static void dual_input_init(void)
 {
 	DISO_data.irq_callback_func = diso_auxadc_irq_thread;
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_DISO_INIT, &DISO_data);
 }
 #endif
@@ -4083,6 +5098,7 @@ int __batt_init_cust_data_from_cust_header(void)
 	#endif
 #endif
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return 0;
 }
 
@@ -4092,6 +5108,7 @@ static void __batt_parse_node(const struct device_node *np,
 {
 	u32 val;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (of_property_read_u32(np, node_srting, &val) == 0) {
 		(*cust_val) = (int)val;
 		battery_log(BAT_LOG_FULL, "Get %s: %d\n", node_srting, (*cust_val));
@@ -4105,6 +5122,7 @@ static int __batt_init_cust_data_from_dt(void)
 	/* struct device_node *np = dev->dev.of_node; */
 	struct device_node *np;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	/* check customer setting */
 	np = of_find_compatible_node(NULL, NULL, "mediatek,battery");
 	if (!np) {
@@ -4304,6 +5322,7 @@ int batt_init_cust_data(void)
 {
 	__batt_init_cust_data_from_cust_header();
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 #if defined(BATTERY_DTS_SUPPORT) && defined(CONFIG_OF)
 	battery_log(BAT_LOG_CRTI, "battery custom init by DTS\n");
 	__batt_init_cust_data_from_dt();
@@ -4316,6 +5335,7 @@ static int battery_probe(struct platform_device *dev)
 	struct class_device *class_dev = NULL;
 	int ret = 0;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "******** battery driver probe!! ********\n");
 
 	/* Integrate with NVRAM */
@@ -4454,7 +5474,34 @@ static int battery_probe(struct platform_device *dev)
 	}
 
 	/* battery_meter_initial();      //move to mt_battery_GetBatteryData() to decrease booting time */
+#ifdef CONFIG_V36BML_BATTERY
+        /* Initialization BMT Struct */
+        BMT_status.bat_exist = KAL_TRUE;        /* phone must have battery */
+        BMT_status.charger_exist = KAL_FALSE;   /* for default, no charger */
+        BMT_status.bat_vol = 0;
+        BMT_status.ICharging = 0;
+        BMT_status.temperature = 0;
+        BMT_status.charger_vol = 0;
+        BMT_status.total_charging_time = 0;
+        BMT_status.PRE_charging_time = 0;
+        BMT_status.CC_charging_time = 0;
+        BMT_status.TOPOFF_charging_time = 0;
+        BMT_status.POSTFULL_charging_time = 0;
+        BMT_status.SOC = -1;
+        BMT_status.UI_SOC = 0;
+        BMT_status.full_level = 100;
+//#ifdef HTC_ENABLE_AICL
+#if 1
+        BMT_status.htc_acil_state = 0;
+        BMT_status.avg_charger_vol = 0;
+#endif
 
+        BMT_status.bat_charging_state = CHR_PRE;
+        BMT_status.bat_in_recharging_state = KAL_FALSE;
+        BMT_status.bat_full = KAL_FALSE;
+        BMT_status.nPercent_ZCV = 0;
+        BMT_status.nPrecent_UI_SOC_check_point = battery_meter_get_battery_nPercent_UI_SOC();
+#else
 	/* Initialization BMT Struct */
 	BMT_status.bat_exist = KAL_TRUE;	/* phone must have battery */
 	BMT_status.charger_exist = KAL_FALSE;	/* for default, no charger */
@@ -4479,6 +5526,7 @@ static int battery_probe(struct platform_device *dev)
 	BMT_status.bat_full = KAL_FALSE;
 	BMT_status.nPercent_ZCV = 0;
 	BMT_status.nPrecent_UI_SOC_check_point = battery_meter_get_battery_nPercent_UI_SOC();
+#endif
 
 #if defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 	dual_input_init();
@@ -4525,6 +5573,7 @@ static void battery_timer_pause(void)
 	if (KAL_TRUE == bat_is_ext_power())
 		return 0;
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	mutex_lock(&bat_mutex);
 	/* cancel timer */
 	hrtimer_cancel(&battery_kthread_timer);
@@ -4584,10 +5633,12 @@ static void battery_timer_resume(void)
 	mutex_unlock(&bat_mutex);
 
 #endif
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 }
 
 static int battery_remove(struct platform_device *dev)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "******** battery driver remove!! ********\n");
 
 	return 0;
@@ -4595,6 +5646,7 @@ static int battery_remove(struct platform_device *dev)
 
 static void battery_shutdown(struct platform_device *dev)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "******** battery driver shutdown!! ********\n");
 
 }
@@ -4604,6 +5656,7 @@ static void battery_shutdown(struct platform_device *dev)
 /* ///////////////////////////////////////////////////////////////////////////////////////// */
 static ssize_t show_BatteryNotify(struct device *dev, struct device_attribute *attr, char *buf)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[Battery] show_BatteryNotify : %x\n", g_BatteryNotifyCode);
 
 	return sprintf(buf, "%u\n", g_BatteryNotifyCode);
@@ -4616,6 +5669,7 @@ static ssize_t store_BatteryNotify(struct device *dev, struct device_attribute *
 	int rv;
 	unsigned long reg_BatteryNotifyCode = 0;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[Battery] store_BatteryNotify\n");
 	if (buf != NULL && size != 0) {
 		battery_log(BAT_LOG_CRTI, "[Battery] buf is %s and size is %Zu\n", buf, size);
@@ -4632,6 +5686,7 @@ static DEVICE_ATTR(BatteryNotify, 0664, show_BatteryNotify, store_BatteryNotify)
 
 static ssize_t show_BN_TestMode(struct device *dev, struct device_attribute *attr, char *buf)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[Battery] show_BN_TestMode : %x\n", g_BN_TestMode);
 	return sprintf(buf, "%u\n", g_BN_TestMode);
 }
@@ -4643,6 +5698,7 @@ static ssize_t store_BN_TestMode(struct device *dev, struct device_attribute *at
 	int rv;
 	unsigned long reg_BN_TestMode = 0;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "[Battery] store_BN_TestMode\n");
 	if (buf != NULL && size != 0) {
 		battery_log(BAT_LOG_CRTI, "[Battery] buf is %s and size is %Zu\n", buf, size);
@@ -4690,6 +5746,7 @@ static ssize_t battery_cmd_write(struct file *file, const char *buffer, size_t c
 	char desc[32];
 
 	len = (count < (sizeof(desc) - 1)) ? count : (sizeof(desc) - 1);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (copy_from_user(desc, buffer, len))
 		return 0;
 
@@ -4716,6 +5773,7 @@ static ssize_t battery_cmd_write(struct file *file, const char *buffer, size_t c
 
 static int proc_utilization_show(struct seq_file *m, void *v)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	seq_printf(m,
 		   "=> g_battery_thermal_throttling_flag=%d,\nbattery_cmd_thermal_test_mode=%d,\nbattery_cmd_thermal_test_mode_value=%d\n",
 		   g_battery_thermal_throttling_flag, battery_cmd_thermal_test_mode,
@@ -4728,6 +5786,7 @@ static int proc_utilization_show(struct seq_file *m, void *v)
 
 static int proc_utilization_open(struct inode *inode, struct file *file)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return single_open(file, proc_utilization_show, NULL);
 }
 
@@ -4745,6 +5804,7 @@ static ssize_t current_cmd_write(struct file *file, const char *buffer, size_t c
 	unsigned int charging_enable = false;
 
 	len = (count < (sizeof(desc) - 1)) ? count : (sizeof(desc) - 1);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (copy_from_user(desc, buffer, len))
 		return 0;
 
@@ -4780,6 +5840,7 @@ static int current_cmd_read(struct seq_file *m, void *v)
 	charging_enable = false;
 	adjust_power = -1;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
 
 	battery_log(BAT_LOG_CRTI, "[current_cmd_write] cmd_discharging=%d\n", cmd_discharging);
@@ -4789,6 +5850,7 @@ static int current_cmd_read(struct seq_file *m, void *v)
 
 static int proc_utilization_open_cur_stop(struct inode *inode, struct file *file)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return single_open(file, current_cmd_read, NULL);
 }
 
@@ -4800,6 +5862,7 @@ static ssize_t discharging_cmd_write(struct file *file, const char *buffer, size
 	unsigned int charging_enable = false;
 
 	len = (count < (sizeof(desc) - 1)) ? count : (sizeof(desc) - 1);
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	if (copy_from_user(desc, buffer, len))
 		return 0;
 
@@ -4833,6 +5896,7 @@ static int mt_batteryNotify_probe(struct platform_device *dev)
 	/* struct proc_dir_entry *entry = NULL; */
 	struct proc_dir_entry *battery_dir = NULL;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "******** mt_batteryNotify_probe!! ********\n");
 
 	ret_device_file = device_create_file(&(dev->dev), &dev_attr_BatteryNotify);
@@ -4885,6 +5949,7 @@ static int battery_pm_suspend(struct device *device)
 
 	BUG_ON(pdev == NULL);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret;
 }
 
@@ -4896,6 +5961,7 @@ static int battery_pm_resume(struct device *device)
 
 	BUG_ON(pdev == NULL);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret;
 }
 
@@ -4907,6 +5973,7 @@ static int battery_pm_freeze(struct device *device)
 
 	BUG_ON(pdev == NULL);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret;
 }
 
@@ -4918,6 +5985,7 @@ static int battery_pm_restore(struct device *device)
 
 	BUG_ON(pdev == NULL);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret;
 }
 
@@ -4929,6 +5997,7 @@ static int battery_pm_restore_noirq(struct device *device)
 
 	BUG_ON(pdev == NULL);
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return ret;
 }
 
@@ -4972,6 +6041,7 @@ static int battery_dts_probe(struct platform_device *dev)
 			    "****[battery_dts_probe] Unable to register device (%d)\n", ret);
 		return ret;
 	}
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	return 0;
 
 }
@@ -5016,6 +6086,7 @@ static int mt_batteryNotify_dts_probe(struct platform_device *dev)
 	int ret = 0;
 	/* struct proc_dir_entry *entry = NULL; */
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_CRTI, "******** mt_batteryNotify_dts_probe!! ********\n");
 
 	MT_batteryNotify_device.dev.of_node = dev->dev.of_node;
@@ -5044,6 +6115,7 @@ static struct platform_driver mt_batteryNotify_dts_driver = {
 
 static int battery_pm_event(struct notifier_block *notifier, unsigned long pm_event, void *unused)
 {
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	switch (pm_event) {
 	case PM_HIBERNATION_PREPARE:	/* Going to hibernate */
 	case PM_RESTORE_PREPARE:	/* Going to restore a saved image */
@@ -5070,6 +6142,7 @@ static int __init battery_init(void)
 {
 	int ret;
 
+printk("[btrcmndebug] %s\n", __FUNCTION__);
 	pr_debug("battery_init\n");
 
 #ifdef CONFIG_OF

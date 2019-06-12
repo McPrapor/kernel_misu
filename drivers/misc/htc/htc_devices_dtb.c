@@ -1,5 +1,4 @@
-//#include <linux/htc_devices_dtb.h>
-#include "htc_devices_dtb.h"
+#include <linux/htc_devices_dtb.h>
 #include <linux/of.h>
 
 #define CONFIG_DATA_PATH   "/htc,config-data"
@@ -265,7 +264,6 @@ static int __init htc_devices_dtb_init(void) {
 	LOG_INF("bomid: %d\n", of_machine_bomid());
 	LOG_INF("sku1: 0x%08X\n", of_machine_sku1());
 	LOG_INF("boot mode: %s\n", htc_get_bootmode());
-	return 0;
 }
 arch_initcall(htc_devices_dtb_init);
 

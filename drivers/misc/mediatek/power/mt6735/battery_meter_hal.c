@@ -65,6 +65,7 @@ void get_hw_chip_diff_trim_value(void)
 	bm_print(BM_LOG_FULL, "[Chip_Trim] need check reg number\n");
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	switch (chip_diff_trim_value_4_0) {
 	case 0:
 		chip_diff_trim_value = 1000;
@@ -177,6 +178,7 @@ signed int use_chip_trim_value(signed int not_trim_val)
 
 	ret_val = ((not_trim_val * chip_diff_trim_value) / 1000);
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_FULL, "[use_chip_trim_value] %d -> %d\n", not_trim_val, ret_val);
 
 	return ret_val;
@@ -186,6 +188,7 @@ signed int use_chip_trim_value(signed int not_trim_val)
 int get_hw_ocv(void)
 {
 #if defined(CONFIG_POWER_EXT)
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return 4001;
 	bm_print(BM_LOG_CRTI, "[get_hw_ocv] TBD\n");
 #else
@@ -208,6 +211,7 @@ int get_hw_ocv(void)
 #endif
 
 	adc_result += g_hw_ocv_tune_value;
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return adc_result;
 #endif
 }
@@ -221,6 +225,7 @@ int get_hw_ocv(void)
 
 static void dump_nter(void)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[dump_nter] mt6328_upmu_get_fg_nter_29_16 = 0x%x\r\n",
 		 pmic_get_register_value(PMIC_FG_NTER_29_16));
 	bm_print(BM_LOG_CRTI, "[dump_nter] mt6328_upmu_get_fg_nter_15_00 = 0x%x\r\n",
@@ -229,6 +234,7 @@ static void dump_nter(void)
 
 static void dump_car(void)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[dump_car] upmu_get_fg_car_31_16 = 0x%x\r\n",
 		 pmic_get_register_value(PMIC_FG_CAR_31_16));
 	bm_print(BM_LOG_CRTI, "[dump_car] upmu_get_fg_car_15_00 = 0x%x\r\n",
@@ -240,6 +246,7 @@ static unsigned int fg_get_data_ready_status(void)
 	unsigned int ret = 0;
 	unsigned int temp_val = 0;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	ret = pmic_read_interface(MT6328_FGADC_CON0, &temp_val, 0xFFFF, 0x0);
 
 	bm_print(BM_LOG_FULL, "[fg_get_data_ready_status] Reg[0x%x]=0x%x\r\n", MT6328_FGADC_CON0,
@@ -257,12 +264,14 @@ static signed int fgauge_read_current(void *data);
 static signed int fgauge_initialization(void *data)
 {
 #if defined(CONFIG_POWER_EXT)
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	/*  */
 #else
 	unsigned int ret = 0;
 	signed int current_temp = 0;
 	int m = 0;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	get_hw_chip_diff_trim_value();
 
 /* 1. HW initialization */
@@ -309,6 +318,7 @@ static signed int fgauge_read_current(void *data)
 {
 #if defined(CONFIG_POWER_EXT)
 	*(signed int *) (data) = 0;
+printk("[bmhdebug] %s\n", __FUNCTION__);
 #else
 	unsigned short uvalue16 = 0;
 	signed int dvalue = 0;
@@ -317,6 +327,7 @@ static signed int fgauge_read_current(void *data)
 	signed int Current_Compensate_Value = 0;
 	unsigned int ret = 0;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 /* HW Init */
 	/* (1)    i2c_write (0x60, 0xC8, 0x01); // Enable VA2 */
 	/* (2)    i2c_write (0x61, 0x15, 0x00); // Enable FGADC clock for digital */
@@ -438,6 +449,7 @@ signed int fgauge_read_IM_current(void *data)
 	/*unsigned int ret = 0;*/
 
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 
 	uvalue16 = pmic_get_register_value(PMIC_FG_R_CURR);
 	bm_print(BM_LOG_FULL, "[fgauge_read_IM_current] : FG_CURRENT = %x\r\n", uvalue16);
@@ -513,6 +525,7 @@ static signed int fgauge_read_current_sign(void *data)
 {
 	*(kal_bool *) (data) = g_fg_is_charging;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -521,6 +534,7 @@ static signed int fgauge_read_columb(void *data);
 signed int fgauge_set_columb_interrupt_internal(void *data, int reset)
 {
 #if defined(CONFIG_POWER_EXT)
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 #else
 
@@ -533,6 +547,7 @@ signed int fgauge_set_columb_interrupt_internal(void *data, int reset)
 	unsigned int ret = 0;
 	unsigned short *plow, *phigh, *pori;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_FULL, "fgauge_set_columb_interrupt_internal car=%d\n", car);
 
 
@@ -660,6 +675,7 @@ signed int fgauge_set_columb_interrupt_internal(void *data, int reset)
 
 static signed int fgauge_set_columb_interrupt(void *data)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return fgauge_set_columb_interrupt_internal(data, 0);
 }
 
@@ -667,6 +683,7 @@ static signed int fgauge_read_columb_internal(void *data, int reset, int precise
 {
 #if defined(CONFIG_POWER_EXT)
 	*(signed int *) (data) = 0;
+printk("[bmhdebug] %s\n", __FUNCTION__);
 #else
 	unsigned int uvalue32_CAR = 0;
 	unsigned int uvalue32_CAR_MSB = 0;
@@ -675,6 +692,7 @@ static signed int fgauge_read_columb_internal(void *data, int reset, int precise
 	long long Temp_Value = 0;
 	unsigned int ret = 0;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 /* HW Init */
 	/* (1)    i2c_write (0x60, 0xC8, 0x01); // Enable VA2 */
 	/* (2)    i2c_write (0x61, 0x15, 0x00); // Enable FGADC clock for digital */
@@ -805,23 +823,27 @@ static signed int fgauge_read_columb_internal(void *data, int reset, int precise
 
 static signed int fgauge_read_columb(void *data)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return fgauge_read_columb_internal(data, 0, 0);
 }
 
 static signed int fgauge_read_columb_accurate(void *data)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return fgauge_read_columb_internal(data, 0, 1);
 }
 
 static signed int fgauge_hw_reset(void *data)
 {
 #if defined(CONFIG_POWER_EXT)
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	/*  */
 #else
 	volatile unsigned int val_car = 1;
 	unsigned int val_car_temp = 1;
 	unsigned int ret = 0;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_FULL, "[fgauge_hw_reset] : Start \r\n");
 
 	while (val_car != 0x0) {
@@ -841,6 +863,7 @@ static signed int read_adc_v_bat_sense(void *data)
 {
 #if defined(CONFIG_POWER_EXT)
 	*(signed int *) (data) = 4201;
+printk("[bmhdebug] %s\n", __FUNCTION__);
 #else
 #if defined(SWCHR_POWER_PATH)
 	*(signed int *) (data) =
@@ -851,6 +874,7 @@ static signed int read_adc_v_bat_sense(void *data)
 #endif
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -870,6 +894,7 @@ static signed int read_adc_v_i_sense(void *data)
 #endif
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -888,6 +913,7 @@ static signed int read_adc_v_bat_temp(void *data)
 #endif
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -906,6 +932,7 @@ static signed int read_adc_v_charger(void *data)
 	*(signed int *) (data) = val;
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -922,11 +949,13 @@ static signed int read_hw_ocv(void *data)
 #endif
 #endif
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
 static signed int dump_register_fgadc(void *data)
 {
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -934,6 +963,7 @@ static signed int read_battery_plug_out_status(void *data)
 {
 	*(signed int *) (data) = is_battery_remove_pmic();
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return STATUS_OK;
 }
 
@@ -968,5 +998,6 @@ signed int bm_ctrl_cmd(BATTERY_METER_CTRL_CMD cmd, void *data)
 	} else
 		return STATUS_UNSUPPORTED;
 
+printk("[bmhdebug] %s\n", __FUNCTION__);
 	return status;
 }

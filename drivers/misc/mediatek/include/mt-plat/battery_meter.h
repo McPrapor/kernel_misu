@@ -4,7 +4,7 @@
 #include <linux/platform_device.h>
 #include <mach/mt_battery_meter.h>
 #include <mt-plat/charging.h>
-#if 0
+#ifdef CONFIG_V36BML_BATTERY
 #include <mt-plat/mt_typedefs.h>
 #endif
 /* ============================================================ */
@@ -389,4 +389,17 @@ extern int battery_meter_get_low_battery_interrupt_status(void);
 unsigned int get_cv_voltage(void);
 #endif
 
+#ifdef CONFIG_V36BML_BATTERY
+int fgauge_get_battery_id(void);
+int fgauge_get_battery_id_mv(void);
+/* ---------------- HTC Featured function ---------------- */
+extern kal_int32 htc_battery_meter_get_battery_voltage_imm(int times);
+extern kal_int32 htc_battery_meter_get_battery_current_imm(kal_bool bImmediately);
+extern kal_int32 htc_battery_meter_get_battery_temperature_imm(int times);
+extern kal_uint32 htc_battery_meter_show_attr(char *buf, kal_uint32 size);
+extern void htc_battery_meter_overload(kal_bool is_reset, kal_bool *overload);
+extern kal_int32 htc_battery_meter_get_car(void);
+extern kal_int32 htc_battery_get_socbyv(void);
+extern kal_int32 htc_battery_get_socbyc(void);
+#endif
 #endif /* #ifndef _BATTERY_METER_H */

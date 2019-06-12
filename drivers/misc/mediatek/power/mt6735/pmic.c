@@ -112,6 +112,9 @@ unsigned int g_eint_pmic_num = 206;
 unsigned int g_cust_eint_mt_pmic_debounce_cn = 1;
 unsigned int g_cust_eint_mt_pmic_type = 4;
 unsigned int g_cust_eint_mt_pmic_debounce_en = 1;
+#ifdef CONFIG_V36BML_BATTERY
+extern kal_bool Vchr_check_delayed10s;
+#endif
 
 /*****************************************************************************
  * PMIC related define
@@ -3125,6 +3128,20 @@ void chrdet_int_handler(void)
 {
 	PMICLOG("[chrdet_int_handler]CHRDET status = %d....\n",
 		pmic_get_register_value(PMIC_RGS_CHRDET));
+
+#ifdef CONFIG_V36BML_BATTERY
+    if(!pmic_get_register_value(PMIC_RGS_CHRDET))
+    {
+                BMT_status.htc_acil_state = 0;
+                BMT_status.avg_charger_vol = 0;
+                BMT_status.bat_charging_state = CHR_PRE;
+                BMT_status.htc_extension &= ~HTC_EXT_BAD_CABLE_USED;
+//                #if defined(V36BML_BATT)
+		#if 1
+                Vchr_check_delayed10s = KAL_FALSE;
+                #endif
+    }
+#endif
 
 #ifdef CONFIG_MTK_KERNEL_POWER_OFF_CHARGING
 	if (!upmu_get_rgs_chrdet()) {

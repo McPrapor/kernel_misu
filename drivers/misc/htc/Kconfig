@@ -1,0 +1,31 @@
+#
+# HTC MISC Driver Kconfig
+#
+
+config HTC_REBOOT_REASON_INFORMATION
+	default y
+	bool "HTC style reboot reason information features"
+	help
+	  Say Y here if you want the HTC style reboot reason information features
+	  
+config HTC_DEBUG_BOOTLOADER_LOG
+	default y
+	bool "HTC Bootloader Log Support"
+	help
+	  Say Y here if you want the HTC Bootloader Log Support
+
+
+config HTC_VIRTUAL_DEV
+	default n
+	tristate "Audio Virtual Device Control"
+	help
+	  Say Y if you are using specific GPIO for AUdio device Control.
+
+config HTC_POWER_PROFILING_6753
+        default y
+        bool "HTC style power profiling features"
+        help
+          Say Y here if you want the HTC power profiling features
+
+config HTC_PROJECT_DTB
+	string "HTC project DTB"

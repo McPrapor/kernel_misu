@@ -75,6 +75,49 @@ do {\
 /* ============================================================ */
 /* ENUM */
 /* ============================================================ */
+#ifdef CONFIG_V36BML_BATTERY
+typedef enum {
+        CHARGING_CMD_INIT,
+        CHARGING_CMD_DUMP_REGISTER,
+        CHARGING_CMD_ENABLE,
+        CHARGING_CMD_POWERPATH_CTRL,
+        CHARGING_CMD_SET_CV_VOLTAGE,
+        CHARGING_CMD_GET_CURRENT,
+        CHARGING_CMD_SET_CURRENT,
+        CHARGING_CMD_SET_INPUT_CURRENT,
+        CHARGING_CMD_GET_CHARGING_STATUS,
+        CHARGING_CMD_RESET_WATCH_DOG_TIMER,
+        CHARGING_CMD_SET_HV_THRESHOLD,
+        CHARGING_CMD_GET_HV_STATUS,
+        CHARGING_CMD_GET_BATTERY_STATUS,
+        CHARGING_CMD_GET_CHARGER_DET_STATUS,
+        CHARGING_CMD_GET_CHARGER_TYPE,
+        CHARGING_CMD_GET_IS_PCM_TIMER_TRIGGER,
+        CHARGING_CMD_SET_PLATFORM_RESET,
+        CHARGING_CMD_GET_PLATFORM_BOOT_MODE,
+        CHARGING_CMD_SET_POWER_OFF,
+        CHARGING_CMD_HTC_DUMP_REGISTER,
+#if 1
+//#ifdef HTC_ENABLE_AICL
+        CHARGING_CMD_HTC_AICL_INIT,
+        CHARGING_CMD_HTC_SET_VDM,
+        CHARGINF_CMD_HTC_GET_DPM_STATUS,
+#endif
+        CHARGING_CMD_GET_POWER_SOURCE,
+        CHARGING_CMD_GET_POWER_OVP_STATE,
+        CHARGING_CMD_GET_POWER_OVP_STATE2,
+        CHARGING_CMD_GET_CSDAC_FALL_FLAG,
+        CHARGING_CMD_SET_TA_CURRENT_PATTERN,
+        CHARGING_CMD_SET_ERROR_STATE,
+        CHARGING_CMD_DISO_INIT,
+        CHARGING_CMD_GET_DISO_STATE,
+#ifdef MTK_BQ24296_SUPPORT
+        CHARGING_CMD_SET_BATFET_STATUS,
+#endif
+CHARGING_CMD_ENABLE_SAFETY_TIMER,
+        CHARGING_CMD_NUMBER
+} CHARGING_CTRL_CMD;
+#else
 typedef enum {
 	CHARGING_CMD_INIT,
 	CHARGING_CMD_DUMP_REGISTER,
@@ -110,7 +153,7 @@ typedef enum {
 	CHARGING_CMD_GET_BIF_TBAT,
 	CHARGING_CMD_NUMBER
 } CHARGING_CTRL_CMD;
-
+#endif
 
 typedef enum {
 	CHARGER_UNKNOWN = 0,
@@ -123,6 +166,25 @@ typedef enum {
 	APPLE_0_5A_CHARGER,	/* 0.5A apple charger */
 	WIRELESS_CHARGER,
 } CHARGER_TYPE;
+
+#ifdef CONFIG_V36BML_BATTERY
+enum charger_control_flag {
+        STOP_CHARGER = 0,
+        ENABLE_CHARGER,
+        ENABLE_LIMIT_CHARGER,
+        DISABLE_LIMIT_CHARGER,
+        DISABLE_PWRSRC,
+        ENABLE_PWRSRC,
+        END_CHARGER
+};
+enum ftm_charger_control_flag {
+        FTM_ENABLE_CHARGER = 0,
+        FTM_STOP_CHARGER,
+        FTM_FAST_CHARGE,
+        FTM_SLOW_CHARGE,
+        FTM_END_CHARGER
+};
+#endif
 
 /*add begin by sunxiaogang@yulong.com 2015.05.11 for battery type detect*/
 typedef enum {
@@ -490,14 +552,21 @@ typedef enum {
 	CHARGE_CURRENT_2900_00_MA = 290000,
 	CHARGE_CURRENT_3000_00_MA = 300000,
 	CHARGE_CURRENT_3100_00_MA = 310000,
+#ifndef CONFIG_V36BML_BATTERY
 	CHARGE_CURRENT_3200_00_MA = 320000,
+#endif
 	CHARGE_CURRENT_MAX
 } CHR_CURRENT_ENUM;
 
 /* ============================================================ */
 /* structure */
 /* ============================================================ */
-
+#ifdef CONFIG_V36BML_BATTERY
+typedef struct {
+    char *buf;
+    int size;
+} sCHR_REG_DUMP, *pCHR_REG_DUMP;
+#endif
 
 /* ============================================================ */
 /* typedef */

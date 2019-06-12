@@ -3376,21 +3376,26 @@ signed int battery_meter_get_battery_voltage(kal_bool update)
 	static int pre_val = -1;
 
 	if (update == KAL_TRUE || pre_val == -1) {
+printk("[bmtrdebug] %s update = KAL_TRUE\n", __FUNCTION__);
 		val = 5;	/* set avg times */
 		ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_SENSE, &val);
 		pre_val = val;
 	} else {
+printk("[bmtrdebug] %s update = KAL_FALSE\n", __FUNCTION__);
 		val = pre_val;
 	}
 	g_sw_vbat_temp = val;
 
 #ifdef MTK_BATTERY_LIFETIME_DATA_SUPPORT
-	if (g_sw_vbat_temp > gFG_max_voltage)
+	if (g_sw_vbat_temp > gFG_max_voltage){
+printk("[bmtrdebug] %s g_sw_vbat_temp > gFG_max_voltage %d %d\n", __FUNCTION__, g_sw_vbat_temp, gFG_max_voltage);
 		gFG_max_voltage = g_sw_vbat_temp;
+	}
 
-
-	if (g_sw_vbat_temp < gFG_min_voltage)
+	if (g_sw_vbat_temp < gFG_min_voltage) {
+printk("[bmtrdebug] %s g_sw_vbat_temp < gFG_max_voltage %d %d\n", __FUNCTION__, g_sw_vbat_temp, gFG_max_voltage);
 		gFG_min_voltage = g_sw_vbat_temp;
+	}
 
 #endif
 
@@ -3965,6 +3970,140 @@ printk("[bmtrdebug] %s return val == %d ret == %d\n", __FUNCTION__, val, ret);
 #endif
 }
 
+/* ---------------- HTC Featured function ---------------- */
+#if 0
+kal_int32 htc_battery_meter_get_battery_voltage_imm(int times)
+{
+   int ret, val;
+
+    val = times;
+   ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_SENSE, &val);
+
+   return val;
+}
+#endif
+kal_int32 htc_battery_meter_get_battery_current_imm(kal_bool bImmediately)
+{
+    int ret = 0;
+    kal_int32 val1, val2;
+
+    if( bImmediately ){
+        ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT, &val1);
+        ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT_SIGN, &val2);
+    }else{
+        val1 = gFG_current;
+        val2 = gFG_Is_Charging;
+    }
+    if (!val2)
+        val1 = -val1;
+
+printk("[bmtrdebug] %s return val1(%d)/10\n", __FUNCTION__, val1);
+   return val1/10;
+}
+
+#if 0
+kal_int32 htc_battery_meter_get_battery_temperature_imm(int times)
+{
+   int bat_temperature_volt = 0;
+   int bat_temperature_val = 0;
+   int fg_r_value = 0;
+   kal_int32 fg_current_temp = 0;
+   kal_bool fg_current_state;
+   int ret = 0;
+
+    /* Get V_BAT_Temperature */
+    bat_temperature_volt = times;
+    ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_TEMP, &bat_temperature_volt);
+
+    if (bat_temperature_volt != 0) {
+
+        fg_r_value = get_r_fg_value();
+
+        ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT, &fg_current_temp);
+        ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT_SIGN, &fg_current_state);
+        fg_current_temp = DIV_ROUND_CLOSEST(fg_current_temp, 10);
+
+        if (fg_current_state == KAL_TRUE)
+            bat_temperature_volt -= (fg_current_temp * fg_r_value)/ 1000;
+        else
+            bat_temperature_volt += (fg_current_temp * fg_r_value)/ 1000;
+
+        bat_temperature_val = BattVoltToTemp(bat_temperature_volt);
+    }
+   return bat_temperature_val;
+}
+#endif
+
+void htc_battery_meter_overload(kal_bool is_reset, kal_bool *overload)
+{
+    static kal_int32 pre_cc = INT_MIN;
+
+    if( is_reset ){
+        pre_cc = gFG_columb;
+        *overload = FALSE;
+        return;
+    }
+
+    if( gFG_columb > pre_cc ){
+        pre_cc = gFG_columb;
+        *overload = FALSE;
+    }else if( gFG_columb < pre_cc - gFG_BATT_CAPACITY_aging/100 ){
+        pre_cc = gFG_columb + gFG_BATT_CAPACITY_aging/100;
+        *overload = TRUE;
+    }
+    //else if( pre_cc >= gFG_columb && gFG_columb >= pre_cc - gFG_BATT_CAPACITY_aging/100 )  ---> keep on original value
+
+    bm_print(BM_LOG_FULL, "[%s] pre_cc = %d, gFG_columb = %d, overload = %d\n",
+        __FUNCTION__, pre_cc, gFG_columb, *overload);
+    return;
+}
+
+#if 0
+kal_int32 htc_battery_meter_get_car(void)
+{
+        return gFG_columb;
+}
+
+kal_int32 htc_battery_get_socbyv(void)
+{
+        return gFG_capacity_by_v;
+}
+
+kal_int32 htc_battery_get_socbyc(void)
+{
+        return gFG_capacity_by_c;
+}
+
+kal_uint32 htc_battery_meter_show_attr(char *buf, kal_uint32 size)
+{
+    int len = 0;
+
+    len += scnprintf(buf + len, size - len,
+            "DOD0:\t%d;\n"
+            "DOD1:\t%d;\n"
+            "CAR:\t%d;\n"
+            "C_aging:\t%d;\n"
+            "hwocv_init:\t%d;\n"
+            "soc_by_hw_init:\t%d;\n"
+            "soc_by_sw_init:\t%d;\n"
+            "soc_from_rtc:\t%d;\n"
+            "soc_init:\t%d;\n"
+            "soc_by_swocv:\t%d;\n",
+            gFG_DOD0,
+            gFG_DOD1,
+            gFG_columb,
+            gFG_BATT_CAPACITY_aging,
+            gFG_hwocv_init,
+            gFG_capacity_by_hwocv_int,
+            gFG_capacity_by_v_init,
+            g_rtc_fg_soc,
+            gFG_capacity,
+            gFG_capacity_by_v
+        );
+
+    return len;
+}
+#endif
 /* ============================================================ // */
 static ssize_t fgadc_log_write(struct file *filp, const char __user *buff,
 			       size_t len, loff_t *data)

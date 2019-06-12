@@ -33,14 +33,31 @@
  ****************************************************************************/
 #include <linux/types.h>
 #include <linux/kernel.h>
+#include <linux/delay.h>
 #include <mt-plat/battery_meter.h>
 #include <mt-plat/battery_common.h>
 #include <mt-plat/charging.h>
 #include <mach/mt_charging.h>
 #include <mt-plat/mt_boot.h>
+#include <mt-plat/mt_typedefs.h>
 
 #ifdef CONFIG_V36BML_BATTERY
+#define AC_CHARGER_CURRENT					CHARGE_CURRENT_MAX
+#define AC_IBAT_CHARGER_CURRENT				CHARGE_CURRENT_1050_00_MA
+#define BAD_CABLE_CURRENT_GAP 400
+#define BAD_CABLE_R_THRESHOLD 850
+#define BAD_CABLE_DPM 4280
+#define BAD_CABLE_SLEEP_TIME 3000
+#define HTC_AICL_START_VOL 3800
+#define HTC_AICL_VBUS_DROP_RATIO 125
 #define HIGH_BATTERY_VOLTAGE_SUPPORT
+//#ifdef V36BML_BATT
+kal_uint32 temp_input_current[] = {CHARGE_CURRENT_MAX, CHARGE_CURRENT_MAX, CHARGE_CURRENT_MAX};
+kal_uint32 temp_current[] = {CHARGE_CURRENT_800_00_MA, CHARGE_CURRENT_1150_00_MA, CHARGE_CURRENT_1525_00_MA};
+kal_uint32 temp_vin_dpm[] = {4520, 4520, 4280};
+kal_uint32 temp_avg_voltage[] = {0, 0, 0, 0, 0, 0};
+kal_bool Vchr_check_delayed10s = KAL_FALSE;
+extern kal_uint16 htc_charging_avg_voltage_check(void);
 #endif
 
 
@@ -743,6 +760,54 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 	battery_charging_control(CHARGING_CMD_ENABLE_SAFETY_TIMER, &en);
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+void select_charging_current_bcct(void)
+{
+        if ((BMT_status.charger_type == STANDARD_HOST) ||
+            (BMT_status.charger_type == NONSTANDARD_CHARGER)) {
+                if (g_bcct_value < 100)
+                        g_temp_input_CC_value = CHARGE_CURRENT_0_00_MA;
+                else if (g_bcct_value < 500)
+                        g_temp_input_CC_value = CHARGE_CURRENT_100_00_MA;
+                else if (g_bcct_value < 800)
+                        g_temp_input_CC_value = CHARGE_CURRENT_500_00_MA;
+                else if (g_bcct_value == 800) 
+                        g_temp_input_CC_value = CHARGE_CURRENT_800_00_MA;
+                else
+                        g_temp_input_CC_value = CHARGE_CURRENT_500_00_MA;
+        } else if ((BMT_status.charger_type == STANDARD_CHARGER) ||
+                   (BMT_status.charger_type == CHARGING_HOST)) {
+                g_temp_input_CC_value = CHARGE_CURRENT_1000_00_MA;
+
+                /* --------------------------------------------------- */
+                /* set IOCHARGE */ 
+                if (g_bcct_value < 550) 
+                        g_temp_CC_value = CHARGE_CURRENT_0_00_MA;
+                else if (g_bcct_value < 650)
+                        g_temp_CC_value = CHARGE_CURRENT_550_00_MA;
+                else if (g_bcct_value < 750)
+                        g_temp_CC_value = CHARGE_CURRENT_650_00_MA;
+                else if (g_bcct_value < 850)
+                        g_temp_CC_value = CHARGE_CURRENT_750_00_MA;
+                else if (g_bcct_value < 950)
+                        g_temp_CC_value = CHARGE_CURRENT_850_00_MA;
+                else if (g_bcct_value < 1050)
+                        g_temp_CC_value = CHARGE_CURRENT_950_00_MA;
+                else if (g_bcct_value < 1150)
+                        g_temp_CC_value = CHARGE_CURRENT_1050_00_MA;
+                else if (g_bcct_value < 1250)
+                        g_temp_CC_value = CHARGE_CURRENT_1150_00_MA;
+                else if (g_bcct_value == 1250)
+                        g_temp_CC_value = CHARGE_CURRENT_1250_00_MA;
+                else
+                        g_temp_CC_value = CHARGE_CURRENT_650_00_MA;
+                /* --------------------------------------------------- */
+
+        } else {
+                g_temp_input_CC_value = CHARGE_CURRENT_500_00_MA;
+        }
+}
+#else
 void select_charging_current_bcct(void)
 {
 /*BQ25896 is the first switch chrager separating input and charge current
@@ -866,7 +931,7 @@ void select_charging_current_bcct(void)
 #endif
 printk("[swchrdebug] %s g_temp_CC_value %d, g_temp_input_CC_value %d\n", __FUNCTION__, g_temp_CC_value, g_temp_input_CC_value);
 }
-
+#endif
 
 /*BQ25896 is the first switch chrager separating input and charge current
 */
@@ -996,6 +1061,31 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 
 			battery_log(BAT_LOG_CRTI, "[BATTERY] set_ac_current \r\n");
 		}
+#ifdef CONFIG_V36BML_BATTERY
+        } else if (g_ftm_charger_ctrl_stat == FTM_FAST_CHARGE) {
+                g_temp_input_CC_value = batt_cust_data.ac_charger_current;
+                g_temp_CC_value = batt_cust_data.ac_charger_current;
+        } else if (g_ftm_charger_ctrl_stat == FTM_SLOW_CHARGE) {
+                g_temp_input_CC_value = USB_CHARGER_CURRENT;
+                g_temp_CC_value = USB_CHARGER_CURRENT;
+        }else if (g_chg_limit_reason & HTC_BATT_CHG_LIMIT_BIT_TALK) {
+                g_temp_input_CC_value = CHARGE_CURRENT_1000_00_MA;
+                g_temp_CC_value = CHARGE_CURRENT_700_00_MA;
+        } else if (g_chg_limit_reason & HTC_BATT_CHG_LIMIT_BIT_THRML) {
+//#ifdef HTC_ENABLE_AICL
+#if 1
+                if(BMT_status.charger_type == STANDARD_CHARGER){
+                        g_temp_input_CC_value = batt_cust_data.ac_charger_current;
+                        g_temp_CC_value = AC_IBAT_CHARGER_CURRENT;
+                }else{
+#endif
+	                g_temp_input_CC_value = CHARGE_CURRENT_700_00_MA;
+        	        g_temp_CC_value = CHARGE_CURRENT_700_00_MA;
+//#ifdef HTC_ENABLE_AICL
+#if 1
+                }
+#endif
+#endif
 	} else {
 		if (BMT_status.charger_type == STANDARD_HOST) {
 #ifdef CONFIG_USB_IF
@@ -1025,12 +1115,33 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 			g_temp_CC_value = batt_cust_data.non_std_ac_charger_current;
 
 		} else if (BMT_status.charger_type == STANDARD_CHARGER) {
-			if (batt_cust_data.ac_charger_input_current != 0)
-				g_temp_input_CC_value = batt_cust_data.ac_charger_input_current;
-			else
-				g_temp_input_CC_value = batt_cust_data.ac_charger_current;
-
-			g_temp_CC_value = batt_cust_data.ac_charger_current;
+#ifdef CONFIG_V36BML_BATTERY
+			 if(BMT_status.htc_acil_state == AICL_DONE){
+				//#ifdef V36BML_BATT
+				#if 1
+                                g_temp_input_CC_value = temp_input_current[2];
+                                g_temp_CC_value = temp_current[2];
+				#else
+                                g_temp_input_CC_value = CHARGE_CURRENT_1500_00_MA;
+                                if(BMT_status.temperature <= 10)
+                                        g_temp_CC_value = CHARGE_CURRENT_1350_00_MA;
+                                else
+                                        g_temp_CC_value = CHARGE_CURRENT_1750_00_MA;
+				#endif
+                        }else {
+                                g_temp_input_CC_value = AC_CHARGER_CURRENT;
+                                g_temp_CC_value = AC_IBAT_CHARGER_CURRENT;
+                        }
+                        battery_log(BAT_LOG_CRTI,
+                                "[BATTERY] [AICL] CC mode charging : input cc: %d, cc: %d .\n",
+                                                    g_temp_CC_value, g_temp_input_CC_value);
+#else
+				if (batt_cust_data.ac_charger_input_current != 0)
+					g_temp_input_CC_value = batt_cust_data.ac_charger_input_current;
+				else
+					g_temp_input_CC_value = batt_cust_data.ac_charger_current;
+				g_temp_CC_value = batt_cust_data.ac_charger_current;
+#endif
 #if defined(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT)
 			if (is_ta_connect == KAL_TRUE)
 				set_ta_charging_current();
@@ -1066,6 +1177,24 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+static kal_uint32 charging_full_check(void)
+{
+        kal_int32 iBatt_cur_check;
+        iBatt_cur_check = htc_battery_meter_get_battery_current_imm(TRUE);
+printk("[swchrdebug] %s iBatt_cur_check = %d BMT_status.bat_vol = %d\n", __FUNCTION__, iBatt_cur_check, BMT_status.bat_vol);
+        if (iBatt_cur_check <= 50 && BMT_status.bat_vol > 4330) {
+                g_full_check_count++;
+                if(g_full_check_count >= 3)
+                return KAL_TRUE;
+                else
+                return KAL_FALSE;
+        } else {
+                g_full_check_count = 0;
+                return KAL_FALSE;
+        }
+}
+#else
 static unsigned int charging_full_check(void)
 {
 	unsigned int status;
@@ -1089,6 +1218,7 @@ printk("[swchrdebug] %s return KAL_FALSE\n", __FUNCTION__);
 printk("[swchrdebug] %s return status == %d\n", __FUNCTION__, status);
 	/*}*/
 }
+#endif
 
 /*add by sunxiaogang@yulong.com 2015.07.20 for thermal regulation when charging*/
 #if defined(CONFIG_YULONG_BQ24296_SUPPORT)
@@ -1107,23 +1237,37 @@ static void pchr_turn_on_charging(void)
 	/*add end by sunxiaogang@yulong.com 2015.07.20*/
 	unsigned int charging_enable = KAL_TRUE;
 
+#ifdef CONFIG_V36BML_BATTERY
+                kal_uint32 charger_vol_sum = 0;
+                int j = 0, k = 0;
+                kal_uint32 Vin_dpm;
+                kal_uint32 DPM_status;
+                int i = 0;
+                kal_uint32 bad_cable_R;
+                kal_uint32 bad_cable_current[] = {CHARGE_CURRENT_500_00_MA,CHARGE_CURRENT_100_00_MA};
+                kal_uint32 bad_cable_charger_vol[] = {0,0,0};
+                kal_uint32 bad_cable_charger_vol_temp[] = {0,0,0,0,0,0};
+#endif
+
 #if defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 	if (KAL_TRUE == BMT_status.charger_exist)
 		charging_enable = KAL_TRUE;
 	else
 		charging_enable = KAL_FALSE;
 #endif
-printk("[swchrdebug] %s\n", __FUNCTION__);
+printk("[swchrdebug] %s start aicl_state %d g_temp_CC_value %d g_temp_input_CC_value %d\n", __FUNCTION__, BMT_status.htc_acil_state,g_temp_CC_value,g_temp_input_CC_value);
 
 	if (BMT_status.bat_charging_state == CHR_ERROR) {
 		battery_log(BAT_LOG_CRTI, "[BATTERY] Charger Error, turn OFF charging !\n");
 
 		charging_enable = KAL_FALSE;
 
+#ifndef CONFIG_V36BML_BATTERY
 	} else if ((g_platform_boot_mode == META_BOOT) || (g_platform_boot_mode == ADVMETA_BOOT)) {
 		battery_log(BAT_LOG_CRTI,
 			    "[BATTERY] In meta or advanced meta mode, disable charging.\n");
 		charging_enable = KAL_FALSE;
+#endif
 	} else {
 		/*HW initialization */
 		battery_charging_control(CHARGING_CMD_INIT, NULL);
@@ -1141,6 +1285,17 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 		/*add end by sunxiaogang@yulong.com 2015.07.20*/
 		/* Set Charging Current */
 		if (get_usb_current_unlimited()) {
+#ifdef CONFIG_V36BML_BATTERY
+                        if(BMT_status.htc_acil_state == AICL_DONE){
+                                g_temp_input_CC_value = CHARGE_CURRENT_1500_00_MA;
+                                g_temp_CC_value = CHARGE_CURRENT_1750_00_MA;
+                        }else {
+//                                g_temp_input_CC_value = batt_cust_data.ac_charger_current;
+                                g_temp_input_CC_value = AC_CHARGER_CURRENT;
+                                g_temp_CC_value = AC_IBAT_CHARGER_CURRENT;
+                        }
+printk("[[swchrdebug] after MT_status.htc_acil_state == AICL_DONE g_temp_CC_value %d g_temp_input_CC_value %d\n", g_temp_CC_value, g_temp_input_CC_value);
+#else
 			if (batt_cust_data.ac_charger_input_current != 0) {
 				printk("[swchrdebug] batt_cust_data.ac_charger_input_current != 0 g_temp_input_CC_value = batt_cust_data.ac_charger_input_current %d\n", batt_cust_data.ac_charger_input_current);
 				g_temp_input_CC_value = batt_cust_data.ac_charger_input_current;
@@ -1152,6 +1307,8 @@ printk("[swchrdebug] %s\n", __FUNCTION__);
 			}
 
 			g_temp_CC_value = batt_cust_data.ac_charger_current;
+#endif
+printk("[swchrdebug] USB_CURRENT_UNLIMITED use AC_CHARGER_CURRENT\n");
 			battery_log(BAT_LOG_FULL,
 				    "USB_CURRENT_UNLIMITED, use batt_cust_data.ac_charger_current\n");
 #ifndef CONFIG_MTK_SWITCH_INPUT_OUTPUT_CURRENT_SUPPORT
@@ -1203,9 +1360,173 @@ printk("[swchrdebug] %s Default CC mode charging : %d, input current = %d\n", __
 				    "[BATTERY] charging current is set 0mA, turn off charging !\r\n");
 printk("[swchrdebug] %s charging current is set 0mA, turn off charging !\n", __FUNCTION__);
 		} else {
+#ifdef CONFIG_V36BML_BATTERY
+printk("[swchrdebug] %s BMT_status.charger_type == %d STANDARD_CHARGER == %d =? BMT_status.bat_vol %d <=? HTC_AICL_START_VOL %d BMT_status.UI_SOC %d <? 11\n", __FUNCTION__, BMT_status.charger_type, STANDARD_CHARGER, BMT_status.bat_vol, HTC_AICL_START_VOL, BMT_status.UI_SOC);
+                        if(BMT_status.charger_type == STANDARD_CHARGER && BMT_status.htc_acil_state == 0){
+                                temp_avg_voltage[2] = BMT_status.bat_vol;
+                                if (BMT_status.bat_vol <= HTC_AICL_START_VOL || BMT_status.UI_SOC < 11){
+                                	BMT_status.htc_acil_state = AICL_START;
+                                	printk("[swchrdebug][AICL]AICL_START HTC_AICL_START_VOL %d , bat_vol = %d.\n", HTC_AICL_START_VOL, BMT_status.bat_vol);
+                                	battery_log(BAT_LOG_CRTI, "[BATTERY][AICL]AICL_START , bat_vol = %d.\n", BMT_status.bat_vol);
+                                } else {
+                                	BMT_status.htc_acil_state = AICL_STOP;
+                                	printk("[swchrdebug][AICL]AICL_STOP HTC_AICL_START_VOL %d , bat_vol = %d.\n", HTC_AICL_START_VOL, BMT_status.bat_vol);
+                                	battery_log(BAT_LOG_CRTI, "[BATTERY][AICL]AICL_STOP , bat_vol = %d.\n", BMT_status.bat_vol);
+                                }
+                        }
+                        switch(BMT_status.htc_acil_state){
+                                case AICL_START: //1
+                                        BMT_status.htc_acil_state = AICL_CHECKING;
+                                        Vin_dpm = temp_vin_dpm[1];
+                                        g_temp_input_CC_value = temp_input_current[1];
+//                                        #ifdef V36BML_BATT
+					#if 1
+                                        g_temp_CC_value = temp_current[0];
+                                        #else
+                                        g_temp_CC_value = temp_current[1];
+                                        #endif
+                                        battery_charging_control(CHARGING_CMD_HTC_SET_VDM, &Vin_dpm);
+                                        battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
+                                        battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+                                        break; // fall through
+                                case AICL_CHECKING: //2
+                                        for(i = 0; i < 3; i++){
+                                                Vin_dpm = temp_vin_dpm[i];
+                                                g_temp_input_CC_value = temp_input_current[i];
+                                                g_temp_CC_value = temp_current[i];
+                                                battery_charging_control(CHARGING_CMD_HTC_SET_VDM, &Vin_dpm);
+                                                battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
+                                                battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+                                                if( 2 == i)break;
+                                                if(htc_charging_avg_voltage_check())
+                                                        temp_avg_voltage[i] = BMT_status.avg_charger_vol;
+                                        }
+                                        battery_charging_control(CHARGINF_CMD_HTC_GET_DPM_STATUS, &DPM_status);
+                                        battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] vol1= %d. vol2 = %d, PDM_status=%d\n", temp_avg_voltage[0], temp_avg_voltage[1],DPM_status);
+                                        if(DPM_status == KAL_TRUE){
+                                                if(htc_charging_avg_voltage_check() && (temp_avg_voltage[0] != temp_avg_voltage[1])){
+                                                        if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) < HTC_AICL_VBUS_DROP_RATIO){
+								#if 1
+//                                                                #ifdef V36BML_BATT
+                                                                if(temp_avg_voltage[0] > 4780)
+                                                                #endif
+                                                                        {
+                                                                BMT_status.htc_acil_state = AICL_DONE;
+                                                                battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] Done 1.5A charging, charger vol = %d.\n", BMT_status.avg_charger_vol);
+                                                                break;
+                                                                        }
+//                                                                #ifdef V36BML_BATT
+								#if 1
+                                                                }else if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) >= HTC_AICL_VBUS_DROP_RATIO
+                                                                && (temp_avg_voltage[1] - BMT_status.avg_charger_vol) < 150){
+                                                                BMT_status.htc_acil_state = AICL_DONE;
+                                                                break;
+                                                                #endif
+                                                        } else {
+                                                                battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] charger vol = %d to small,restore charging cc = %d.\n", BMT_status.avg_charger_vol, g_temp_input_CC_value);
+                                                        }
+                                                }
+                                        }
+                                        // break; // fail through
+                                case AICL_STOP: //3
+#if 0
+                                        g_temp_input_CC_value = AC_CHARGER_CURRENT;
+                                        g_temp_CC_value = AC_IBAT_CHARGER_CURRENT;
+#endif
+					g_temp_input_CC_value = batt_cust_data.ac_charger_input_current;
+					g_temp_CC_value = AC_IBAT_CHARGER_CURRENT;
+                                        Vin_dpm = 4520;
+                                        battery_charging_control(CHARGING_CMD_HTC_SET_VDM, &Vin_dpm);  //VIN DPM check, 4.52V for 1.0A charge
+                                        battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
+                                        battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+					#if 1
+//                                        #if defined(A51CML_BATT) || defined(V36BML_BATT)
+//                                        #if defined(V36BML_BATT)
+                                        if(Vchr_check_delayed10s == KAL_FALSE){
+                                                Vchr_check_delayed10s = KAL_TRUE;
+                                                break;}
+                                        msleep(3000);
+//                                        #endif
+                                        htc_charging_avg_voltage_check();
+                                        battery_log(BAT_LOG_CRTI,"[BadCable] bat_vol=%d,charger_vol=%d,bat_curr=%d\n",
+                                                BMT_status.bat_vol,BMT_status.avg_charger_vol,htc_battery_meter_get_battery_current_imm(1));
+                                        if(BMT_status.bat_vol <= 4200 && BMT_status.avg_charger_vol <= 4600)
+                                            BMT_status.htc_acil_state = AICL_PENDGIN;
+                                        else
+                                                BMT_status.htc_acil_state = AICL_COMPLETE;
+                                        #else
+                                        BMT_status.htc_acil_state = AICL_COMPLETE;
+                                        #endif
+                                        battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] Stop 1.5A charging, charger cc = %d. Vin_dpm = %d\n", g_temp_input_CC_value, Vin_dpm);
+                                        break;
+                                case AICL_PENDGIN: //4
+					#if 1
+//                                        #if defined(A51CML_BATT) || defined(V36BML_BATT)
+                                        for(i = 0; i < sizeof(bad_cable_current)/sizeof(bad_cable_current[0]); i++){
+                                        g_temp_input_CC_value = bad_cable_current[i];
+                                        g_temp_CC_value = bad_cable_current[i];
+                                        Vin_dpm = BAD_CABLE_DPM;
+                                        battery_charging_control(CHARGING_CMD_HTC_SET_VDM, &Vin_dpm);
+                                        battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
+                                        battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+                                        msleep(BAD_CABLE_SLEEP_TIME);
+                                        for(j = 0; j < 6; j++)
+                                        {
+                                                bad_cable_charger_vol_temp[j] = battery_meter_get_charger_voltage();
+                                                msleep(200);
+                                                charger_vol_sum += bad_cable_charger_vol_temp[j];
+                                        }
+                                        for(j = 0; j < 6; j++)
+                                        {
+                                                for(k = 5; k > j; k--){
+                                                if(bad_cable_charger_vol_temp[k] < bad_cable_charger_vol_temp[k-1])
+                                                        {
+                                                                kal_uint32 temp = bad_cable_charger_vol_temp[k];
+                                                                bad_cable_charger_vol_temp[k] = bad_cable_charger_vol_temp[k-1];
+                                                                bad_cable_charger_vol_temp[k-1] = temp;
+                                                        }
+                                                        }
+                                        }
+                                        charger_vol_sum -= (bad_cable_charger_vol_temp[0]+bad_cable_charger_vol_temp[5]);
+                                        bad_cable_charger_vol[i] = charger_vol_sum/4;
+                                        battery_log(BAT_LOG_CRTI,"[BadCable]bad_cable_charger_vol[%d]=%d\n",i,bad_cable_charger_vol[i]);
+                                        }
+//                                        #if defined(V36BML_BATT)
+					#if 1
+                                        temp_avg_voltage[3] = bad_cable_charger_vol[0];
+                                        temp_avg_voltage[4] = bad_cable_charger_vol[1];
+                                        bad_cable_R = (bad_cable_charger_vol[1] - bad_cable_charger_vol[0])*1000/BAD_CABLE_CURRENT_GAP;
+                                        temp_avg_voltage[5] =bad_cable_R;
+                                        battery_log(BAT_LOG_CRTI,"[BadCable]bad_cable_R=%d\n",bad_cable_R);
+                                        if(bad_cable_R > BAD_CABLE_R_THRESHOLD)
+                                        #elif defined(A51CML_BATT)
+                                        bad_cable_R1 = (bad_cable_charger_vol[1] - bad_cable_charger_vol[0])*1000/(450-145);
+                                        bad_cable_R2 = (bad_cable_charger_vol[2] - bad_cable_charger_vol[0])*1000/(450-95);
+                                        bad_cable_R3 = (bad_cable_charger_vol[2] - bad_cable_charger_vol[1])*1000/(145-95);
+                                        battery_log(BAT_LOG_CRTI,"[BadCable]R1=%d,R2=%d,R3=%d\n",bad_cable_R1,bad_cable_R2,bad_cable_R3);
+                                        if((bad_cable_R1 > BAD_CABLE_R_THRESHOLD && bad_cable_R2 > BAD_CABLE_R_THRESHOLD) || bad_cable_R3 > BAD_CABLE_R_THRESHOLD)
+                                        #endif
+                                                {
+                                                        BMT_status.htc_extension |= HTC_EXT_BAD_CABLE_USED;
+                                                        wake_up_bat();
+                                                        battery_log(BAT_LOG_CRTI,"[BadCable]pop up bad cable warning message!\n");
+                                                }
+                                        BMT_status.htc_acil_state = AICL_COMPLETE;
+                                        #endif
+                                case AICL_COMPLETE: //5
+                                case AICL_DONE: //6
+                                default:
+                                        battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
+                                        battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+                                        break;
+                        }
+                        battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] status = %d, input cc = %d(%d).\n",
+                                BMT_status.htc_acil_state, g_temp_input_CC_value, g_temp_CC_value);
+#else
 			battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT,
 						 &g_temp_input_CC_value);
 			battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+#endif
 
 			/*Set CV Voltage */
 #if !defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
@@ -1215,7 +1536,8 @@ printk("[swchrdebug] %s charging current is set 0mA, turn off charging !\n", __F
 			else
 				cv_voltage = BATTERY_VOLT_04_200000_V;
 /* htc: set cv voltage depending on battery temperature, we add(?) in htc_batt_temp_cv_set */
-		        if(battery_meter_get_battery_temperature() >= 48)
+//		        if(battery_meter_get_battery_temperature() >= 48)
+		        if(BMT_status.temperature_now >= 48)
 				cv_voltage = BATTERY_VOLT_04_000000_V;
 #else
 			//modify by sunxiaogang@yulong.com 2015.04.23 to increase the battery full voltage
@@ -1249,6 +1571,7 @@ printk("[swchrdebug] %s gCV g_cv_voltage == cv_voltage %d\n", __FUNCTION__,cv_vo
 
 	battery_log(BAT_LOG_FULL, "[BATTERY] pchr_turn_on_charging(), enable =%d !\r\n",
 		    charging_enable);
+printk("[swchrdebug] %s end aicl_state %d g_temp_CC_value %d g_temp_input_CC_value %d cv_voltage %d\n", __FUNCTION__, BMT_status.htc_acil_state,g_temp_CC_value,g_temp_input_CC_value, cv_voltage);
 printk("[swchrdebug] %s enable =  %d\n", __FUNCTION__, charging_enable);
 }
 
