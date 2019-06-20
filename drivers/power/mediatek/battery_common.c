@@ -1865,7 +1865,6 @@ printk("[btrcmndebug] %s\n", __FUNCTION__);
 
 }
 #endif
-#define TMPDIS
 #ifndef TMPDIS
 static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
 {
@@ -2262,16 +2261,25 @@ printk("[btrcmndebug] %s\n", __FUNCTION__);
 		timer_counter = 0;
 
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
+printk("[bcmndebug] CUST_CAPACITY_OCV2CV_TRANSFORM  not defined BMT_status.UI_SOC = BMT_status.SOC\n");
 		BMT_status.UI_SOC = BMT_status.SOC;
 #else
-		if (BMT_status.UI_SOC == -1)
+		if (BMT_status.UI_SOC == -1) {
+printk("[bcmndebug] BMT_status.UI_SOC == -1\n");
 			BMT_status.UI_SOC = BMT_status.SOC;
+		}
 		else if (BMT_status.charger_exist && BMT_status.bat_charging_state != CHR_ERROR) {
+printk("[bcmndebug] BMT_status.charger_exist && BMT_status.bat_charging_state != CHR_ERROR\n");
 			if (BMT_status.UI_SOC < BMT_status.SOC
-			    && (BMT_status.SOC - BMT_status.UI_SOC > 1))
+			    && (BMT_status.SOC - BMT_status.UI_SOC > 1)) {
+printk("[bcmndebug] BMT_status.UI_SOC < BMT_status.SOC && (BMT_status.SOC - BMT_status.UI_SOC > 1)\n");
 				BMT_status.UI_SOC++;
+			}
 			else
+			{
+printk("[bcmndebug] BMT_status.UI_SOC >= BMT_status.SOC || (BMT_status.SOC - BMT_status.UI_SOC <= 1)\n");
 				BMT_status.UI_SOC = BMT_status.SOC;
+			}
 		}
 #endif
 	}
@@ -3147,6 +3155,7 @@ printk("[btrcmndebug] %s\n", __FUNCTION__);
 		/* if(BMT_status.bat_vol > 3800) //test */
 	{
 		g_BatteryNotifyCode |= 0x0008;
+printk("[btrcmndebug] %s [BATTERY] bat_vlot(%ld) > 4350mV\n", __FUNCTION__, BMT_status.bat_vol);
 		battery_log(BAT_LOG_CRTI, "[BATTERY] bat_vlot(%ld) > 4350mV\n", BMT_status.bat_vol);
 	} else {
 		g_BatteryNotifyCode &= ~(0x0008);
@@ -3709,11 +3718,12 @@ void BAT_thread(void)
 printk("[btrcmndebug] %s start BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_status.bat_vol);
 	if (battery_meter_initilized == KAL_FALSE) {
 #ifdef CONFIG_V36BML_BATTERY
-//		mt_battery_charger_detect_check();
+		mt_battery_charger_detect_check();
 #endif
 		battery_meter_initial();	/* move from battery_probe() to decrease booting time */
 		BMT_status.nPercent_ZCV = battery_meter_get_battery_nPercent_zcv();
 		battery_meter_initilized = KAL_TRUE;
+#ifndef CONFIG_V36BML_BATTERY
 #if defined(CONFIG_POWER_EXT)
 #else
 		BMT_status.SOC = battery_meter_get_battery_percentage();
@@ -3725,6 +3735,7 @@ printk("[btrcmndebug] %s start BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_sta
 		BMT_status.bat_vol = battery_meter_get_battery_voltage(KAL_TRUE);
 		BMT_status.temperature = battery_meter_get_battery_temperature();
 		battery_update(&battery_main);
+#endif
 #endif
 	}
 
@@ -3746,14 +3757,14 @@ printk("[btrcmndebug] %s start BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_sta
 	}
 
 #ifdef CONFIG_V36BML_BATTERY
-//    htc_battery_check_overload();
+    htc_battery_check_overload();
 
-//    htc_battery_sync_ui_soc(&battery_main);
+    htc_battery_sync_ui_soc(&battery_main);
 #endif
         mt_battery_update_status();
         mt_kpoc_power_off_check();
 #ifdef CONFIG_HTC_LIMIT_POWER
-//        htc_battery_limited_power();
+        htc_battery_limited_power();
 #endif
 printk("[btrcmndebug] %s end BMT_status.bat_vol = %d\n", __FUNCTION__, BMT_status.bat_vol);
 }

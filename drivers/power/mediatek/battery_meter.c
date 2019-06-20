@@ -28,7 +28,6 @@
 #include <mt-plat/mt_boot.h>
 #include <mt-plat/mtk_rtc.h>
 
-
 #include <mt-plat/mt_boot_reason.h>
 
 #include <mt-plat/battery_meter.h>
@@ -1346,6 +1345,7 @@ signed int fgauge_read_capacity_by_v(signed int voltage)
 	BATTERY_PROFILE_STRUCT_P profile_p;
 	signed int ret_percent = 0;
 
+printk("[bmtrdebug] %s voltage %d\n", __FUNCTION__, voltage);
 	profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
 printk("[bmtrdebug] %s return 100 1\n", __FUNCTION__);
@@ -2580,11 +2580,11 @@ signed int auxadc_algo_run(void)
 {
 	signed int val = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	gFG_voltage = battery_meter_get_battery_voltage(KAL_FALSE);
 	val = fgauge_read_capacity_by_v(gFG_voltage);
 
 	bm_print(BM_LOG_CRTI, "[auxadc_algo_run] %d,%d\n", gFG_voltage, val);
+printk("[bmtrdebug] %s gFG_voltage %d val %d\n", __FUNCTION__, gFG_voltage, val);
 
 	return val;
 }
@@ -3673,13 +3673,61 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 }
 #endif				/* #if defined(FG_BAT_INT) */
 
+#if 0
+static kal_uint32 htc_battery_0percent_volt(kal_int32 temp)
+{
+    kal_int32 iGap_temp_map_tbl[] = {0, 10};
+    kal_uint32 ui0percent_volt_map_tbl[] = {2950, 3200, 3200};
+    int i;
+
+    for( i=0; i< sizeof(iGap_temp_map_tbl)/sizeof(kal_int32); i++){
+        if( temp < iGap_temp_map_tbl[i] )
+            break;
+    }
+
+    if( temp >= iGap_temp_map_tbl[i] )
+        i = sizeof(ui0percent_volt_map_tbl)/sizeof(kal_uint32) - 1;
+
+    return ui0percent_volt_map_tbl[i];
+}
+
+static kal_int32 htc_battery_meter_estimate_percentage(kal_int32 soc_by_v,kal_int32 soc_by_c,kal_bool is_charging)
+{
+        kal_int32 weight = 0,soc_by_v_map;
+        kal_int32 volt0 = htc_battery_0percent_volt(BMT_status.temperature_now);
+        kal_int32 ll=100-fgauge_read_d_by_v(volt0);/*lowest level*/
+
+        if (ll >= 98){
+                bm_print(BM_LOG_CRTI, "Wrong battery parameters!\n");
+                return 0;
+        }
+        soc_by_v_map=10000/(98-ll);
+        soc_by_v_map*=(soc_by_v-ll);
+        soc_by_v_map=(soc_by_v_map+50)/100;
+
+        if (((soc_by_v_map<80)&&(is_charging>0))||
+                ((soc_by_v_map>20)&&(is_charging<=0)))
+                return soc_by_c;
+
+        weight=25*soc_by_v_map/4-soc_by_v_map*soc_by_v_map/16;
+        weight=weight<0?0:weight;
+
+        bm_print(BM_LOG_CRTI, "ll=%d,soc_by_v_map=%d,weight=%d",ll,soc_by_v_map,weight);
+
+        return (weight*soc_by_c+(100-weight)*soc_by_v_map)/100;
+}
+#endif
+
 signed int battery_meter_get_battery_percentage(void)
 {
+
+	kal_int32 tempshit = 0;
 #if defined(CONFIG_POWER_EXT)
 printk("[bmtrdebug] %s return 50\n", __FUNCTION__);
 	return 50;
 #else
 
+printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (bat_is_charger_exist() == KAL_FALSE)
 		fg_qmax_update_for_aging_flag = 1;
 
@@ -3689,14 +3737,26 @@ printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 #endif
 
 #if defined(SOC_BY_HW_FG)
-	if (g_auxadc_solution == 1)
+	if (g_auxadc_solution == 1) {
 printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 		return auxadc_algo_run();
+	}
 /*else {*/
 		fgauge_algo_run();
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
+#ifdef CONFIG_V36BML_BATTERY
+printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
+//         return htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+//           tempshit=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d)) stock was %d htc is %d return %d\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging, gFG_capacity_by_c, tempshit, fgauge_read_capacity_by_v(BMT_status.bat_vol));
+//	return tempshit;		
+	tempshit = fgauge_read_capacity_by_v(BMT_status.bat_vol);
+	return tempshit;
+
+#else
 printk("[bmtrdebug] %s return gFG_capacity_by_c == %d\n", __FUNCTION__, gFG_capacity_by_c);
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */
+#endif
 #else
 		/* We keep gFG_capacity_by_c as capacity before compensation */
 		/* Compensated capacity is returned for UI SOC tracking */
