@@ -3724,7 +3724,8 @@ printk("[btrdebug] %s ll=%d,soc_by_v_map=%d,weight=%d return %d\n", __FUNCTION__
 signed int battery_meter_get_battery_percentage(void)
 {
 
-	kal_int32 tempshit = 0;
+	kal_int32 temphtc = 0;
+	kal_int32 tempvol = 0;
 #if defined(CONFIG_POWER_EXT)
 printk("[bmtrdebug] %s return 50\n", __FUNCTION__);
 	return 50;
@@ -3749,14 +3750,16 @@ printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #ifdef CONFIG_V36BML_BATTERY
 printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
-//           tempshit=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-//	return tempshit;		
-//	tempshit = fgauge_read_capacity_by_v(BMT_status.bat_vol);
-//	return tempshit;
-//         return htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-	tempshit = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))==%d stock was %d htc is %d fgauge_read_capacity_by_v(BMT_status.bat_vol) %d\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging, tempshit, gFG_capacity_by_c, tempshit, fgauge_read_capacity_by_v(BMT_status.bat_vol));
-	return tempshit;
+	temphtc = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+	tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
+printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))==%d stock was %d htc is %d fgauge_read_capacity_by_v(BMT_status.bat_vol) %d\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging, temphtc, gFG_capacity_by_c, temphtc, fgauge_read_capacity_by_v(BMT_status.bat_vol));
+	if (temphtc < tempvol) {
+		printk("[bmtdebug] %s return temphtc %d\n", __FUNCTION__, temphtc);
+		return temphtc;
+	} else {
+		printk("[bmtdebug] %s return tempvol %d\n", __FUNCTION__, tempvol);
+		return tempvol;
+	}
 
 #else
 printk("[bmtrdebug] %s return gFG_capacity_by_c == %d\n", __FUNCTION__, gFG_capacity_by_c);
