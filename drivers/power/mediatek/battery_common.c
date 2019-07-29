@@ -2324,6 +2324,8 @@ printk("[btrcmndebug] %s\n", __FUNCTION__);
 	}
 	battery_xlog_printk(BAT_LOG_CRTI, "[sunxiaogang] charging_state = %d,Icharging = %d,charger_type = %d\n",
 			BMT_status.bat_charging_state,BMT_status.ICharging,bat_data->BAT_Charger_Type);
+	printk("[btrcmndebug] %s charging_state = %d,Icharging = %d,charger_type = %d, htc_battery_meter_get_battery_current_imm(TRUE) = %d\n", __FUNCTION__,
+			BMT_status.bat_charging_state,BMT_status.ICharging,bat_data->BAT_Charger_Type, htc_battery_meter_get_battery_current_imm(TRUE));
 	/*add end by sunxiaogang@yulong.com*/
 
 	if ((BMT_status.charger_exist == KAL_TRUE) && (BMT_status.bat_charging_state != CHR_ERROR)) {

@@ -2766,12 +2766,13 @@ signed int fgauge_update_dod(void)
 {
 	signed int FG_dod_1 = 0;
 	int adjust_coulomb_counter = batt_meter_cust_data.car_tune_value;
+#ifndef CONFIG_V36BML_BATTERY
 #ifdef Q_MAX_BY_CURRENT
 	signed int C_0mA = 0;
 	signed int C_400mA = 0;
 	signed int C_FGCurrent = 0;
 #endif
-
+#endif
 	if (gFG_DOD0 > 100) {
 		gFG_DOD0 = 100;
 		bm_print(BM_LOG_FULL, "[fgauge_update_dod] gFG_DOD0 set to 100, gFG_columb=%d\r\n",
@@ -3697,7 +3698,7 @@ static kal_int32 htc_battery_meter_estimate_percentage(kal_int32 soc_by_v,kal_in
         kal_int32 volt0 = htc_battery_0percent_volt(BMT_status.temperature_now);
         kal_int32 ll=100-fgauge_read_d_by_v(volt0);/*lowest level*/
 
-printk("[btrdebug] %s volt0 %d ll %d\n", __FUNCTION__, volt0, ll);
+printk("[btrdebug] %s volt0 %d ll %d soc_by_v %d soc_by_c %d is_charging %d\n", __FUNCTION__, volt0, ll, soc_by_v,soc_by_c,is_charging);
 
         if (ll >= 98){
                 bm_print(BM_LOG_CRTI, "Wrong battery parameters!\n");
@@ -3716,7 +3717,7 @@ printk("[btrdebug] %s volt0 %d ll %d\n", __FUNCTION__, volt0, ll);
 
         bm_print(BM_LOG_CRTI, "ll=%d,soc_by_v_map=%d,weight=%d",ll,soc_by_v_map,weight);
 
-printk("[btrdebug] %s ll=%d,soc_by_v_map=%d,weight=%d return %d\n", __FUNCTION__, ll, soc_by_v_map,weight, (weight*soc_by_c+(100-weight)*soc_by_v_map)/100);
+printk("[btrdebug] %s ll=%d,soc_by_v_map=%d,weight=%d return %d\n", __FUNCTION__, ll, soc_by_v_map,weight,(weight*soc_by_c+(100-weight)*soc_by_v_map)/100);
         return (weight*soc_by_c+(100-weight)*soc_by_v_map)/100;
 }
 #endif
@@ -3724,7 +3725,6 @@ printk("[btrdebug] %s ll=%d,soc_by_v_map=%d,weight=%d return %d\n", __FUNCTION__
 signed int battery_meter_get_battery_percentage(void)
 {
 
-	kal_int32 temphtc = 0;
 	kal_int32 tempvol = 0;
 #if defined(CONFIG_POWER_EXT)
 printk("[bmtrdebug] %s return 50\n", __FUNCTION__);
@@ -3749,18 +3749,22 @@ printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 		fgauge_algo_run();
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #ifdef CONFIG_V36BML_BATTERY
-printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
-	temphtc = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+#if 0
 	tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
-printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))==%d stock was %d htc is %d fgauge_read_capacity_by_v(BMT_status.bat_vol) %d\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging, temphtc, gFG_capacity_by_c, temphtc, fgauge_read_capacity_by_v(BMT_status.bat_vol));
-	if (temphtc < tempvol) {
-		printk("[bmtdebug] %s return temphtc %d\n", __FUNCTION__, temphtc);
-		return temphtc;
-	} else {
-		printk("[bmtdebug] %s return tempvol %d\n", __FUNCTION__, tempvol);
-		return tempvol;
+	if (tempvol == 100) {
+		printk("[bmtrdebug] fgauge_read_capacity_by_v(%d) == 100, calling htc_battery_meter_estimate_percentage(%d,%d, %d) instead\n", BMT_status.bat_vol, gFG_capacity_by_v, gFG_capacity_by_c,gFG_Is_Charging);
+printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
+		tempvol = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+		if (tempvol > 100) {
+			tempvol = 100;
+		}
 	}
-
+	return tempvol;
+#else
+	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
+	printk("[bmtrdebug] htc_battery_meter_estimate_percentage(%d,%d, %d)=%d instead\n", gFG_capacity_by_v, gFG_capacity_by_c,gFG_Is_Charging, tempvol);
+	return tempvol;
+#endif
 #else
 printk("[bmtrdebug] %s return gFG_capacity_by_c == %d\n", __FUNCTION__, gFG_capacity_by_c);
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */

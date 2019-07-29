@@ -70,7 +70,20 @@ typedef enum
 // ============================================================
 /*add begin by sunxiaogang@yulong.com 2015.04.20 for multi-battery support*/
 /* Qmax for battery  */
-#if defined(CONFIG_YULONG_BATTERY_3000MA) || defined(CONFIG_V36BML_BATTERY)
+#if defined(CONFIG_V36BML_BATTERY)
+
+#define TOTAL_BATTERY_NUMBER 3
+signed int g_battery_id_voltage[] = {500, 700, -1};//0~0.5V for battery 0(ATL), 0.5~0.7V for battery 1(BYD), -1 for the last one (battery 2)
+kal_int32 g_Q_MAX_POS_50[] = {2150, 2194, 2150};
+kal_int32 g_Q_MAX_POS_25[] = {2170, 2194, 2170};
+kal_int32 g_Q_MAX_POS_0[] = {1600, 1375, 1600};
+kal_int32 g_Q_MAX_NEG_10[] = {926, 850, 926};
+kal_int32 g_Q_MAX_POS_50_H_CURRENT[] = {2150, 2194, 2150};
+kal_int32 g_Q_MAX_POS_25_H_CURRENT[] = {2170, 2194, 2170};
+kal_int32 g_Q_MAX_POS_0_H_CURRENT[] = {1600, 1375, 1600};
+kal_int32 g_Q_MAX_NEG_10_H_CURRENT[] = {926, 850, 926};
+
+#elif defined(CONFIG_YULONG_BATTERY_3000MA)
 signed int g_Q_MAX_POS_50[] = {2994, 2994, 3110,3037};
 signed int g_Q_MAX_POS_25[] = {3021, 3021, 3119,3010};
 signed int g_Q_MAX_POS_0[] = {3082, 3082, 3123,3024};
@@ -81,11 +94,7 @@ signed int g_Q_MAX_POS_25_H_CURRENT[] = {2992, 2992, 3061,2970};
 signed int g_Q_MAX_POS_0_H_CURRENT[] = {2574, 2574, 2988,2721};
 signed int g_Q_MAX_NEG_10_H_CURRENT[] = {1422, 1422, 2381,1669};
 
-#ifdef CONFIG_V36BML_BATTERY
-signed int g_battery_id_voltage[] = {500, 700, 1500, -1};//0~0.5V for battery 0(ATL), 0.5~0.7V for battery 1(BYD), -1 for the last one (battery 2)
-#else
 signed int g_battery_id_voltage[] = {200,800,1200, -1};//0~0.2V for battery 0 guangyu(CPCC), 0.2~0.8V for battery 1 weike (CPVK), 0.8~1.2V for battery 2 atl(CPAT) -1 for the last one (battery 3 tianmao(CPTM))
-#endif
 
 /*add begin by sunxiaogang@yulong.com*/
 #elif defined(CONFIG_YULONG_BATTERY_2500MA)
