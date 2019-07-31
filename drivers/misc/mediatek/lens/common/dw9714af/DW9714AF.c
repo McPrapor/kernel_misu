@@ -43,7 +43,6 @@ static int s4AF_ReadReg(unsigned short *a_pu2Result)
 
 	g_pstAF_I2Cclient->addr = g_pstAF_I2Cclient->addr >> 1;
 
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	i4RetValue = i2c_master_recv(g_pstAF_I2Cclient, pBuff, 2);
 
 	if (i4RetValue < 0) {
@@ -66,7 +65,6 @@ static int s4AF_WriteReg(u16 a_u2Data)
 
 	g_pstAF_I2Cclient->addr = g_pstAF_I2Cclient->addr >> 1;
 
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, puSendCmd, 2);
 
 	if (i4RetValue < 0) {
@@ -88,7 +86,6 @@ static inline int getAFInfo(__user stAF_MotorInfo *pstMotorInfo)
 
 	stMotorInfo.bIsMotorMoving = 1;
 
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	if (*g_pAF_Opened >= 1)
 		stMotorInfo.bIsMotorOpen = 1;
 	else
@@ -104,7 +101,6 @@ static inline int moveAF(unsigned long a_u4Position)
 {
 	int ret = 0;
 
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	if ((a_u4Position > g_u4AF_MACRO) || (a_u4Position < g_u4AF_INF)) {
 		LOG_INF("out of range\n");
 		return -EINVAL;
@@ -156,7 +152,6 @@ static inline int moveAF(unsigned long a_u4Position)
 
 static inline int setAFInf(unsigned long a_u4Position)
 {
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	spin_lock(g_pAF_SpinLock);
 	g_u4AF_INF = a_u4Position;
 	spin_unlock(g_pAF_SpinLock);
@@ -165,7 +160,6 @@ static inline int setAFInf(unsigned long a_u4Position)
 
 static inline int setAFMacro(unsigned long a_u4Position)
 {
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	spin_lock(g_pAF_SpinLock);
 	g_u4AF_MACRO = a_u4Position;
 	spin_unlock(g_pAF_SpinLock);
@@ -177,7 +171,6 @@ long DW9714AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command, unsigned l
 {
 	long i4RetValue = 0;
 
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	switch (a_u4Command) {
 	case AFIOC_G_MOTORINFO:
 		i4RetValue = getAFInfo((__user stAF_MotorInfo *) (a_u4Param));
@@ -211,7 +204,6 @@ long DW9714AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command, unsigned l
 /* Q1 : Try release multiple times. */
 int DW9714AF_Release(struct inode *a_pstInode, struct file *a_pstFile)
 {
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 	LOG_INF("Start\n");
 
 	if (*g_pAF_Opened == 2) {
@@ -240,5 +232,4 @@ void DW9714AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_S
 	g_pstAF_I2Cclient = pstAF_I2Cclient;
 	g_pAF_SpinLock = pAF_SpinLock;
 	g_pAF_Opened = pAF_Opened;
-	printk("[camdebug] dw9714 %s\n", __FUNCTION__);
 }

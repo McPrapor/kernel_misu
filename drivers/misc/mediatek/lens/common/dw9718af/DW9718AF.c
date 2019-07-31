@@ -37,7 +37,6 @@ static int i2c_read(u8 a_u2Addr, u8 *a_puBuff)
 {
 	int i4RetValue = 0;
 	char puReadCmd[1] = { (char)(a_u2Addr) };
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	i4RetValue = i2c_master_send(g_pstAF_I2Cclient, puReadCmd, 1);
 	if (i4RetValue != 2) {
 		LOG_INF(" I2C write failed!!\n");
@@ -56,7 +55,6 @@ static int i2c_read(u8 a_u2Addr, u8 *a_puBuff)
 static u8 read_data(u8 addr)
 {
 	u8 get_byte = 0;
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	i2c_read(addr, &get_byte);
 
 	return get_byte;
@@ -64,7 +62,6 @@ static u8 read_data(u8 addr)
 
 static int s4DW9718AF_ReadReg(unsigned short *a_pu2Result)
 {
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	*a_pu2Result = (read_data(0x02) << 8) + (read_data(0x03) & 0xff);
 
 	return 0;
@@ -76,7 +73,6 @@ static int s4AF_WriteReg(u16 a_u2Data)
 
 	char puSendCmd[3] = { 0x02, (char)(a_u2Data >> 8), (char)(a_u2Data & 0xFF) };
 
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	g_pstAF_I2Cclient->addr = AF_I2C_SLAVE_ADDR;
 
 	g_pstAF_I2Cclient->addr = g_pstAF_I2Cclient->addr >> 1;
@@ -102,7 +98,6 @@ static inline int getAFInfo(__user stAF_MotorInfo *pstMotorInfo)
 
 	stMotorInfo.bIsMotorMoving = 1;
 
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	if (*g_pAF_Opened >= 1)
 		stMotorInfo.bIsMotorOpen = 1;
 	else
@@ -118,7 +113,6 @@ static void initdrv(void)
 {
 	char puSendCmd2[2] = { 0x01, 0x39 };
 	char puSendCmd3[2] = { 0x05, 0x65 };
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	i2c_master_send(g_pstAF_I2Cclient, puSendCmd2, 2);
 	i2c_master_send(g_pstAF_I2Cclient, puSendCmd3, 2);
 }
@@ -128,7 +122,6 @@ static inline int moveAF(unsigned long a_u4Position)
 {
 	int ret = 0;
 
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	if ((a_u4Position > g_u4AF_MACRO) || (a_u4Position < g_u4AF_INF)) {
 		LOG_INF("out of range\n");
 		return -EINVAL;
@@ -181,7 +174,6 @@ static inline int moveAF(unsigned long a_u4Position)
 
 static inline int setAFInf(unsigned long a_u4Position)
 {
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	spin_lock(g_pAF_SpinLock);
 	g_u4AF_INF = a_u4Position;
 	spin_unlock(g_pAF_SpinLock);
@@ -190,7 +182,6 @@ static inline int setAFInf(unsigned long a_u4Position)
 
 static inline int setAFMacro(unsigned long a_u4Position)
 {
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	spin_lock(g_pAF_SpinLock);
 	g_u4AF_MACRO = a_u4Position;
 	spin_unlock(g_pAF_SpinLock);
@@ -202,7 +193,6 @@ long DW9718AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command, unsigned l
 {
 	long i4RetValue = 0;
 
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	switch (a_u4Command) {
 	case AFIOC_G_MOTORINFO:
 		i4RetValue = getAFInfo((__user stAF_MotorInfo *) (a_u4Param));
@@ -236,7 +226,6 @@ long DW9718AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command, unsigned l
 /* Q1 : Try release multiple times. */
 int DW9718AF_Release(struct inode *a_pstInode, struct file *a_pstFile)
 {
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 	LOG_INF("Start\n");
 
 	if (*g_pAF_Opened == 2)
@@ -260,5 +249,4 @@ void DW9718AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_S
 	g_pstAF_I2Cclient = pstAF_I2Cclient;
 	g_pAF_SpinLock = pAF_SpinLock;
 	g_pAF_Opened = pAF_Opened;
-	printk("[camdebug] dw9718 %s\n", __FUNCTION__);
 }
