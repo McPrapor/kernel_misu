@@ -3763,6 +3763,8 @@ printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%
 #else
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
 	printk("[bmtrdebug] htc_battery_meter_estimate_percentage(%d,%d, %d)=%d instead\n", gFG_capacity_by_v, gFG_capacity_by_c,gFG_Is_Charging, tempvol);
+	if (tempvol > 100)
+		tempvol = 100;
 	return tempvol;
 #endif
 #else
