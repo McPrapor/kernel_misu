@@ -85,23 +85,19 @@ static void mtk_cl_bcct_set_bcct_limit(void)
 		unsigned long curr_state;
 
 		MTK_CL_BCCT_GET_CURR_STATE(curr_state, cl_bcct_state[i]);
-printk("[coolerdebug] %s cl_bcct_state[%d] curr_state %lu\n", __FUNCTION__, i, curr_state);
 		if (1 == curr_state) {
 
 			int limit;
 			MTK_CL_BCCT_GET_LIMIT(limit, cl_bcct_state[i]);
-printk("[coolerdebug] %s cl_bcct_state[%d] %d MAX_NUM_INSTANCE_MTK_COOLER_BCCT %d\n", __FUNCTION__, i, limit, MAX_NUM_INSTANCE_MTK_COOLER_BCCT);
 			if ((min_limit > limit) && (limit > 0))
 				min_limit = limit;
 		}
 	}
 
-printk("[coolerdebug] %s min_limit %d cl_bcct_cur_limit %d\n",__FUNCTION__, min_limit, cl_bcct_cur_limit);
 	if (min_limit != cl_bcct_cur_limit) {
 		cl_bcct_cur_limit = min_limit;
 
 		if (65535 <= cl_bcct_cur_limit) {
-printk("[coolerdebug] %s calling set_bat_charging_current_limit(-1)\n",__FUNCTION__);
 			set_bat_charging_current_limit(-1);
 			mtk_cooler_bcct_dprintk_always("mtk_cl_bcct_set_bcct_limit() limit=-1\n");
 		} else {
@@ -121,7 +117,6 @@ printk("[coolerdebug] %s calling set_bat_charging_current_limit(-1)\n",__FUNCTIO
                         else
                         {
 #endif
-printk("[coolerdebug] %s calling set_bat_charging_current_limit(%d)\n",__FUNCTION__, cl_bcct_cur_limit);
 				set_bat_charging_current_limit(cl_bcct_cur_limit);
 			mtk_cooler_bcct_dprintk_always("mtk_cl_bcct_set_bcct_limit() limit=%d\n",
 						       cl_bcct_cur_limit);
@@ -329,7 +324,6 @@ static ssize_t _cl_bcct_write(struct file *filp, const char __user *buf, size_t 
 	MTK_CL_BCCT_SET_LIMIT(-1, cl_bcct_state[0]);
 	MTK_CL_BCCT_SET_LIMIT(-1, cl_bcct_state[1]);
 	MTK_CL_BCCT_SET_LIMIT(-1, cl_bcct_state[2]);
-printk("[coolerdebug] %s limit0 %d limit1 %d limit2 %d\n", __FUNCTION__, limit0, limit1, limit2);
 	if (1 <= sscanf(tmp, "%d %d %d %d", &klog_on, &limit0, &limit1, &limit2)) {
 		if (klog_on == 0 || klog_on == 1)
 			cl_bcct_klog_on = klog_on;

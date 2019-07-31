@@ -264,7 +264,6 @@ void fgauge_get_profile_id(void)
 	//int ret = 0;
 	/*add begin by sunxiaogang@yulong.com 2015.05.27 to add battery id in factory mode*/
 	unsigned char buf[50] = {0};
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/*add end by sunxiaogang@yulong.com*/
 //	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
 	id_volt = PMIC_IMM_GetOneChannelValue(MT6328_AUX_TSX,5,1);      //huangqingjun add for multi battery
@@ -308,13 +307,11 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 #elif defined(MTK_GET_BATTERY_ID_BY_GPIO)
 void fgauge_get_profile_id(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	g_fg_battery_id = 0;
 }
 #else
 void fgauge_get_profile_id(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	g_fg_battery_id = 0;
 }
 #endif
@@ -329,7 +326,6 @@ int __batt_meter_init_cust_data_from_cust_header(void)
 {
 	battery_log(BAT_LOG_CRTI, "__batt_meter_init_cust_data_from_cust_header\n");
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* mt_battery_meter_table.h */
 #if (BAT_NTC_10 == 1)
 	batt_meter_cust_data.bat_ntc = 10;
@@ -523,7 +519,6 @@ static void __batt_meter_parse_node(const struct device_node *np,
 				const char *node_srting, int *cust_val)
 {
 	u32 val;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (of_property_read_u32(np, node_srting, &val) == 0) {
 		(*cust_val) = (int)val;
 		bm_print(BM_LOG_FULL, "Get %s: %d\n", node_srting, (*cust_val));
@@ -537,7 +532,6 @@ static void __batt_meter_parse_table(const struct device_node *np,
 {
 	int addr, val, idx, saddles;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/*the number of battery table is
 		the same as the number of r table*/
 	saddles = fgauge_get_saddles();
@@ -598,7 +592,6 @@ int __batt_meter_init_cust_data_from_dt(void)
 	int num;
 	unsigned int idx, addr, val;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* check customer setting */
 	np = of_find_compatible_node(NULL, NULL, "mediatek,bat_meter");
 	if (!np) {
@@ -812,7 +805,6 @@ int batt_meter_init_cust_data(void)
 {
 	static int init_done;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (init_done == 1)
 		return 0;
 	init_done = 1;
@@ -879,7 +871,6 @@ int BattThermistorConverTemp(int Res)
 		TBatt_Value = (((Res - RES2) * TMP1) + ((RES1 - Res) * TMP2)) / (RES1 - RES2);
 	}
 
-printk("[bmtrdebug] %s return TBatt_Value == %d\n", __FUNCTION__, TBatt_Value);
 	return TBatt_Value;
 }
 
@@ -924,7 +915,6 @@ signed int fgauge_get_Q_max(signed short temperature)
 
 	bm_print(BM_LOG_FULL, "[fgauge_get_Q_max] Q_max = %d\r\n", ret_Q_max);
 
-printk("[bmtrdebug] %s return ret_Q_max == %d\n", __FUNCTION__, ret_Q_max);
 	return ret_Q_max;
 }
 
@@ -935,7 +925,6 @@ signed int fgauge_get_Q_max_high_current(signed short temperature)
 	signed int low_temperature = 0, high_temperature = 0;
 	signed int low_Q_max = 0, high_Q_max = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature <= batt_meter_cust_data.temperature_t1) {
 		low_temperature = (-10);
 		low_Q_max = g_Q_MAX_NEG_10_H_CURRENT[g_fg_battery_id];
@@ -982,7 +971,6 @@ int BattThermistorConverTemp(int Res)
 	int RES1 = 0, RES2 = 0;
 	int TBatt_Value = -200, TMP1 = 0, TMP2 = 0;
 
-printk("[bmtrdebug] else %s Res %d\n", __FUNCTION__, Res);
 	if (Res >= Batt_Temperature_Table[0].TemperatureR) {
 		TBatt_Value = -20;
 	} else if (Res <= Batt_Temperature_Table[16].TemperatureR) {
@@ -1015,7 +1003,6 @@ signed int fgauge_get_Q_max(signed short temperature)
 	signed int low_temperature = 0, high_temperature = 0;
 	signed int low_Q_max = 0, high_Q_max = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature <= batt_meter_cust_data.temperature_t1) {
 		low_temperature = (-10);
 		low_Q_max = batt_meter_cust_data.q_max_neg_10;
@@ -1061,7 +1048,6 @@ signed int fgauge_get_Q_max_high_current(signed short temperature)
 	signed int low_temperature = 0, high_temperature = 0;
 	signed int low_Q_max = 0, high_Q_max = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature <= batt_meter_cust_data.temperature_t1) {
 		low_temperature = (-10);
 		low_Q_max = batt_meter_cust_data.q_max_neg_10_h_current;
@@ -1124,7 +1110,6 @@ int BattVoltToTemp(int dwVolt)
 	/* convert register to temperature */
 	sBaTTMP = BattThermistorConverTemp((int)TRes);
 
-printk("[bmtrdebug] %s return sBaTTMP == %d\n", __FUNCTION__, sBaTTMP);
 	return sBaTTMP;
 }
 
@@ -1132,7 +1117,6 @@ int force_get_tbat(kal_bool update)
 {
 #if defined(CONFIG_POWER_EXT) || defined(FIXED_TBAT_25)
 	bm_print(BM_LOG_CRTI, "[force_get_tbat] fixed TBAT=25 t\n");
-printk("[bmtrdebug] %s return 25 1\n", __FUNCTION__);
 	return 25;
 #else
 	int bat_temperature_volt = 0;
@@ -1146,7 +1130,6 @@ printk("[bmtrdebug] %s return 25 1\n", __FUNCTION__);
 
 	if (batt_meter_cust_data.fixed_tbat_25) {
 		bm_print(BM_LOG_CRTI, "[force_get_tbat] fixed TBAT=25 t\n");
-printk("[bmtrdebug] %s return 25 2\n", __FUNCTION__);
 		return 25;
 	}
 
@@ -1191,7 +1174,6 @@ printk("[bmtrdebug] %s return 25 2\n", __FUNCTION__);
 	} else {
 		bat_temperature_val = pre_bat_temperature_val;
 	}
-printk("[bmtrdebug] %s return bat_temperature_val == %d\n", __FUNCTION__, bat_temperature_val);
 	return bat_temperature_val;
 #endif
 }
@@ -1200,93 +1182,76 @@ EXPORT_SYMBOL(force_get_tbat);
 #ifdef MTK_MULTI_BAT_PROFILE_SUPPORT
 int fgauge_get_saddles(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sizeof(battery_profile_temperature) / sizeof(BATTERY_PROFILE_STRUCT);
 }
 
 int fgauge_get_saddles_r_table(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sizeof(r_profile_temperature) / sizeof(R_PROFILE_STRUCT);
 }
 
 BATTERY_PROFILE_STRUCT_P fgauge_get_profile(unsigned int temperature)
 {
 	if (temperature == batt_meter_cust_data.temperature_t0) {
-printk("[bmtrdebug] %s return &battery_profile_t0[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &battery_profile_t0[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t1) {
-printk("[bmtrdebug] %s return &battery_profile_t1[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &battery_profile_t1[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t2) {
-printk("[bmtrdebug] %s return &battery_profile_t2[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &battery_profile_t2[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t3) {
-printk("[bmtrdebug] %s return &battery_profile_t3[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &battery_profile_t3[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t) {
-printk("[bmtrdebug] %s return &battery_profile_temperature[0]\n", __FUNCTION__);
 		return &battery_profile_temperature[0];
 	}
 
-printk("[bmtrdebug] %s return NULL\n", __FUNCTION__);
 	return NULL;
 }
 
 R_PROFILE_STRUCT_P fgauge_get_profile_r_table(unsigned int temperature)
 {
 	if (temperature == batt_meter_cust_data.temperature_t0) {
-printk("[bmtrdebug] %s return &r_profile_t0[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &r_profile_t0[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t1) {
-printk("[bmtrdebug] %s return &r_profile_t1[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &r_profile_t1[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t2) {
-printk("[bmtrdebug] %s return &r_profile_t2[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &r_profile_t2[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t3) {
-printk("[bmtrdebug] %s return &r_profile_t3[g_fg_battery_id][0]\n", __FUNCTION__);
 		return &r_profile_t3[g_fg_battery_id][0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t) {
-printk("[bmtrdebug] %s return &r_profile_temperature[0]\n", __FUNCTION__);
 		return &r_profile_temperature[0];
 	}
 
-printk("[bmtrdebug] %s return NULL\n", __FUNCTION__);
 	return NULL;
 }
 #else
 int fgauge_get_saddles(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sizeof(battery_profile_t2) / sizeof(BATTERY_PROFILE_STRUCT);
 }
 
 int fgauge_get_saddles_r_table(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sizeof(r_profile_t2) / sizeof(R_PROFILE_STRUCT);
 }
 
 BATTERY_PROFILE_STRUCT_P fgauge_get_profile(unsigned int temperature)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature == batt_meter_cust_data.temperature_t0)
 		return &battery_profile_t0[0];
 
@@ -1310,31 +1275,25 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 R_PROFILE_STRUCT_P fgauge_get_profile_r_table(unsigned int temperature)
 {
 	if (temperature == batt_meter_cust_data.temperature_t0) {
-printk("[bmtrdebug] %s return &r_profile_t0[0]\n", __FUNCTION__);
 		return &r_profile_t0[0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t1) {
-printk("[bmtrdebug] %s return &r_profile_t1[0]\n", __FUNCTION__);
 		return &r_profile_t1[0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t2) {
-printk("[bmtrdebug] %s return &r_profile_t2[0]\n", __FUNCTION__);
 		return &r_profile_t2[0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t3) {
-printk("[bmtrdebug] %s return &r_profile_t3[0]\n", __FUNCTION__);
 		return &r_profile_t3[0];
 	}
 
 	if (temperature == batt_meter_cust_data.temperature_t) {
-printk("[bmtrdebug] %s return &r_profile_t3[0]\n", __FUNCTION__);
 		return &r_profile_temperature[0];
 	}
 
-printk("[bmtrdebug] %s return NULL\n", __FUNCTION__);
 	return NULL;
 }
 #endif
@@ -1345,10 +1304,8 @@ signed int fgauge_read_capacity_by_v(signed int voltage)
 	BATTERY_PROFILE_STRUCT_P profile_p;
 	signed int ret_percent = 0;
 
-printk("[bmtrdebug] %s voltage %d\n", __FUNCTION__, voltage);
 	profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
-printk("[bmtrdebug] %s return 100 1\n", __FUNCTION__);
 		bm_print(BM_LOG_CRTI, "[FGADC] fgauge get ZCV profile : fail !\r\n");
 		return 100;
 	}
@@ -1356,12 +1313,10 @@ printk("[bmtrdebug] %s return 100 1\n", __FUNCTION__);
 	saddles = fgauge_get_saddles();
 
 	if (voltage > (profile_p + 0)->voltage) {
-printk("[bmtrdebug] %s return 100 2\n", __FUNCTION__);
 		return 100;	/* battery capacity, not dod */
 	}
 
 	if (voltage < (profile_p + saddles - 1)->voltage) {
-printk("[bmtrdebug] %s return 0 \n", __FUNCTION__);
 		return 0;	/* battery capacity, not dod */
 	}
 
@@ -1383,7 +1338,6 @@ printk("[bmtrdebug] %s return 0 \n", __FUNCTION__);
 	}
 	ret_percent = 100 - ret_percent;
 
-printk("[bmtrdebug] %s return ret_percent == %d \n", __FUNCTION__, ret_percent);
 	return ret_percent;
 }
 
@@ -1393,7 +1347,6 @@ signed int fgauge_read_v_by_capacity(int bat_capacity)
 	BATTERY_PROFILE_STRUCT_P profile_p;
 	signed int ret_volt = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
 		bm_print(BM_LOG_CRTI,
@@ -1434,7 +1387,6 @@ signed int fgauge_read_d_by_v(signed int volt_bat)
 	BATTERY_PROFILE_STRUCT_P profile_p;
 	signed int ret_d = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
 		bm_print(BM_LOG_CRTI, "[FGADC] fgauge get ZCV profile : fail !\r\n");
@@ -1475,7 +1427,6 @@ signed int fgauge_read_v_by_d(int d_val)
 	BATTERY_PROFILE_STRUCT_P profile_p;
 	signed int ret_volt = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
 		bm_print(BM_LOG_CRTI,
@@ -1518,7 +1469,6 @@ signed int fgauge_read_r_bat_by_v(signed int voltage)
 
 	profile_p = fgauge_get_profile_r_table(batt_meter_cust_data.temperature_t);
 	if (profile_p == NULL) {
-printk("[bmtrdebug] %s return (profile_p + 0)->resistance == %d 1\n", __FUNCTION__, (profile_p + 0)->resistance);
 		bm_print(BM_LOG_CRTI, "[FGADC] fgauge get R-Table profile : fail !\r\n");
 		return (profile_p + 0)->resistance;
 	}
@@ -1526,12 +1476,10 @@ printk("[bmtrdebug] %s return (profile_p + 0)->resistance == %d 1\n", __FUNCTION
 	saddles = fgauge_get_saddles_r_table();
 
 	if (voltage > (profile_p + 0)->voltage){
-printk("[bmtrdebug] %s return (profile_p + 0)->resistance == %d 2\n", __FUNCTION__, (profile_p + 0)->resistance);
 		return (profile_p + 0)->resistance;
 	}
 
 	if (voltage < (profile_p + saddles - 1)->voltage) {
-printk("[bmtrdebug] %s return (profile_p + saddles - 1)->resistance == %d 2\n", __FUNCTION__, (profile_p + saddles - 1)->resistance);
 		return (profile_p + saddles - 1)->resistance;
 	}
 
@@ -1550,7 +1498,6 @@ printk("[bmtrdebug] %s return (profile_p + saddles - 1)->resistance == %d 2\n", 
 		}
 	}
 
-printk("[bmtrdebug] %s return ret_r == %d 2\n", __FUNCTION__, ret_r);
 	return ret_r;
 }
 
@@ -1560,7 +1507,6 @@ void fgauge_construct_battery_profile_init(void)
 	int i, j, saddles, profile_index;
 	signed int low_p = 0, high_p = 0, now_p = 0, low_vol = 0, high_vol = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	profile_p[0] = fgauge_get_profile(batt_meter_cust_data.temperature_t0);
 	profile_p[1] = fgauge_get_profile(batt_meter_cust_data.temperature_t1);
 	profile_p[2] = fgauge_get_profile(batt_meter_cust_data.temperature_t2);
@@ -1622,7 +1568,6 @@ void fgauge_construct_battery_profile(signed int temperature, BATTERY_PROFILE_ST
 	int i, saddles;
 	signed int temp_v_1 = 0, temp_v_2 = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature <= batt_meter_cust_data.temperature_t1) {
 		low_profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t0);
 		high_profile_p = fgauge_get_profile(batt_meter_cust_data.temperature_t1);
@@ -1700,7 +1645,6 @@ void fgauge_construct_r_table_profile(signed int temperature, R_PROFILE_STRUCT_P
 	signed int temp_v_1 = 0, temp_v_2 = 0;
 	signed int temp_r_1 = 0, temp_r_2 = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (temperature <= batt_meter_cust_data.temperature_t1) {
 		low_profile_p = fgauge_get_profile_r_table(batt_meter_cust_data.temperature_t0);
 		high_profile_p = fgauge_get_profile_r_table(batt_meter_cust_data.temperature_t1);
@@ -1814,7 +1758,6 @@ void fgauge_construct_table_by_temp(void)
 
 	static unsigned char tempIndex;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	curr_temp = battery_meter_get_battery_temperature();
 
 	/* Temperature window init */
@@ -1867,7 +1810,6 @@ void fgauge_get_current_factor(void)
 	static signed int current_sum;
 	static unsigned char tempcurrentIndex;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (KAL_TRUE == gFG_Is_Charging) {
 		init_current = KAL_TRUE;
 		g_currentfactor = 100;
@@ -1916,7 +1858,6 @@ signed int fgauge_get_Q_max_high_current_by_current(signed int i_current, signed
 	BATTERY_PROFILE_STRUCT_P p_profile_battery;
 	signed int threshold = SYSTEM_OFF_VOLTAGE;
 	/* for Qmax initialization */
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	ret_Q_max = fgauge_get_Q_max_high_current(val_temp);
 
 	/* get Rbat and OCV table of the current temperature */
@@ -1959,11 +1900,9 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 void fg_qmax_update_for_aging(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #else
 	kal_bool hw_charging_done = bat_is_charging_full();
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (hw_charging_done == KAL_TRUE) {	/* charging full, g_HW_Charging_Done == 1 */
 		if (gFG_DOD0 > 85) {
 			if (gFG_columb < 0)
@@ -2009,7 +1948,6 @@ void sw_oam_init_v2(void)
 	int plugout_status = 0;
 	int type = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* use get_hw_ocv----------------------------------------------------------------- */
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &gFG_voltage);
 	gFG_capacity_by_v = fgauge_read_capacity_by_v(gFG_voltage);
@@ -2083,7 +2021,6 @@ void dod_init(void)
 	signed int gFG_capacity_by_sw_ocv = gFG_capacity_by_v;
 #endif				/* #if defined(IS_BATTERY_REMOVE_BY_PMIC) */
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* use get_hw_ocv----------------------------------------------------------------- */
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &gFG_voltage);
 	gFG_capacity_by_v = fgauge_read_capacity_by_v(gFG_voltage);
@@ -2257,7 +2194,6 @@ signed int mtk_imp_tracking(signed int ori_voltage, signed int ori_current, sign
 	signed int temp_voltage_2 = temp_voltage_1;
 	int i = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	for (i = 0; i < recursion_time; i++) {
 		gFG_resistance_bat = fgauge_read_r_bat_by_v(temp_voltage_2);
 		ret_compensate_value =
@@ -2292,7 +2228,6 @@ void oam_init(void)
 	signed int vbat_capacity = 0;
 	kal_bool charging_enable = KAL_FALSE;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/*stop charging for vbat measurement */
 	battery_charging_control(CHARGING_CMD_ENABLE, &charging_enable);
 
@@ -2389,7 +2324,6 @@ void oam_run(void)
 	/* delta_time = now_time - last_oam_run_time; */
 	delta_time = now_time.tv_sec - last_oam_run_time.tv_sec;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[oam_run_time] delta time=%d\n", delta_time);
 
 #if defined(SW_OAM_INIT_V2)
@@ -2559,7 +2493,6 @@ void table_init(void)
 
 	int temperature = force_get_tbat(KAL_FALSE);
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* Re-constructure r-table profile according to current temperature */
 	profile_p_r_table = fgauge_get_profile_r_table(batt_meter_cust_data.temperature_t);
 	if (profile_p_r_table == NULL) {
@@ -2584,7 +2517,6 @@ signed int auxadc_algo_run(void)
 	val = fgauge_read_capacity_by_v(gFG_voltage);
 
 	bm_print(BM_LOG_CRTI, "[auxadc_algo_run] %d,%d\n", gFG_voltage, val);
-printk("[bmtrdebug] %s gFG_voltage %d val %d\n", __FUNCTION__, gFG_voltage, val);
 
 	return val;
 }
@@ -2594,7 +2526,6 @@ void update_fg_dbg_tool_value(void)
 {
 	g_fg_dbg_bat_volt = gFG_voltage_init;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (gFG_Is_Charging == KAL_TRUE)
 		g_fg_dbg_bat_current = 1 - gFG_current - 1;
 	else
@@ -2625,7 +2556,6 @@ signed int fgauge_compensate_battery_voltage(signed int ori_voltage)
 {
 	signed int ret_compensate_value = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	gFG_ori_voltage = ori_voltage;
 	gFG_resistance_bat = fgauge_read_r_bat_by_v(ori_voltage);	/* Ohm */
 	ret_compensate_value =
@@ -2685,7 +2615,6 @@ signed int fgauge_compensate_battery_voltage_recursion(signed int ori_voltage,
 	bm_print(BM_LOG_FULL, "[fgauge_compensate_battery_voltage_recursion] %d,%d,%d,%d\r\n",
 		 temp_voltage_1, temp_voltage_2, gFG_resistance_bat, ret_compensate_value);
 
-printk("[bmtrdebug] %s return ret_compensate_value == %d\n", __FUNCTION__, ret_compensate_value);
 	return ret_compensate_value;
 }
 
@@ -2698,7 +2627,6 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 	R_PROFILE_STRUCT_P profile_p_r_table;
 	int ret = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 /* R-Table (First Time) */
 	/* Re-constructure r-table profile according to current temperature */
 	profile_p_r_table = fgauge_get_profile_r_table(batt_meter_cust_data.temperature_t);
@@ -2827,7 +2755,6 @@ signed int fgauge_update_dod(void)
 	} else {
 	}
 
-printk("[bmtrdebug] %s return FG_dod_1 == %d\n", __FUNCTION__, FG_dod_1);
 	return FG_dod_1;
 }
 
@@ -2859,14 +2786,12 @@ signed int fgauge_read_capacity(signed int type)
 		bm_print(BM_LOG_FULL, "[fgauge_read_capacity] dvalue<=1 and set dvalue=1 !!\r\n");
 	}
 
-printk("[bmtrdebug] %s return dvalue == %d\n", __FUNCTION__, dvalue);
 	return dvalue;
 }
 
 
 void fg_voltage_mode(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #if defined(CONFIG_POWER_EXT)
 #else
 	if (bat_is_charger_exist() == KAL_TRUE) {
@@ -2897,7 +2822,6 @@ void fgauge_algo_run(void)
 	int charge_current = 0;
 #endif
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* Reconstruct table if temp changed; */
 	fgauge_construct_table_by_temp();
 
@@ -3064,7 +2988,6 @@ void fgauge_algo_run_init(void)
 
 	msleep(500);//modify by sunxiaogang@yulong.com 2014.04.22 for the battery capacity is higher when power on with charger.
 #endif
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 /* 1. Get Raw Data */
 	gFG_voltage = battery_meter_get_battery_voltage(KAL_TRUE);
 	gFG_voltage_init = gFG_voltage;
@@ -3180,7 +3103,6 @@ unsigned char reset_fg_bat_int = KAL_TRUE;
 void fg_bat_int_handler(void)
 {
 	reset_fg_bat_int = KAL_TRUE;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	wake_up_bat2();
 }
 #endif
@@ -3192,7 +3114,6 @@ void fgauge_initialization(void)
 	int i = 0;
 	unsigned int ret = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	/* gFG_BATT_CAPACITY_init_high_current = fgauge_get_Q_max_high_current(25); */
 	/* gFG_BATT_CAPACITY_aging = fgauge_get_Q_max(25); */
 
@@ -3256,7 +3177,6 @@ signed int get_dynamic_period(int first_use, int first_wakeup_time, int battery_
 
 	signed int vbat_val = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #ifdef CONFIG_MTK_POWER_EXT_DETECT
 	if (KAL_TRUE == bat_is_ext_power())
 		return batt_meter_cust_data.normal_wakeup_period;
@@ -3377,37 +3297,31 @@ signed int battery_meter_get_battery_voltage(kal_bool update)
 	static int pre_val = -1;
 
 	if (update == KAL_TRUE || pre_val == -1) {
-printk("[bmtrdebug] %s update = KAL_TRUE\n", __FUNCTION__);
 		val = 5;	/* set avg times */
 		ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_SENSE, &val);
 		pre_val = val;
 	} else {
-printk("[bmtrdebug] %s update = KAL_FALSE\n", __FUNCTION__);
 		val = pre_val;
 	}
 	g_sw_vbat_temp = val;
 
 #ifdef MTK_BATTERY_LIFETIME_DATA_SUPPORT
 	if (g_sw_vbat_temp > gFG_max_voltage){
-printk("[bmtrdebug] %s g_sw_vbat_temp > gFG_max_voltage %d %d\n", __FUNCTION__, g_sw_vbat_temp, gFG_max_voltage);
 		gFG_max_voltage = g_sw_vbat_temp;
 	}
 
 	if (g_sw_vbat_temp < gFG_min_voltage) {
-printk("[bmtrdebug] %s g_sw_vbat_temp < gFG_max_voltage %d %d\n", __FUNCTION__, g_sw_vbat_temp, gFG_max_voltage);
 		gFG_min_voltage = g_sw_vbat_temp;
 	}
 
 #endif
 
-printk("[bmtrdebug] %s return val == %d\n", __FUNCTION__, val);
 	return val;
 }
 
 signed int battery_meter_get_charging_current_imm(void)
 {
 #ifdef AUXADC_SUPPORT_IMM_CURRENT_MODE
-printk("[bmtrdebug] %s return PMIC_IMM_GetCurrent()\n", __FUNCTION__);
 	return PMIC_IMM_GetCurrent();
 #else
 	int ret;
@@ -3421,7 +3335,6 @@ printk("[bmtrdebug] %s return PMIC_IMM_GetCurrent()\n", __FUNCTION__);
 	ICharging =
 	    (ADC_I_SENSE - ADC_BAT_SENSE +
 	     g_I_SENSE_offset) * 1000 / batt_meter_cust_data.cust_r_sense;
-printk("[bmtrdebug] %s return ICharging == %d\n", __FUNCTION__, ICharging);
 	return ICharging;
 #endif
 }
@@ -3429,7 +3342,6 @@ printk("[bmtrdebug] %s return ICharging == %d\n", __FUNCTION__, ICharging);
 signed int battery_meter_get_charging_current(void)
 {
 #ifdef DISABLE_CHARGING_CURRENT_MEASURE
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 0;
 #elif !defined(EXTERNAL_SWCHR_SUPPORT)
 	signed int ADC_BAT_SENSE_tmp[20] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -3445,7 +3357,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 	int ICharging = 0;
 	int ret = 0;
 	int val = 1;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	for (i = 0; i < repeat; i++) {
 		val = 1;	/* set avg times */
 		ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_SENSE, &val);
@@ -3531,7 +3442,6 @@ signed int battery_meter_get_battery_current(void)
 	int ret = 0;
 	signed int val = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (g_auxadc_solution == 1)
 		val = oam_i_2;
 	else
@@ -3545,7 +3455,6 @@ kal_bool battery_meter_get_battery_current_sign(void)
 	int ret = 0;
 	kal_bool val = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (g_auxadc_solution == 1)
 		val = 0;	/* discharging */
 	else
@@ -3559,7 +3468,6 @@ signed int battery_meter_get_car(void)
 	int ret = 0;
 	signed int val = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (g_auxadc_solution == 1)
 		val = oam_car_2;
 	else
@@ -3578,10 +3486,8 @@ signed int battery_meter_get_battery_temperature(void)
 	if (batt_temp < gFG_min_temperature)
 		gFG_min_temperature = batt_temp;
 
-printk("[bmtrdebug] %s return batt_temp == %d\n", __FUNCTION__, batt_temp);
 	return batt_temp;
 #else
-printk("[bmtrdebug] %s return force_get_tbat(KAL_TRUE)\n", __FUNCTION__);
 	return force_get_tbat(KAL_TRUE);
 #endif
 }
@@ -3594,7 +3500,6 @@ signed int battery_meter_get_charger_voltage(void)
 	val = 5;		/* set avg times */
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_CHARGER, &val);
 
-printk("[bmtrdebug] %s return val == %d, ret == %d\n", __FUNCTION__, val, ret);
 	/* val = (((R_CHARGER_1+R_CHARGER_2)*100*val)/R_CHARGER_2)/100; */
 	return val;
 }
@@ -3602,13 +3507,11 @@ printk("[bmtrdebug] %s return val == %d, ret == %d\n", __FUNCTION__, val, ret);
 #if defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 void battery_meter_set_reset_soc(kal_bool bUSE_UI_SOC)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	g_USE_UI_SOC = bUSE_UI_SOC;
 }
 
 signed int battery_meter_get_battery_soc(void)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #if defined(SOC_BY_HW_FG)
 	return gFG_capacity_by_c;
 #else
@@ -3637,7 +3540,6 @@ signed int battery_meter_trans_battery_percentage(kal_bool d_val)
 	signed int i_avg_current = 0;
 
 	d_val_before = d_val;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	temp_val = battery_meter_get_battery_temperature();
 	C_0mA = fgauge_get_Q_max(temp_val);
 
@@ -3667,7 +3569,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 #if defined(FG_BAT_INT)
 signed int battery_meter_set_columb_interrupt(unsigned int val)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	battery_log(BAT_LOG_FULL, "battery_meter_set_columb_interrupt=%d\n", val);
 	battery_meter_ctrl(BATTERY_METER_CMD_SET_COLUMB_INTERRUPT, &val);
 	return 0;
@@ -3698,7 +3599,6 @@ static kal_int32 htc_battery_meter_estimate_percentage(kal_int32 soc_by_v,kal_in
         kal_int32 volt0 = htc_battery_0percent_volt(BMT_status.temperature_now);
         kal_int32 ll=100-fgauge_read_d_by_v(volt0);/*lowest level*/
 
-printk("[btrdebug] %s volt0 %d ll %d soc_by_v %d soc_by_c %d is_charging %d\n", __FUNCTION__, volt0, ll, soc_by_v,soc_by_c,is_charging);
 
         if (ll >= 98){
                 bm_print(BM_LOG_CRTI, "Wrong battery parameters!\n");
@@ -3717,7 +3617,6 @@ printk("[btrdebug] %s volt0 %d ll %d soc_by_v %d soc_by_c %d is_charging %d\n", 
 
         bm_print(BM_LOG_CRTI, "ll=%d,soc_by_v_map=%d,weight=%d",ll,soc_by_v_map,weight);
 
-printk("[btrdebug] %s ll=%d,soc_by_v_map=%d,weight=%d return %d\n", __FUNCTION__, ll, soc_by_v_map,weight,(weight*soc_by_c+(100-weight)*soc_by_v_map)/100);
         return (weight*soc_by_c+(100-weight)*soc_by_v_map)/100;
 }
 #endif
@@ -3727,22 +3626,18 @@ signed int battery_meter_get_battery_percentage(void)
 
 	kal_int32 tempvol = 0;
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s return 50\n", __FUNCTION__);
 	return 50;
 #else
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (bat_is_charger_exist() == KAL_FALSE)
 		fg_qmax_update_for_aging_flag = 1;
 
 #if defined(SOC_BY_AUXADC)
-printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 	return auxadc_algo_run();
 #endif
 
 #if defined(SOC_BY_HW_FG)
 	if (g_auxadc_solution == 1) {
-printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 		return auxadc_algo_run();
 	}
 /*else {*/
@@ -3752,8 +3647,6 @@ printk("[bmtrdebug] %s return auxadc_algo_run()\n", __FUNCTION__);
 #if 0
 	tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
 	if (tempvol == 100) {
-		printk("[bmtrdebug] fgauge_read_capacity_by_v(%d) == 100, calling htc_battery_meter_estimate_percentage(%d,%d, %d) instead\n", BMT_status.bat_vol, gFG_capacity_by_v, gFG_capacity_by_c,gFG_Is_Charging);
-printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", __FUNCTION__, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
 		tempvol = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
 		if (tempvol > 100) {
 			tempvol = 100;
@@ -3762,19 +3655,16 @@ printk("[bmtrdebug] %s htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%
 	return tempvol;
 #else
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-	printk("[bmtrdebug] htc_battery_meter_estimate_percentage(%d,%d, %d)=%d instead\n", gFG_capacity_by_v, gFG_capacity_by_c,gFG_Is_Charging, tempvol);
 	if (tempvol > 100)
 		tempvol = 100;
 	return tempvol;
 #endif
 #else
-printk("[bmtrdebug] %s return gFG_capacity_by_c == %d\n", __FUNCTION__, gFG_capacity_by_c);
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */
 #endif
 #else
 		/* We keep gFG_capacity_by_c as capacity before compensation */
 		/* Compensated capacity is returned for UI SOC tracking */
-printk("[bmtrdebug] %s return 100 - battery_meter_trans_battery_percentage(100 - gFG_capacity_by_c) == 100 - battery_meter_trans_battery_percentage( 100 - %d)\n", __FUNCTION__, gFG_capacity_by_c);
 		return 100 - battery_meter_trans_battery_percentage(100 - gFG_capacity_by_c);
 #endif
 	/*}*/
@@ -3784,18 +3674,14 @@ printk("[bmtrdebug] %s return 100 - battery_meter_trans_battery_percentage(100 -
 	oam_run();
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #if (OAM_D5 == 1)
-printk("[bmtrdebug] %s return 100 - oam_d_5 == 100 - %d\n", __FUNCTION__, oam_d_5);
 	return 100 - oam_d_5;
 #else
-printk("[bmtrdebug] %s return 100 - oam_d_2 == 100 - %d\n", __FUNCTION__, oam_d_2);
 	return 100 - oam_d_2;
 #endif
 #else
 #if (OAM_D5 == 1)
-printk("[bmtrdebug] %s return 100 - battery_meter_trans_battery_percentage(oam_d_5) == 100 - %d\n", __FUNCTION__, oam_d_5);
 	return 100 - battery_meter_trans_battery_percentage(oam_d_5);
 #else
-printk("[bmtrdebug] %s return 100 - battery_meter_trans_battery_percentage(oam_d_2) == 100 - %d\n", __FUNCTION__, oam_d_2);
 	return 100 - battery_meter_trans_battery_percentage(oam_d_2);
 #endif
 #endif
@@ -3808,12 +3694,10 @@ printk("[bmtrdebug] %s return 100 - battery_meter_trans_battery_percentage(oam_d
 signed int battery_meter_initial(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 0;
 #else
 	static kal_bool meter_initilized = KAL_FALSE;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	mutex_lock(&FGADC_mutex);
 	if (meter_initilized == KAL_FALSE) {
 #ifdef MTK_MULTI_BAT_PROFILE_SUPPORT
@@ -3850,7 +3734,6 @@ void reset_parameter_car(void)
 {
 #if defined(SOC_BY_HW_FG)
 	int ret = 0;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_HW_RESET, NULL);
 	gFG_columb = 0;
 
@@ -3872,20 +3755,17 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 	oam_car_1 = 0;
 	oam_car_2 = 0;
 	gFG_columb = 0;
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #endif
 }
 
 void reset_parameter_dod_change(void)
 {
 #if defined(SOC_BY_HW_FG)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FGADC] Update DOD0(%d) by %d \r\n", gFG_DOD0, gFG_DOD1);
 	gFG_DOD0 = gFG_DOD1;
 #endif
 
 #if defined(SOC_BY_SW_FG)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FGADC] Update oam_d0(%d) by %d \r\n", oam_d0, oam_d_5);
 	oam_d0 = oam_d_5;
 	gFG_DOD0 = oam_d0;
@@ -3899,7 +3779,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 void reset_parameter_dod_full(unsigned int ui_percentage)
 {
 #if defined(SOC_BY_HW_FG)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[battery_meter_reset]1 DOD0=%d,DOD1=%d,ui=%d\n", gFG_DOD0, gFG_DOD1,
 		 ui_percentage);
 	gFG_DOD0 = 100 - ui_percentage;
@@ -3909,7 +3788,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 #endif
 
 #if defined(SOC_BY_SW_FG)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[battery_meter_reset]1 oam_d0=%d,oam_d_5=%d,ui=%d\n", oam_d0,
 		 oam_d_5, ui_percentage);
 	oam_d0 = 100 - ui_percentage;
@@ -3928,7 +3806,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 signed int battery_meter_reset(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 0;
 #else
 	unsigned int ui_percentage = bat_get_ui_percentage();
@@ -3942,7 +3819,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 	}
 #endif
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	reset_parameter_car();
 	reset_parameter_dod_full(ui_percentage);
 
@@ -3953,10 +3829,8 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 signed int battery_meter_sync(signed int bat_i_sense_offset)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 0;
 #else
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	g_I_SENSE_offset = bat_i_sense_offset;
 	return 0;
 #endif
@@ -3965,10 +3839,8 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 signed int battery_meter_get_battery_zcv(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s return 3987\n", __FUNCTION__);
 	return 3987;
 #else
-printk("[bmtrdebug] %s return gFG_voltage == %d\n", __FUNCTION__, gFG_voltage);
 	return gFG_voltage;
 #endif
 }
@@ -3976,10 +3848,8 @@ printk("[bmtrdebug] %s return gFG_voltage == %d\n", __FUNCTION__, gFG_voltage);
 signed int battery_meter_get_battery_nPercent_zcv(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 3700;
 #else
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return gFG_15_vlot;	/* 15% zcv,  15% can be customized by 100-g_tracking_point */
 #endif
 }
@@ -3987,10 +3857,8 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 signed int battery_meter_get_battery_nPercent_UI_SOC(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return 15;
 #else
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return g_tracking_point;	/* tracking point */
 #endif
 }
@@ -3998,7 +3866,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 signed int battery_meter_get_tempR(signed int dwVolt)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 	return 0;
 #else
 	int TRes;
@@ -4007,7 +3874,6 @@ printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 	    (batt_meter_cust_data.rbat_pull_up_r * dwVolt) /
 	    (batt_meter_cust_data.rbat_pull_up_volt - dwVolt);
 
-printk("[bmtrdebug] %s return TRes == %d\n", __FUNCTION__, TRes);
 	return TRes;
 #endif
 }
@@ -4015,7 +3881,6 @@ printk("[bmtrdebug] %s return TRes == %d\n", __FUNCTION__, TRes);
 signed int battery_meter_get_tempV(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 	return 0;
 #else
 	int ret = 0;
@@ -4023,7 +3888,6 @@ printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 
 	val = 1;		/* set avg times */
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_TEMP, &val);
-printk("[bmtrdebug] %s return val == %d, ret == %d\n", __FUNCTION__, val, ret);
 	return val;
 #endif
 }
@@ -4031,7 +3895,6 @@ printk("[bmtrdebug] %s return val == %d, ret == %d\n", __FUNCTION__, val, ret);
 signed int battery_meter_get_VSense(void)
 {
 #if defined(CONFIG_POWER_EXT)
-printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 	return 0;
 #else
 	int ret = 0;
@@ -4039,7 +3902,6 @@ printk("[bmtrdebug] %s return 0\n", __FUNCTION__);
 
 	val = 1;		/* set avg times */
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_I_SENSE, &val);
-printk("[bmtrdebug] %s return val == %d ret == %d\n", __FUNCTION__, val, ret);
 	return val;
 #endif
 }
@@ -4071,7 +3933,6 @@ kal_int32 htc_battery_meter_get_battery_current_imm(kal_bool bImmediately)
     if (!val2)
         val1 = -val1;
 
-printk("[bmtrdebug] %s return val1(%d)/10\n", __FUNCTION__, val1);
    return val1/10;
 }
 
@@ -4185,7 +4046,6 @@ static ssize_t fgadc_log_write(struct file *filp, const char __user *buff,
 
 	char proc_fgadc_data;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if ((len <= 0) || copy_from_user(&proc_fgadc_data, buff, 1)) {
 		bm_print(BM_LOG_CRTI, "fgadc_log_write error.\n");
 		return -EFAULT;
@@ -4213,7 +4073,6 @@ int init_proc_log_fg(void)
 {
 	int ret = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #if 1
 	proc_create("fgadc_log", 0644, NULL, &fgadc_proc_fops);
 	bm_print(BM_LOG_CRTI, "proc_create fgadc_proc_fops\n");
@@ -4243,7 +4102,6 @@ signed int get_battery_aging_factor(signed int cycle)
 	signed int i, f1, f2, c1, c2;
 	signed int saddles;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	saddles = sizeof(battery_aging_table) / sizeof(BATTERY_CYCLE_STRUCT);
 
 	for (i = 0; i < saddles; i++) {
@@ -4280,7 +4138,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 
 static ssize_t show_FG_Battery_Cycle(struct device *dev, struct device_attribute *attr, char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_battery_cycle  : %d\n", gFG_battery_cycle);
 	return sprintf(buf, "%d\n", gFG_battery_cycle);
 }
@@ -4295,7 +4152,6 @@ static ssize_t store_FG_Battery_Cycle(struct device *dev, struct device_attribut
 	signed int factor;
 #endif
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &cycle)) {
 		bm_print(BM_LOG_CRTI, "[FG] update battery cycle count: %d\n", cycle);
 		gFG_battery_cycle = cycle;
@@ -4327,7 +4183,6 @@ static DEVICE_ATTR(FG_Battery_Cycle, 0664, show_FG_Battery_Cycle, store_FG_Batte
 static ssize_t show_FG_Max_Battery_Voltage(struct device *dev, struct device_attribute *attr,
 					   char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_max_voltage  : %d\n", gFG_max_voltage);
 	return sprintf(buf, "%d\n", gFG_max_voltage);
 }
@@ -4337,7 +4192,6 @@ static ssize_t store_FG_Max_Battery_Voltage(struct device *dev, struct device_at
 {
 	signed int voltage;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &voltage)) {
 		if (voltage > gFG_max_voltage) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery max voltage: %d\n", voltage);
@@ -4358,7 +4212,6 @@ static ssize_t show_FG_Min_Battery_Voltage(struct device *dev, struct device_att
 					   char *buf)
 {
 	bm_print(BM_LOG_CRTI, "[FG] gFG_min_voltage  : %d\n", gFG_min_voltage);
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sprintf(buf, "%d\n", gFG_min_voltage);
 }
 
@@ -4367,7 +4220,6 @@ static ssize_t store_FG_Min_Battery_Voltage(struct device *dev, struct device_at
 {
 	signed int voltage;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &voltage)) {
 		if (voltage < gFG_min_voltage) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery min voltage: %d\n", voltage);
@@ -4387,7 +4239,6 @@ static DEVICE_ATTR(FG_Min_Battery_Voltage, 0664, show_FG_Min_Battery_Voltage,
 static ssize_t show_FG_Max_Battery_Current(struct device *dev, struct device_attribute *attr,
 					   char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_max_current  : %d\n", gFG_max_current);
 	return sprintf(buf, "%d\n", gFG_max_current);
 }
@@ -4397,7 +4248,6 @@ static ssize_t store_FG_Max_Battery_Current(struct device *dev, struct device_at
 {
 	signed int bat_current;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &bat_current)) {
 		if (bat_current > gFG_max_current) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery max current: %d\n", bat_current);
@@ -4417,7 +4267,6 @@ static DEVICE_ATTR(FG_Max_Battery_Current, 0664, show_FG_Max_Battery_Current,
 static ssize_t show_FG_Min_Battery_Current(struct device *dev, struct device_attribute *attr,
 					   char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_min_current  : %d\n", gFG_min_current);
 	return sprintf(buf, "%d\n", gFG_min_current);
 }
@@ -4427,7 +4276,6 @@ static ssize_t store_FG_Min_Battery_Current(struct device *dev, struct device_at
 {
 	signed int bat_current;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &bat_current)) {
 		if (bat_current < gFG_min_current) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery min current: %d\n", bat_current);
@@ -4447,7 +4295,6 @@ static DEVICE_ATTR(FG_Min_Battery_Current, 0664, show_FG_Min_Battery_Current,
 static ssize_t show_FG_Max_Battery_Temperature(struct device *dev, struct device_attribute *attr,
 					       char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_max_temperature  : %d\n", gFG_max_temperature);
 	return sprintf(buf, "%d\n", gFG_max_temperature);
 }
@@ -4457,7 +4304,6 @@ static ssize_t store_FG_Max_Battery_Temperature(struct device *dev, struct devic
 {
 	signed int temp;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &temp)) {
 		if (temp > gFG_max_temperature) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery max temp: %d\n", temp);
@@ -4477,7 +4323,6 @@ static DEVICE_ATTR(FG_Max_Battery_Temperature, 0664, show_FG_Max_Battery_Tempera
 static ssize_t show_FG_Min_Battery_Temperature(struct device *dev, struct device_attribute *attr,
 					       char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_min_temperature  : %d\n", gFG_min_temperature);
 	return sprintf(buf, "%d\n", gFG_min_temperature);
 }
@@ -4487,7 +4332,6 @@ static ssize_t store_FG_Min_Battery_Temperature(struct device *dev, struct devic
 {
 	signed int temp;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &temp)) {
 		if (temp < gFG_min_temperature) {
 			bm_print(BM_LOG_CRTI, "[FG] update battery min temp: %d\n", temp);
@@ -4506,7 +4350,6 @@ static DEVICE_ATTR(FG_Min_Battery_Temperature, 0664, show_FG_Min_Battery_Tempera
 
 static ssize_t show_FG_Aging_Factor(struct device *dev, struct device_attribute *attr, char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] gFG_aging_factor  : %d\n", gFG_aging_factor);
 	return sprintf(buf, "%d\n", gFG_aging_factor);
 }
@@ -4517,7 +4360,6 @@ static ssize_t store_FG_Aging_Factor(struct device *dev, struct device_attribute
 	signed int factor;
 	signed int aging_capacity;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	if (1 == kstrtoint(buf, 0, &factor)) {
 		if (factor <= 100 && factor >= 0) {
 			bm_print(BM_LOG_CRTI,
@@ -4557,7 +4399,6 @@ static ssize_t show_FG_Current(struct device *dev, struct device_attribute *attr
 	signed int val = 0;
 	kal_bool is_charging = 0;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT, &val);
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CURRENT_SIGN, &is_charging);
 
@@ -4574,7 +4415,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_Current(struct device *dev, struct device_attribute *attr, const char *buf,
 				size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4584,7 +4424,6 @@ static DEVICE_ATTR(FG_Current, 0664, show_FG_Current, store_FG_Current);
 static ssize_t show_FG_g_fg_dbg_bat_volt(struct device *dev, struct device_attribute *attr,
 					 char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_volt : %d\n", g_fg_dbg_bat_volt);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_volt);
 }
@@ -4592,7 +4431,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_volt(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4602,7 +4440,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_volt, 0664, show_FG_g_fg_dbg_bat_volt,
 static ssize_t show_FG_g_fg_dbg_bat_current(struct device *dev, struct device_attribute *attr,
 					    char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_current : %d\n", g_fg_dbg_bat_current);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_current);
 }
@@ -4610,7 +4447,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_current(struct device *dev, struct device_attribute *attr,
 					     const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4620,7 +4456,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_current, 0664, show_FG_g_fg_dbg_bat_current,
 static ssize_t show_FG_g_fg_dbg_bat_zcv(struct device *dev, struct device_attribute *attr,
 					char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_zcv : %d\n", g_fg_dbg_bat_zcv);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_zcv);
 }
@@ -4628,7 +4463,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_zcv(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4637,7 +4471,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_zcv, 0664, show_FG_g_fg_dbg_bat_zcv, store_FG
 static ssize_t show_FG_g_fg_dbg_bat_temp(struct device *dev, struct device_attribute *attr,
 					 char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_temp : %d\n", g_fg_dbg_bat_temp);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_temp);
 }
@@ -4645,7 +4478,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_temp(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4655,14 +4487,12 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_temp, 0664, show_FG_g_fg_dbg_bat_temp,
 static ssize_t show_FG_g_fg_dbg_bat_r(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_r : %d\n", g_fg_dbg_bat_r);
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_r);
 }
 
 static ssize_t store_FG_g_fg_dbg_bat_r(struct device *dev, struct device_attribute *attr,
 				       const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4671,7 +4501,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_r, 0664, show_FG_g_fg_dbg_bat_r, store_FG_g_f
 static ssize_t show_FG_g_fg_dbg_bat_car(struct device *dev, struct device_attribute *attr,
 					char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_car : %d\n", g_fg_dbg_bat_car);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_car);
 }
@@ -4679,7 +4508,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_car(struct device *dev, struct device_attribute *attr,
 					 const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4688,7 +4516,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_car, 0664, show_FG_g_fg_dbg_bat_car, store_FG
 static ssize_t show_FG_g_fg_dbg_bat_qmax(struct device *dev, struct device_attribute *attr,
 					 char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_bat_qmax : %d\n", g_fg_dbg_bat_qmax);
 	return sprintf(buf, "%d\n", g_fg_dbg_bat_qmax);
 }
@@ -4696,7 +4523,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_bat_qmax(struct device *dev, struct device_attribute *attr,
 					  const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4705,7 +4531,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_bat_qmax, 0664, show_FG_g_fg_dbg_bat_qmax,
 /* ------------------------------------------------------------------------------------------- */
 static ssize_t show_FG_g_fg_dbg_d0(struct device *dev, struct device_attribute *attr, char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_d0 : %d\n", g_fg_dbg_d0);
 	return sprintf(buf, "%d\n", g_fg_dbg_d0);
 }
@@ -4713,7 +4538,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_d0(struct device *dev, struct device_attribute *attr,
 				    const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4721,7 +4545,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_d0, 0664, show_FG_g_fg_dbg_d0, store_FG_g_fg_dbg_
 /* ------------------------------------------------------------------------------------------- */
 static ssize_t show_FG_g_fg_dbg_d1(struct device *dev, struct device_attribute *attr, char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_d1 : %d\n", g_fg_dbg_d1);
 	return sprintf(buf, "%d\n", g_fg_dbg_d1);
 }
@@ -4729,7 +4552,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_d1(struct device *dev, struct device_attribute *attr,
 				    const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4738,7 +4560,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_d1, 0664, show_FG_g_fg_dbg_d1, store_FG_g_fg_dbg_
 static ssize_t show_FG_g_fg_dbg_percentage(struct device *dev, struct device_attribute *attr,
 					   char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_percentage : %d\n", g_fg_dbg_percentage);
 	return sprintf(buf, "%d\n", g_fg_dbg_percentage);
 }
@@ -4746,7 +4567,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_percentage(struct device *dev, struct device_attribute *attr,
 					    const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4756,7 +4576,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_percentage, 0664, show_FG_g_fg_dbg_percentage,
 static ssize_t show_FG_g_fg_dbg_percentage_fg(struct device *dev, struct device_attribute *attr,
 					      char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_percentage_fg : %d\n", g_fg_dbg_percentage_fg);
 	return sprintf(buf, "%d\n", g_fg_dbg_percentage_fg);
 }
@@ -4764,7 +4583,6 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 static ssize_t store_FG_g_fg_dbg_percentage_fg(struct device *dev, struct device_attribute *attr,
 					       const char *buf, size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4774,7 +4592,6 @@ static DEVICE_ATTR(FG_g_fg_dbg_percentage_fg, 0664, show_FG_g_fg_dbg_percentage_
 static ssize_t show_FG_g_fg_dbg_percentage_voltmode(struct device *dev,
 						    struct device_attribute *attr, char *buf)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[FG] g_fg_dbg_percentage_voltmode : %d\n",
 		 g_fg_dbg_percentage_voltmode);
 	return sprintf(buf, "%d\n", g_fg_dbg_percentage_voltmode);
@@ -4784,7 +4601,6 @@ static ssize_t store_FG_g_fg_dbg_percentage_voltmode(struct device *dev,
 						     struct device_attribute *attr, const char *buf,
 						     size_t size)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	return size;
 }
 
@@ -4800,7 +4616,6 @@ static int battery_meter_probe(struct platform_device *dev)
 #endif
 	battery_meter_ctrl = bm_ctrl_cmd;
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[battery_meter_probe] probe\n");
 
 	batt_meter_init_cust_data();
@@ -4855,21 +4670,18 @@ printk("[bmtrdebug] %s\n", __FUNCTION__);
 
 static int battery_meter_remove(struct platform_device *dev)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[battery_meter_remove]\n");
 	return 0;
 }
 
 static void battery_meter_shutdown(struct platform_device *dev)
 {
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	bm_print(BM_LOG_CRTI, "[battery_meter_shutdown]\n");
 }
 
 static int battery_meter_suspend(struct platform_device *dev, pm_message_t state)
 {
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 #if defined(FG_BAT_INT)
 #if defined(CONFIG_POWER_EXT)
 #elif defined(SOC_BY_HW_FG)
@@ -4928,7 +4740,6 @@ void battery_aging_check(void)
 	signed int suspend_current = 0;
 #endif
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &hw_ocv_after_sleep);
 	vbat = battery_meter_get_battery_voltage(KAL_TRUE);
 	bm_print(BM_LOG_CRTI, "@@@ HW_OCV_D3=%d, HW_OCV_D1=%d, VBAT=%d\n", hw_ocv_after_sleep,
@@ -5115,7 +4926,6 @@ static int battery_meter_resume(struct platform_device *dev)
 		return 0;
 #endif
 
-printk("[bmtrdebug] %s\n", __FUNCTION__);
 	get_monotonic_boottime(&rtc_time_after_sleep);
 
 	g_sleep_total_time = timespec_add(g_sleep_total_time,
