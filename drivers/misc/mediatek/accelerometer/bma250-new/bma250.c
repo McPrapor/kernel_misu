@@ -310,26 +310,9 @@ static int BMA250_ReadData(struct i2c_client *client, s16 data[BMA250_AXES_NUM])
 				data[i] -= 0x1;			//printk("data 1 step %x \n",data[i]);
 				data[i] = ~data[i];		//printk("data 2 step %x \n",data[i]);
 				data[i] &= 0x01ff;		//printk("data 3 step %x \n\n",data[i]);
-//#ifndef CONFIG_BMA250_V36BML_SWAP_XY
 				data[i] = -data[i];		
-/*
-#else
-				if ( i == BMA250_AXIS_Z ) {
-					data[i] = -data[i];		
-				}
-#endif
-*/
-// debug off by Max		} else {
-// debug off by Max				GSE_LOG("ELSE IF i: %d data: %5d \n", i, data[i]);
 			}
 		}	
-/* debug off by Max
-		if(1)//(atomic_read(&priv->trace) & ADX_TRC_RAWDATA)
-		{
-			GSE_LOG("[%08X %08X %08X] => [%5d %5d %5d] after\n", data[BMA250_AXIS_X], data[BMA250_AXIS_Y], data[BMA250_AXIS_Z],
-		                               data[BMA250_AXIS_X], data[BMA250_AXIS_Y], data[BMA250_AXIS_Z]);
-		}
-*/
 #ifdef CONFIG_BMA250_LOWPASS
 		if(atomic_read(&priv->filter))
 		{
@@ -877,6 +860,7 @@ static int BMA250_ReadSensorData(struct i2c_client *client, char *buf, int bufsi
 #ifdef CONFIG_BMA250_V36BML_SWAP_XY
 		acc[BMA250_AXIS_X] = (-1) * acc[BMA250_AXIS_X];
 		acc[BMA250_AXIS_Y] = (-1) * acc[BMA250_AXIS_Y];
+		acc[BMA250_AXIS_Z] = (-1) * acc[BMA250_AXIS_Z];
 #endif
 		//add by wangyufei@yulong.com for acc calibration begin at 20150416
 		acc_data_b[BMA250_AXIS_X] = acc[BMA250_AXIS_X];
