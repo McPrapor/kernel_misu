@@ -51,13 +51,13 @@ Front Camera | 5MP, Int. 5MP
  
 -------------
 ## Testing...
+ * fast charging
+ * battery meter tables
  * cameras (ov5670, s5k3l2)
  * hall_ak8789 magnetometer
  
 -------------
 ## Broken/Bugs
- * fast charging
- * battery meter tables
  * SENTRAL iio sensor hub needs new sensor drivers support
 
 -------------
