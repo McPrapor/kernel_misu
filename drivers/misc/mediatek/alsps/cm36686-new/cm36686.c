@@ -67,12 +67,11 @@ static struct alsps_hw *hw = &alsps_cust;
 struct platform_device *alspsPltFmDev;
 
 /* For alsp driver get cust info */
-/*
-static struct alsps_hw *get_cust_alsps(void)
+struct alsps_hw *get_cust_alsps(void)
 {
 	return &alsps_cust;
 }
-*/
+
 /*----------------------------------------------------------------------------*/
 struct cm36686_priv {
 	struct alsps_hw *hw;
@@ -423,7 +422,6 @@ static int cm36686_get_ps_value(struct cm36686_priv *obj, u16 ps)
 
 	val = intr_flag;	/* value between high/low threshold should sync. with hw status. */
 
-printk("]cm36686debug] %s PS %d\n", __FUNCTION__, ps);
 	if (ps > atomic_read(&obj->ps_thd_val_high))
 		val = 0;	/*close */
 	else if (ps < atomic_read(&obj->ps_thd_val_low))
@@ -655,7 +653,6 @@ static ssize_t cm36686_show_reg(struct device_driver *ddri, char *buf)
 	u8 _bIndex = 0;
 	u8 databuf[2] = { 0 };
 	ssize_t _tLength = 0;
-	int res;
 
 	if (!cm36686_obj) {
 		APS_ERR("cm3623_obj is null!!\n");
@@ -664,10 +661,7 @@ static ssize_t cm36686_show_reg(struct device_driver *ddri, char *buf)
 
 	for (_bIndex = 0; _bIndex < 0x0D; _bIndex++) {
 		databuf[0] = _bIndex;
-		res = CM36686_i2c_master_operate(cm36686_obj->client, databuf, 0x201, I2C_FLAG_READ);
-		if (res < 0) {
-			APS_ERR("i2c_master_send function err res = %d\n", res);
-		}
+		CM36686_i2c_master_operate(cm36686_obj->client, databuf, 0x201, I2C_FLAG_READ);
 		_tLength +=
 		    snprintf((buf + _tLength), (PAGE_SIZE - _tLength), "Reg[0x%02X]: 0x%02X\n",
 			     _bIndex, databuf[0]);
@@ -1267,7 +1261,6 @@ static long cm36686_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned
 
 	case ALSPS_IOCTL_GET_CALI:
 		ps_cali = obj->ps_cali;
-printk("[cm36686debug] %s ALSPS_IOCTL_GET_CALI %d\n", __FUNCTION__, ps_cali);
 		if (copy_to_user(ptr, &ps_cali, sizeof(ps_cali))) {
 			err = -EFAULT;
 			goto err_out;
@@ -1279,6 +1272,7 @@ printk("[cm36686debug] %s ALSPS_IOCTL_GET_CALI %d\n", __FUNCTION__, ps_cali);
 			err = -EFAULT;
 			goto err_out;
 		}
+
 //V36BML
 #ifdef CONFIG_CM36686_V36BML_CUST_CALI
 		obj->ps_cali = 1;
@@ -1306,6 +1300,7 @@ printk("[cm36686debug] %s ALSPS_IOCTL_SET_CALI %d\n", __FUNCTION__, ps_cali);
 #endif
 
 printk("[cm36686debug] %s ALSPS_SET_PS_THRESHOLD %d %d\n", __FUNCTION__, (threshold[0] + obj->ps_cali), (threshold[1] + obj->ps_cali));
+
 		set_psensor_threshold(obj->client);
 
 		break;
@@ -1626,7 +1621,6 @@ static int ps_get_data(int *value, int *status)
 		err = -1;
 	} else {
 		*value = cm36686_get_ps_value(cm36686_obj, cm36686_obj->ps);
-printk("[cm36686debug] %s *vaule = %d\n", __FUNCTION__, *value);
 		if (*value < 0)
 			err = -1;
 		*status = SENSOR_STATUS_ACCURACY_MEDIUM;
@@ -1818,7 +1812,7 @@ static int cm36686_i2c_remove(struct i2c_client *client)
 
 static int cm36686_i2c_detect(struct i2c_client *client, struct i2c_board_info *info)
 {
-	strncpy(info->type, CM36686_DEV_NAME, sizeof(info->type));
+	strcpy(info->type, CM36686_DEV_NAME);
 	return 0;
 
 }
