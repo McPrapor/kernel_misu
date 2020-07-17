@@ -7,7 +7,25 @@ apt-get install software-properties-common
 add-apt-repository ppa:openjdk-r/ppa 
 sudo apt-get update 
 sudo apt-get install openjdk-8-jdk
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+# Deprecated:
+#git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9
+wget https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/93092903254cba0b6950c94170332973a85b450f.tar.gz
+mkdir aarch64-linux-android-4.9
+tar -xf ./93092903254cba0b6950c94170332973a85b450f.tar.gz -C ./aarch64-linux-android-4.9/ 
+cd aarch64-linux-android-4.9/bin
+mv aarch64-linux-android-c++ aarch64-linux-android-c++_
+cp db96eedc-a815-11e9-a708-d79346614c9b aarch64-linux-android-c++
+mv aarch64-linux-android-g++ aarch64-linux-android-g++_
+cp db96eedc-a815-11e9-a708-d79346614c9b aarch64-linux-android-g++
+
+mv aarch64-linux-android-gcc aarch64-linux-android-gcc_
+cp 921d9846-a815-11e9-84ea-ff8bce1b90b6 aarch64-linux-android-gcc
+mv aarch64-linux-android-gcc-4.9 aarch64-linux-android-gcc-4.9_
+cp 921d9846-a815-11e9-84ea-ff8bce1b90b6 aarch64-linux-android-gcc-4.9
+mv aarch64-linux-androidkernel-gcc aarch64-linux-androidkernel-gcc_
+cp 921d9846-a815-11e9-84ea-ff8bce1b90b6 aarch64-linux-androidkernel-gcc
+
+cd -
 mv ./aarch64-linux-android-4.9/ /usr/local/bin/
 
 
