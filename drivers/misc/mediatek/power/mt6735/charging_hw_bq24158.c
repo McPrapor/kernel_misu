@@ -58,7 +58,7 @@ static CHARGER_TYPE g_charger_type = CHARGER_UNKNOWN;
 int wireless_charger_gpio_number   = (168 | 0x80000000); 
 #endif
 
-#ifdef CONFIG_V36BML_BATTERY
+#ifndef CONFIG_V36BML_BATTERY
 #include <cust_gpio_usage.h>
 int gpio_number   = GPIO_SWCHARGER_EN_PIN; 
 int gpio_off_mode = GPIO_SWCHARGER_EN_PIN_M_GPIO;
