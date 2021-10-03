@@ -1774,12 +1774,12 @@ static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
         static kal_int32 pre_charging_status = -1;
         static kal_int32 pre_soc = -2;
 
-        printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
         kal_int32 is_charging=pUisoc_data->bIs_charging;
         kal_int32 soc = pUisoc_data->iSOC;
         kal_int32 ui_soc = pUisoc_data->iUI_SOC;
         kal_int32 rc;
 
+        printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
         if ((pre_charging_status!=is_charging)||(g_recalc_co_soc == KAL_TRUE)){
                 htc_battery_calc_co_soc(soc,ui_soc,is_charging);
                 g_recalc_co_soc = KAL_FALSE;
@@ -1803,7 +1803,6 @@ static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)
 {
         static kal_int32 time_cnt = 0;
         static kal_int32 display_100Percent_count = 0;
-    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
         kal_int32 ui_soc = htc_battery_adjust_ui_soc(pUisoc_data);
 //        kal_int32 pressure=1;
         kal_int32 update_cycle = 60/BAT_TASK_PERIOD;
@@ -1853,12 +1852,12 @@ if( pUisoc_data->bIs_charging ){
 static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
 {
     static kal_bool pre_is_charging = KAL_FALSE;
-    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
     kal_bool bIs_charging = (BMT_status.charger_exist == KAL_TRUE? (!BMT_status.is_overload): FALSE) &&
             (BMT_status.bat_charging_state == CHR_CC) && BMT_status.bat_exist;
 
     kal_bool bIs_chr_chg = pre_is_charging != bIs_charging;
     sSync_uisoc sUisoc_data;
+    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
     if( bIs_charging )                     /* charging */
         bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_CHARGING;
         else
