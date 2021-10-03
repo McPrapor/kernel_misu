@@ -5461,7 +5461,7 @@ static int battery_probe(struct platform_device *dev)
         BMT_status.TOPOFF_charging_time = 0;
         BMT_status.POSTFULL_charging_time = 0;
         BMT_status.SOC = -1;
-        BMT_status.UI_SOC = 0;
+        BMT_status.UI_SOC = -1;
         BMT_status.full_level = 100;
 //#ifdef HTC_ENABLE_AICL
 #if 1
