@@ -136,7 +136,7 @@ int g_battery_tt_check_flag = 0;
  */
 #ifdef CONFIG_V36BML_BATTERY
 #define Q_MAX_SPEC 2200   // 2200mAh
-extern void dodprint(void);
+//extern void dodprint(void);
 static kal_int32 g_co_soc=100;
 kal_int32 g_recalc_co_soc = KAL_FALSE;
 extern kal_uint32 temp_avg_voltage[];
@@ -3724,7 +3724,7 @@ void BAT_thread(void)
 	}
 
 #ifdef CONFIG_V36BML_BATTERY
-	dodprint();
+//	dodprint();
 #endif
 
 	mt_battery_charger_detect_check();
