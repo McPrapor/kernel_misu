@@ -54,7 +54,7 @@
 #ifdef CONFIG_V36BML_BATTERY
 #define battery_xlog_printk(num, fmt, args...) \
 do {\
-		pr_debug(fmt, ##args); \
+		pr_err(fmt, ##args); \
 } while (0)
 
 #define battery_log(num, fmt, args...) \
@@ -65,7 +65,7 @@ do {\
 			break; \
 			/*fall-through*/\
 		default: \
-		pr_debug(fmt, ##args); \
+		pr_err(fmt, ##args); \
 			break; \
 		} \
 } while (0)

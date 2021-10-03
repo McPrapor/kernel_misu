@@ -136,7 +136,7 @@ int g_battery_tt_check_flag = 0;
  */
 #ifdef CONFIG_V36BML_BATTERY
 #define Q_MAX_SPEC 2200   // 2200mAh
-//extern void dodprint(void);
+extern void dodprint(void);
 static kal_int32 g_co_soc=100;
 kal_int32 g_recalc_co_soc = KAL_FALSE;
 extern kal_uint32 temp_avg_voltage[];
@@ -252,11 +252,18 @@ static int cmd_discharging = -1;
 static int adjust_power = -1;
 static int suspend_discharging = -1;
 
+#ifdef CONFIG_V36BML_BATTERY
+static int charger_ctrl_stat = -1;
+int meta_charging_enable = -1;
+#endif
+
 static int current_now = -1;
 static int voltage_now = -1;
 
+#ifndef CONFIG_V36BML_BATTERY
 #if !defined(CONFIG_POWER_EXT)
 static int is_uisoc_ever_100 = KAL_FALSE;
+#endif
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////// */
@@ -1878,7 +1885,7 @@ static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
     pre_is_charging = bIs_charging;
 }
 #endif
-#if 0
+#ifdef CONFIG_V36BML_BATTERY
 static void htc_battery_update(struct battery_data *bat_data)
 {
     struct power_supply *bat_psy = &bat_data->psy;
@@ -1940,6 +1947,7 @@ static kal_bool htc_battery_100percent_early()
 #endif
 /* HTC added this function  -- */
 #endif
+#ifndef CONFIG_V36BML_BATTERY
 static kal_bool mt_battery_100Percent_tracking_check(void)
 {
 	kal_bool resetBatteryMeter = KAL_FALSE;
@@ -2020,6 +2028,7 @@ static kal_bool mt_battery_100Percent_tracking_check(void)
 
 	return resetBatteryMeter;
 }
+#endif
 
 #if 0
 static kal_bool mt_battery_nPercent_tracking_check(void)
@@ -2075,6 +2084,7 @@ static kal_bool mt_battery_nPercent_tracking_check(void)
 }
 #endif
 
+#ifndef CONFIG_V36BML_BATTERY
 static kal_bool mt_battery_0Percent_tracking_check(void)
 {
 	kal_bool resetBatteryMeter = KAL_TRUE;
@@ -2342,6 +2352,7 @@ static void battery_update(struct battery_data *bat_data)
 
 	power_supply_changed(bat_psy);
 }
+#endif
 
 void update_charger_info(int wireless_state)
 {
@@ -2508,8 +2519,11 @@ PMU_STATUS do_batt_temp_state_machine(void)
 {
 	if (BMT_status.temperature == batt_cust_data.err_charge_temperature)
 		return PMU_STATUS_FAIL;
-
-
+#ifdef CONFIG_V36BML_BATTERY
+#ifdef CONFIG_HAS_EARLYSUSPEND
+                htc_batt_update_limited_charge(temperature);
+#endif
+#endif
 
 	if (batt_cust_data.bat_low_temp_protect_enable) {
 		if (BMT_status.temperature < batt_cust_data.min_charge_temperature) {
@@ -2946,6 +2960,69 @@ static PMU_STATUS mt_battery_CheckCallState(void)
 }
 #endif
 
+#ifdef CONFIG_V36BML_BATTERY
+static PMU_STATUS htc_battery_FullLevelCheck(void)
+{
+        PMU_STATUS status = PMU_STATUS_OK;
+        static kal_bool is_input_chg_off_by_bounding = KAL_FALSE;
+
+        if (!BMT_status.charger_exist) {
+                is_input_chg_off_by_bounding = KAL_FALSE;
+                return status;
+        }
+
+        if ((0 < BMT_status.full_level) && (BMT_status.full_level < 100)) {
+
+                battery_xlog_printk(BAT_LOG_CRTI,"[htc_battery_FullLevelCheck] "
+                        "is_input_chg_off_by_bounding:%d\n",is_input_chg_off_by_bounding);
+
+                if (BMT_status.UI_SOC >= BMT_status.full_level) {
+                        status = PMU_STATUS_FAIL;
+                        is_input_chg_off_by_bounding = KAL_TRUE;
+                } else if (is_input_chg_off_by_bounding) {
+                        if (BMT_status.UI_SOC <= (BMT_status.full_level - 30)) { /* 30% tolerance, LC request */
+                                BMT_status.bat_charging_state = CHR_PRE;
+                                is_input_chg_off_by_bounding = KAL_FALSE;
+                        }
+                }
+        }
+
+        return status;
+}
+
+static PMU_STATUS htc_battery_CharegerControlCheck(void)
+{
+        PMU_STATUS status = PMU_STATUS_OK;
+        static int pre_charger_ctrl_stat = -1;
+        static int pre_g_ftm_charger_ctrl_stat = -1;
+        static int pre_meta_charging_enable = -1;
+
+        if ((pre_charger_ctrl_stat != charger_ctrl_stat)
+                || (pre_g_ftm_charger_ctrl_stat != g_ftm_charger_ctrl_stat)
+                || (pre_meta_charging_enable != meta_charging_enable)) {
+                BMT_status.bat_charging_state = CHR_PRE;
+
+                battery_xlog_printk(BAT_LOG_CRTI, "charger_ctrl_stat changes (%d -> %d), "
+                        "g_ftm_charger_ctrl_stat changes (%d->%d)\n, pre_meta_charging_enable (%d->%d)",
+                        pre_charger_ctrl_stat,charger_ctrl_stat,pre_g_ftm_charger_ctrl_stat,
+                        g_ftm_charger_ctrl_stat,pre_meta_charging_enable,meta_charging_enable);
+
+                pre_charger_ctrl_stat = charger_ctrl_stat;
+                pre_g_ftm_charger_ctrl_stat = g_ftm_charger_ctrl_stat;
+                pre_meta_charging_enable = meta_charging_enable;
+        }
+
+        if (charger_ctrl_stat == STOP_CHARGER
+                || charger_ctrl_stat == DISABLE_PWRSRC
+                || g_ftm_charger_ctrl_stat == FTM_STOP_CHARGER
+                || meta_charging_enable == STOP_CHARGER) {
+                status = PMU_STATUS_FAIL;
+        }
+
+        return status;
+}
+#endif
+
 static void mt_battery_CheckBatteryStatus(void)
 {
 	battery_log(BAT_LOG_FULL, "[mt_battery_CheckBatteryStatus] cmd_discharging=(%d)\n",
@@ -2982,6 +3059,23 @@ static void mt_battery_CheckBatteryStatus(void)
 		BMT_status.bat_charging_state = CHR_ERROR;
 		return;
 	}
+#ifdef CONFIG_V36BML_BATTERY
+        if (htc_battery_FullLevelCheck() != PMU_STATUS_OK) {
+                BMT_status.bat_charging_state = CHR_ERROR;
+                return;
+        }
+
+        if (htc_battery_CharegerControlCheck() != PMU_STATUS_OK) {
+                BMT_status.bat_charging_state = CHR_ERROR;
+                return;
+        }
+/*
+        if (fgauge_get_battery_id() == FG_ERROR_BATTERY) {
+                BMT_status.bat_charging_state = CHR_ERROR;
+                return;
+        }
+*/
+#endif
 }
 
 
@@ -3205,7 +3299,54 @@ static void mt_battery_thermal_check(void)
 
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+static void mt_battery_update_status(void)
+{
+        static int last_src = -1;
+        static int last_UI_SOC = -1;
+        static int last_htc_extension = -1;
+        static int last_temperature = -1;
+        static int last_bat_charging_state = -1;
+        static int last_charging_state = -1;
+        static int last_charger_protect_status = -1;
+        static struct timespec last_ts;
+        struct timespec ts;
+        getnstimeofday(&ts);
 
+#if defined(CONFIG_POWER_EXT)
+        battery_log(BAT_LOG_CRTI, "[BATTERY] CONFIG_POWER_EXT, no update Android.\n");
+#else
+                {
+                battery_xlog_printk(BAT_LOG_FULL, "[BATTERY] time now: %lu. time last: %lu\n", ts.tv_sec, last_ts.tv_sec);
+                if(BMT_status.charger_type != last_src ||
+                        BMT_status.UI_SOC != last_UI_SOC ||
+                        BMT_status.htc_extension != last_htc_extension ||
+                        BMT_status.temperature != last_temperature ||
+                        BMT_status.bat_charging_state != last_bat_charging_state ||
+                        battery_main.BAT_STATUS != last_charging_state ||
+                        BMT_status.charger_protect_status != last_charger_protect_status ||
+                        (ts.tv_sec - last_ts.tv_sec >= 60)) {
+                        battery_xlog_printk(BAT_LOG_FULL, "[BATTERY] Update uevent.\n");
+                        getnstimeofday(&last_ts);
+                        htc_battery_update(&battery_main);
+
+                        if(BMT_status.charger_type != last_src){
+                                wireless_update(&wireless_main);
+                                ac_update(&ac_main);
+                                usb_update(&usb_main);
+                        }
+                        last_src = BMT_status.charger_type;
+                        last_UI_SOC = BMT_status.UI_SOC;
+                        last_htc_extension = BMT_status.htc_extension;
+                        last_temperature = BMT_status.temperature;
+                        last_bat_charging_state = BMT_status.bat_charging_state;
+                        last_charging_state = battery_main.BAT_STATUS;
+                        last_charger_protect_status = BMT_status.charger_protect_status;
+                }
+        }
+#endif
+}
+#else
 static void mt_battery_update_status(void)
 {
 #if defined(CONFIG_POWER_EXT)
@@ -3226,7 +3367,7 @@ static void mt_battery_update_status(void)
 
 #endif
 }
-
+#endif
 
 CHARGER_TYPE mt_charger_type_detection(void)
 {
@@ -3583,7 +3724,7 @@ void BAT_thread(void)
 	}
 
 #ifdef CONFIG_V36BML_BATTERY
-//	dodprint();
+	dodprint();
 #endif
 
 	mt_battery_charger_detect_check();

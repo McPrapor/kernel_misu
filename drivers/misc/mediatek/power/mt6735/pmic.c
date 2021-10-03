@@ -5039,9 +5039,16 @@ unsigned int pmic_Read_Efuse_HPOffset(int i)
 /*****************************************************************************
  * PMIC mudule init/exit
  ******************************************************************************/
+
+#ifdef CONFIG_V36BML_CONFIG
+extern void htc_battery_para_init(void);
+#endif
 static int __init pmic_mt_init(void)
 {
 	int ret;
+#ifdef CONFIG_V36BML_CONFIG
+        htc_battery_para_init();
+#endif
 
 #ifdef BATTERY_PERCENT_PROTECT
 #if !defined CONFIG_HAS_WAKELOCKS

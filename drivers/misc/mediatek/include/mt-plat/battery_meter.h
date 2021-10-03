@@ -390,6 +390,7 @@ unsigned int get_cv_voltage(void);
 #endif
 
 #ifdef CONFIG_V36BML_BATTERY
+//#define FG_ERROR_BATTERY 255
 int fgauge_get_battery_id(void);
 int fgauge_get_battery_id_mv(void);
 /* ---------------- HTC Featured function ---------------- */

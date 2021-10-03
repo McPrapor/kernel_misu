@@ -236,6 +236,9 @@ signed int gFG_min_temperature = 100;
 
 #endif				/* battery info */
 
+#ifdef CONFIG_V36BML_BATTERY
+extern kal_int32 g_recalc_co_soc;
+#endif
 /*extern char *saved_command_line;*/
 /* Temperature window size */
 #define TEMP_AVERAGE_SIZE	30
@@ -2812,6 +2815,29 @@ void fg_voltage_mode(void)
 #endif
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+static kal_bool need_sync_soc(kal_int32 soc_by_c,kal_int32 soc_by_v,kal_bool is_charging)
+{
+        static kal_int32 update_point=0;
+#define GAP_TOLERANCE 8
+
+        if (((is_charging>0)&
+                        (((soc_by_v > 85)&&(update_point!=85))||
+                        ((soc_by_c == 85)&&(soc_by_v < 85-GAP_TOLERANCE))))
+                ||
+                ((is_charging<=0)&&
+                        (((soc_by_v < 15)&&(update_point!=15))||
+                        ((soc_by_c == 15)&&(soc_by_v > 15+GAP_TOLERANCE))))){
+
+                update_point=soc_by_v>50?85:15;
+                return KAL_TRUE;
+
+        }else if(abs(soc_by_c-soc_by_v)>=35){
+                return KAL_TRUE;
+        }
+        return KAL_FALSE;
+}
+#endif
 
 void fgauge_algo_run(void)
 {
@@ -2952,6 +2978,15 @@ void fgauge_algo_run(void)
 /* 3. Calculate battery capacity by Coulomb Counter */
 	gFG_capacity_by_c = fgauge_read_capacity(1);
 
+#ifdef CONFIG_V36BML_BATTERY
+        if(need_sync_soc(gFG_capacity_by_c,gFG_capacity_by_v,gFG_Is_Charging)){
+                htc_battery_meter_overload(TRUE, &BMT_status.is_overload);
+                //battery_meter_reset(gFG_capacity_by_v);
+                battery_meter_reset();
+                g_recalc_co_soc = KAL_TRUE;
+                gFG_capacity_by_c = fgauge_read_capacity(1);
+        }
+#endif
 /* 4. voltage mode */
 	if (volt_mode_update_timer >= volt_mode_update_time_out) {
 		volt_mode_update_timer = 0;
