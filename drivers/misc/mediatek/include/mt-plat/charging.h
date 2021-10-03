@@ -51,6 +51,25 @@
 #define BAT_LOG_CRTI 1
 #define BAT_LOG_FULL 2
 
+#ifdef CONFIG_V36BML_BATTERY
+#define battery_xlog_printk(num, fmt, args...) \
+do {\
+		pr_debug(fmt, ##args); \
+} while (0)
+
+#define battery_log(num, fmt, args...) \
+do {\
+		switch (num) {\
+		case BAT_LOG_CRTI:\
+			pr_err(fmt, ##args); \
+			break; \
+			/*fall-through*/\
+		default: \
+		pr_debug(fmt, ##args); \
+			break; \
+		} \
+} while (0)
+#else
 #define battery_xlog_printk(num, fmt, args...) \
 do {\
 	if (Enable_BATDRV_LOG >= (int)num) \
@@ -70,7 +89,7 @@ do {\
 			break; \
 		} \
 } while (0)
-
+#endif
 
 /* ============================================================ */
 /* ENUM */
