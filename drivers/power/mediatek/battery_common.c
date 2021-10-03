@@ -3557,6 +3557,7 @@ void htc_battery_limited_power(void)
 void BAT_thread(void)
 {
 	static kal_bool battery_meter_initilized = KAL_FALSE;
+    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
 	if (battery_meter_initilized == KAL_FALSE) {
 #ifdef CONFIG_V36BML_BATTERY
 		mt_battery_charger_detect_check();
@@ -3600,11 +3601,13 @@ void BAT_thread(void)
 #ifdef CONFIG_V36BML_BATTERY
     htc_battery_check_overload();
 
+    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
     htc_battery_sync_ui_soc(&battery_main);
 #endif
         mt_battery_update_status();
         mt_kpoc_power_off_check();
 #ifdef CONFIG_HTC_LIMIT_POWER
+    printk("[bat_debug] func: %s  line: %d", __FUNCTION__, __LINE__);
         htc_battery_limited_power();
 #endif
 }
