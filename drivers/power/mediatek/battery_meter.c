@@ -269,7 +269,11 @@ void fgauge_get_profile_id(void)
 	unsigned char buf[50] = {0};
 	/*add end by sunxiaogang@yulong.com*/
 //	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
+#ifdef CONFIG_V36BML_BATTERY
+	id_volt = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
+#else
 	id_volt = PMIC_IMM_GetOneChannelValue(MT6328_AUX_TSX,5,1);      //huangqingjun add for multi battery
+#endif
 	//id_volt = PMIC_IMM_GetOneChannelValue(BATTERY_ID_CHANNEL_NUM,5,1);
 //	if(ret != 0)
 	if(id_volt == 0)
