@@ -270,13 +270,16 @@ void fgauge_get_profile_id(void)
 	/*add end by sunxiaogang@yulong.com*/
 //	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
 #ifdef CONFIG_V36BML_BATTERY
-	id_volt = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
+	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
 #else
 	id_volt = PMIC_IMM_GetOneChannelValue(MT6328_AUX_TSX,5,1);      //huangqingjun add for multi battery
 #endif
 	//id_volt = PMIC_IMM_GetOneChannelValue(BATTERY_ID_CHANNEL_NUM,5,1);
-//	if(ret != 0)
+#ifdef CONFIG_V36BML_BATTERY
+	if(ret != 0)
+#else
 	if(id_volt == 0)
+#endif
 		bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]id_volt read fail\n");
 	else
 		bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]id_volt = %d\n", id_volt);
@@ -294,6 +297,7 @@ void fgauge_get_profile_id(void)
 			g_fg_battery_id = TOTAL_BATTERY_NUMBER - 1;
 		}
 	}
+#ifndef CONFIG_V36BML_BATTERY
 	/*add begin by sunxiaogang@yulong.com 2015.05.27 to add battery id in factory mode*/
 	if (0 == g_fg_battery_id)
 	{
@@ -309,6 +313,7 @@ void fgauge_get_profile_id(void)
 	}
 	get_device_info(buf);
 	/*add end by sunxiaogang@yulong.com*/
+#endif
 	bm_print(BM_LOG_CRTI, "[fgauge_get_profile_id]Battery id (%d)\n", g_fg_battery_id);
 }
 #elif defined(MTK_GET_BATTERY_ID_BY_GPIO)
