@@ -394,6 +394,7 @@ static int IMM_auxadc_GetOneChannelValue_Cali(int Channel, int *voltage)
 	}
 	temp_vol = (u_int64_t) rawvalue * 1500000 / AUXADC_PRECISE;
 	*voltage = temp_vol;
+	pr_err("[adc_api]:IMM_auxadc_GetOneChannelValue_Cali  voltage= %d uv\n",*voltage);
 	/* pr_debug("[adc_api]:IMM_auxadc_GetOneChannelValue_Cali  voltage= %d uv\n",*voltage); */
 	return 0;
 
