@@ -1873,8 +1873,8 @@ static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
 
     sUisoc_data.bIs_cnt_rst = bIs_chr_chg;
     sUisoc_data.bIs_charging = bIs_charging;
-    printk("[bat_debug][ui_soc] %s %d : sUisoc_data.iUI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, sUisoc_data.iUI_SOC, BMT_status.UI_SOC);
     sUisoc_data.iUI_SOC = BMT_status.UI_SOC;
+    printk("[bat_debug][ui_soc] %s %d : sUisoc_data.iUI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, sUisoc_data.iUI_SOC, BMT_status.UI_SOC);
     sUisoc_data.iSOC = BMT_status.SOC;
         if( BMT_status.bat_full )
                 sUisoc_data.iSOC = 100;
@@ -5473,7 +5473,7 @@ static int battery_probe(struct platform_device *dev)
         BMT_status.TOPOFF_charging_time = 0;
         BMT_status.POSTFULL_charging_time = 0;
         BMT_status.SOC = -1;
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 0\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC;
+    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 0\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
         BMT_status.UI_SOC = 0;
         BMT_status.full_level = 100;
 //#ifdef HTC_ENABLE_AICL
