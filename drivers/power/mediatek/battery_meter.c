@@ -264,9 +264,12 @@ void fgauge_get_profile_id(void)
 {
 	int id_volt = 0;
 	int id = 0;
-	//int ret = 0;
+#ifdef CONFIG_V36BML_BATTERY
+	int ret = 0;
+#else
 	/*add begin by sunxiaogang@yulong.com 2015.05.27 to add battery id in factory mode*/
 	unsigned char buf[50] = {0};
+#endif
 	/*add end by sunxiaogang@yulong.com*/
 //	ret = IMM_GetOneChannelValue_Cali(BATTERY_ID_CHANNEL_NUM, &id_volt);
 #ifdef CONFIG_V36BML_BATTERY
@@ -276,6 +279,7 @@ void fgauge_get_profile_id(void)
 #endif
 	//id_volt = PMIC_IMM_GetOneChannelValue(BATTERY_ID_CHANNEL_NUM,5,1);
 #ifdef CONFIG_V36BML_BATTERY
+	id_volt = id_volt/1000;
 	if(ret != 0)
 #else
 	if(id_volt == 0)
