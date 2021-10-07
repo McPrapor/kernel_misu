@@ -2748,7 +2748,11 @@ void mt_battery_GetBatteryData(void)
 	static signed int batteryCurrentBuffer[BATTERY_AVERAGE_SIZE];
 	static signed int batteryTempBuffer[BATTERY_AVERAGE_SIZE];
 	static unsigned char batteryIndex;
+#ifdef CONFIG_V36BML_BATTERY
+	signed int previous_SOC = BMT_status.SOC;
+#else
 	static signed int previous_SOC = -1;
+#endif
 
 	bat_vol = battery_meter_get_battery_voltage(KAL_TRUE);
 	Vsense = battery_meter_get_VSense();
@@ -2768,6 +2772,7 @@ void mt_battery_GetBatteryData(void)
 
 	if (bat_meter_timeout == KAL_TRUE || bat_spm_timeout == TRUE || fg_wake_up_bat == KAL_TRUE) {
 		SOC = battery_meter_get_battery_percentage();
+		printk("[bat_debug] mt_battery_GetBatteryData SOC %d", SOC);
 		/* if (bat_spm_timeout == true) */
 		/* BMT_status.UI_SOC = battery_meter_get_battery_percentage(); */
 
@@ -2818,14 +2823,18 @@ void mt_battery_GetBatteryData(void)
 	BMT_status.SOC = SOC;
 	BMT_status.ZCV = ZCV;
 
+#ifndef CONFIG_V36BML_BATTERY
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 	if (BMT_status.charger_exist == KAL_FALSE) {
 		if (BMT_status.SOC > previous_SOC && previous_SOC >= 0)
 			BMT_status.SOC = previous_SOC;
 	}
 #endif
+#endif
 
+#ifndef CONFIG_V36BML_BATTERY
 	previous_SOC = BMT_status.SOC;
+#endif
 
 	batteryIndex++;
 	if (batteryIndex >= BATTERY_AVERAGE_SIZE)
