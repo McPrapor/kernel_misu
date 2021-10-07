@@ -3710,7 +3710,7 @@ signed int battery_meter_get_battery_percentage(void)
 		tempvol = 100;
 	if (tempvol == 0) {
             tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
-	printk("[bat_debug] battery_meter_get_battery_percentage result %d called fgauge_read_capacity_by_v(BMT_status.bat_vol)\n", tempvol, BMT_status.bat_vol);
+	printk("[bat_debug] battery_meter_get_battery_percentage result %d called fgauge_read_capacity_by_v(BMT_status.bat_vol(%d))\n", tempvol, BMT_status.bat_vol);
 	}
 	return tempvol;
 #endif
