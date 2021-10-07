@@ -1938,7 +1938,7 @@ static void htc_battery_update(struct battery_data *bat_data)
                 BMT_status.htc_extension &= ~HTC_EXT_UNKNOWN_USB_CHARGER;
 #endif
     power_supply_changed(bat_psy);
-    printk("[bat_debug][htc_battery_update] cmd_discharging: %d adjust_power: %d suspend_discharging: %d charger_ctrl_stat: %d meta_charging_enable: %d current_now: %d voltage_now: %d", cmd_discharging, adjust_power, suspend_discharging, charger_ctrl_stat, meta_charging_enable, current_now, voltage_now);
+    printk("[bat_debug][htc_battery_update] cmd_discharging: %d adjust_power: %d suspend_discharging: %d charger_ctrl_stat: %d meta_charging_enable: %d current_now: %d voltage_now: %d\n", cmd_discharging, adjust_power, suspend_discharging, charger_ctrl_stat, meta_charging_enable, current_now, voltage_now);
 }
 #endif
 /* HTC added this function  ++ */
@@ -3837,11 +3837,15 @@ int bat_thread_kthread(void *x)
 #if defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 			battery_meter_set_reset_soc(KAL_FALSE);
 #endif
+#ifndef CONFIG_V36BML_BATTERY
 			battery_meter_reset();
+#endif
 			chr_wake_up_bat = KAL_FALSE;
 
 			battery_log(BAT_LOG_CRTI,
 				    "[BATTERY] Charger plug in/out, Call battery_meter_reset. (%d)\n",
+				    BMT_status.UI_SOC);
+	                printk("[BATTERY] thread_kthread: Charger plug in/out, Call battery_meter_reset. (%d)\n",
 				    BMT_status.UI_SOC);
 		}
 

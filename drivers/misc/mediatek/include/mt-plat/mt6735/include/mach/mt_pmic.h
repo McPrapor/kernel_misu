@@ -37,7 +37,9 @@
 #endif
 
 //begin removed by liuwenbo@yulong.com for suddenly power off with low battery voltage
+//#ifdef CONFIG_V36BML_BATTERY
 //#define DLPT_POWER_OFF_EN
+//#endif
 //end removed by liuwenbo@yulong.com for suddenly power off with low battery voltage
 #define POWEROFF_BAT_CURRENT 3000
 #define DLPT_POWER_OFF_THD 100
