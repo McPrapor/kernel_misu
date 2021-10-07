@@ -1900,7 +1900,7 @@ static void htc_battery_update(struct battery_data *bat_data)
         else
             bat_data->BAT_HEALTH = POWER_SUPPLY_HEALTH_GOOD;
 
-    bat_data->BAT_batt_vol = BMT_status.bat_vol;
+    bat_data->BAT_batt_vol = BMT_status.bat_vol * 1000;
     bat_data->BAT_batt_temp = BMT_status.temperature * 10;
     bat_data->BAT_PRESENT = BMT_status.bat_exist;
 
@@ -1917,10 +1917,20 @@ static void htc_battery_update(struct battery_data *bat_data)
         bat_data->adjust_power = adjust_power;
         battery_xlog_printk(BAT_LOG_CRTI, "adjust_power=(%d)\n", adjust_power);
     }
-        if (BMT_status.bat_full)
-                BMT_status.htc_extension |= HTC_EXT_CHG_FULL_EOC_STOP;
-        else
-                BMT_status.htc_extension &= ~HTC_EXT_CHG_FULL_EOC_STOP;
+    if (current_now != -1) {
+	bat_data->current_now = current_now;
+	battery_log(BAT_LOG_CRTI, "current_now=(%d)\n", current_now);
+    }	
+    if (BMT_status.bat_vol >= 0) {
+	if (bat_data->voltage_now > BMT_status.bat_vol * 1000 || bat_data->BAT_STATUS == POWER_SUPPLY_STATUS_CHARGING) {
+		bat_data->voltage_now = BMT_status.bat_vol * 1000;
+		battery_log(BAT_LOG_CRTI, "voltage_now=(%d)\n", voltage_now);
+        }
+    }
+    if (BMT_status.bat_full)
+        BMT_status.htc_extension |= HTC_EXT_CHG_FULL_EOC_STOP;
+    else
+        BMT_status.htc_extension &= ~HTC_EXT_CHG_FULL_EOC_STOP;
 #if 0
         if (BMT_status.charger_type == NONSTANDARD_CHARGER)
                 BMT_status.htc_extension |= HTC_EXT_UNKNOWN_USB_CHARGER;
@@ -1928,6 +1938,7 @@ static void htc_battery_update(struct battery_data *bat_data)
                 BMT_status.htc_extension &= ~HTC_EXT_UNKNOWN_USB_CHARGER;
 #endif
     power_supply_changed(bat_psy);
+    printk("[bat_debug][htc_battery_update] cmd_discharging: %d adjust_power: %d suspend_discharging: %d charger_ctrl_stat: %d meta_charging_enable: %d current_now: %d voltage_now: %d", cmd_discharging, adjust_power, suspend_discharging, charger_ctrl_stat, meta_charging_enable, current_now, voltage_now);
 }
 #endif
 /* HTC added this function  ++ */
