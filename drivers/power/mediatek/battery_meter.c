@@ -2683,12 +2683,12 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 	/* If battery voltage is less then mimimum profile voltage, then return 100 */
 	/* If battery voltage is greater then maximum profile voltage, then return 0 */
 	if (voltage > (profile_p + 0)->voltage) {
-		printk("[bat_debug][dod0] voltage(%d) > (profile_p + 0)->voltage(%d)\n", voltage, (profile_p + 0)->voltage);
+		printk("[bat_debug][dod0] voltage(%d) > (profile_p + 0)->voltage(%d) return 0\n", voltage, (profile_p + 0)->voltage);
 		return 0;
 	}
 
 	if (voltage < (profile_p + saddles - 1)->voltage)
-		printk("[bat_debug][dod0] voltage(%d) < (profile_p + saddles - 1)->voltage(%d)\n", voltage, (profile_p + saddles - 1)->voltage);
+		printk("[bat_debug][dod0] voltage(%d) < (profile_p + saddles - 1)->voltage(%d) return 100\n", voltage, (profile_p + saddles - 1)->voltage);
 		return 100;
 
 	/* get DOD0 according to current temperature */
@@ -2808,6 +2808,7 @@ signed int fgauge_read_capacity(signed int type)
 		bm_print(BM_LOG_FULL, "[fgauge_read_capacity] dvalue<=1 and set dvalue=1 !!\r\n");
 	}
 
+		printk("[bat_debug][fgauge_read_capacity] type %d dvalue %d\n", type, dvalue);
 	return dvalue;
 }
 
