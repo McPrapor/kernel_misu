@@ -1793,10 +1793,15 @@ static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
         battery_xlog_printk(BAT_LOG_FULL,"Cov = %d\n",g_co_soc);
         printk("[bat_debug] func: %s line: %d Cov = %d\n",__FUNCTION__,__LINE__,g_co_soc);
 
-        if (is_charging)
+        if (is_charging) {
                 rc = 100-g_co_soc+(g_co_soc*soc)/100;
+		printk("[bat_debug] htc_battery_adjust_ui_soc rc(%d) = 100-g_co_soc(%d)+(g_co_soc(%d)*soc(%d))/100\n", rc, g_co_soc, g_co_soc, soc);
+	}
         else
+	{
                 rc = (g_co_soc*soc+99)/100;
+		printk("[bat_debug] htc_battery_adjust_ui_soc rc(%d) = (g_co_soc(%d)*soc(%d)+99)/100\n", rc, g_co_soc, soc);
+	}
 
         pre_charging_status = is_charging;
         pre_soc = soc;
@@ -1804,6 +1809,7 @@ static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
         if (rc<0) rc = 0;
         if (rc>100)rc =100;
 
+		printk("[bat_debug] htc_battery_adjust_ui_soc final rc(%d)\n", rc);
         return rc;
 }
 static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)

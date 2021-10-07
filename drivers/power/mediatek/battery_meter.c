@@ -3688,7 +3688,9 @@ signed int battery_meter_get_battery_percentage(void)
 	if (g_auxadc_solution == 1) {
 		return auxadc_algo_run();
 	}
-/*else {*/
+#ifdef CONFIG_V36BML_BATTERY
+        else {
+#endif
 		fgauge_algo_run();
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #ifdef CONFIG_V36BML_BATTERY
@@ -3703,7 +3705,7 @@ signed int battery_meter_get_battery_percentage(void)
 	return tempvol;
 #else
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
+	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
 	if (tempvol > 100)
 		tempvol = 100;
 	return tempvol;
@@ -3716,7 +3718,9 @@ signed int battery_meter_get_battery_percentage(void)
 		/* Compensated capacity is returned for UI SOC tracking */
 		return 100 - battery_meter_trans_battery_percentage(100 - gFG_capacity_by_c);
 #endif
-	/*}*/
+#ifdef CONFIG_V36BML_BATTERY
+	}
+#endif
 #endif
 
 #if defined(SOC_BY_SW_FG)
