@@ -2505,7 +2505,7 @@ void bat_set_ui_percentage(kal_int32 uiSoc)
     } else {
         set_rtc_spare_fg_value(BMT_status.UI_SOC);
     }
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.PRE_UI_SOC(%d) = BMT_status.UI_SOC(%d)+1\n", __FUNCTION__, __LINE__, BMT_status.PRE_UI_SOC, BMT_status.UI_SOC);
+    printk("[bat_debug][ui_soc] %s %d : BMT_status.PRE_UI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.PRE_UI_SOC, BMT_status.UI_SOC);
         BMT_status.PRE_UI_SOC = BMT_status.UI_SOC;
 }
 #endif

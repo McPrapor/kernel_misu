@@ -2674,16 +2674,21 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 			jj++;
 		}
 		/* voltage = voltage + fgauge_compensate_battery_voltage(voltage); //mV */
+		printk("[bat_debug][dod0] voltage %d before compensation\n", voltage);
 		voltage = voltage + fgauge_compensate_battery_voltage_recursion(voltage, 5);	/* mV */
+		printk("[bat_debug][dod0] voltage %d after compensation\n", voltage);
 		bm_print(BM_LOG_CRTI, "[FGADC] compensate_battery_voltage, voltage=%d\r\n",
 			 voltage);
 	}
 	/* If battery voltage is less then mimimum profile voltage, then return 100 */
 	/* If battery voltage is greater then maximum profile voltage, then return 0 */
-	if (voltage > (profile_p + 0)->voltage)
+	if (voltage > (profile_p + 0)->voltage) {
+		printk("[bat_debug][dod0] voltage(%d) > (profile_p + 0)->voltage(%d)\n", voltage, (profile_p + 0)->voltage);
 		return 0;
+	}
 
 	if (voltage < (profile_p + saddles - 1)->voltage)
+		printk("[bat_debug][dod0] voltage(%d) < (profile_p + saddles - 1)->voltage(%d)\n", voltage, (profile_p + saddles - 1)->voltage);
 		return 100;
 
 	/* get DOD0 according to current temperature */
@@ -2701,6 +2706,7 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 			break;
 		}
 	}
+	printk("[bat_debug][dod0] dod0(%d) found by temp and voltage \n", dod0);
 
 	return dod0;
 }
