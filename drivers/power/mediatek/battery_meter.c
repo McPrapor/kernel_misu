@@ -3190,7 +3190,7 @@ void fgauge_initialization(void)
 	}
 
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_FG_CAR, &gFG_columb);
-#if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
+#if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM) || defined(CONFIG_V36BML_BATTERY)
 	fgauge_construct_battery_profile_init();
 #endif
 	gFG_temp = force_get_tbat(KAL_FALSE);
@@ -3214,9 +3214,9 @@ void fgauge_initialization(void)
 		 "[fgauge_initialization] Done HW_OCV:%d FG_Current:%d FG_CAR:%d tmp=%d capacity=%d Qmax=%d\n",
 		 gFG_voltage, gFG_current, gFG_columb, gFG_temp, gFG_capacity, gFG_BATT_CAPACITY);
 
-#if defined(FG_BAT_INT)
-	/*pmic_register_interrupt_callback(41, fg_bat_int_handler);*/
-	/*pmic_register_interrupt_callback(40, fg_bat_int_handler);*/
+#if defined(FG_BAT_INT) && defined(CONFIG_V36BML_BATTERY)
+	pmic_register_interrupt_callback(41, fg_bat_int_handler);
+	pmic_register_interrupt_callback(40, fg_bat_int_handler);
 #endif
 #endif
 }
