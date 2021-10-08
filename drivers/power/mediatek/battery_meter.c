@@ -2032,6 +2032,9 @@ void dod_init(void)
 {
 #if defined(SOC_BY_HW_FG)
 	int ret = 0;
+#ifdef CONFIG_V36BML_BATTERY
+	int VBAT_POWER_ON = 3450;
+#endif
 
 #if defined(IS_BATTERY_REMOVE_BY_PMIC)
 	signed int gFG_capacity_by_sw_ocv = gFG_capacity_by_v;
@@ -2041,6 +2044,9 @@ void dod_init(void)
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &gFG_voltage);
 	gFG_capacity_by_v = fgauge_read_capacity_by_v(gFG_voltage);
 
+#ifdef CONFIG_V36BML_BATTERY
+	gFG_capacity_by_hwocv_int = gFG_capacity_by_v;
+#endif
 	bm_print(BM_LOG_CRTI, "[FGADC] get_hw_ocv=%d, HW_SOC=%d, SW_SOC = %d\n",
 		 gFG_voltage, gFG_capacity_by_v, gFG_capacity_by_v_init);
 #if defined(EXTERNAL_SWCHR_SUPPORT)
@@ -2066,15 +2072,27 @@ void dod_init(void)
 	g_rtc_fg_soc = get_rtc_spare_fg_value();
 #endif
 
+#ifdef CONFIG_V36BML_BATTERY
+	if ((BMT_status.charger_type == NONSTANDARD_CHARGER) ||
+		    (BMT_status.charger_type == STANDARD_CHARGER)    ||
+			(BMT_status.charger_type == APPLE_2_1A_CHARGER) ||
+			(BMT_status.charger_type == APPLE_1_0A_CHARGER) ||
+			(BMT_status.charger_type == APPLE_0_5A_CHARGER))
+			VBAT_POWER_ON = 3400;
+	else if((BMT_status.charger_type == STANDARD_HOST) ||
+		    (BMT_status.charger_type == CHARGING_HOST))
+		    VBAT_POWER_ON = 3550;
+#endif
 
 #if defined(IS_BATTERY_REMOVE_BY_PMIC)
+#ifndef CONFIG_V36BML_BATTERY
 	if (is_battery_remove_pmic() == 0 && (g_rtc_fg_soc != 0)
 		&& batt_meter_cust_data.vbat_remove_detection) {
 		bm_print(BM_LOG_CRTI, "[FGADC]is_battery_remove()==0 , use rtc_fg_soc%d\n",
 			 g_rtc_fg_soc);
 		gFG_capacity_by_v = g_rtc_fg_soc;
 	} else {
-
+#endif
 #if defined(INIT_SOC_BY_SW_SOC)
 if (((g_rtc_fg_soc != 0)
 		     &&
@@ -2100,6 +2118,7 @@ if (((g_rtc_fg_soc != 0)
 			    || get_boot_reason() == BR_2SEC_REBOOT || get_boot_mode() == RECOVERY_BOOT)))
 #endif
 		{
+                        printk("[bat_debug] dod_init gFG_capacity_by_v(%d) = g_rtc_fg_soc(%d)\n", gFG_capacity_by_v,  g_rtc_fg_soc);
 			gFG_capacity_by_v = g_rtc_fg_soc;
 		} else {
 			if (abs(gFG_capacity_by_v - gFG_capacity_by_sw_ocv) >
@@ -2114,8 +2133,9 @@ if (((g_rtc_fg_soc != 0)
 					 gFG_capacity_by_v, gFG_capacity_by_sw_ocv);
 			}
 		}
-
+#ifndef CONFIG_V36BML_BATTERY
 	}
+#endif
 
 #else
 
