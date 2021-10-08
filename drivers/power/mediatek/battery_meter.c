@@ -3743,11 +3743,13 @@ signed int battery_meter_get_battery_percentage(void)
 #else
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
 	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
+/*
 	if (tempvol > 100)
 		tempvol = 100;
 	if (tempvol == 0) {
             tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
 	printk("[bat_debug] battery_meter_get_battery_percentage result %d called fgauge_read_capacity_by_v(BMT_status.bat_vol(%d))\n", tempvol, BMT_status.bat_vol);
+*/
 	}
 	return tempvol;
 #endif
