@@ -2044,9 +2044,6 @@ void dod_init(void)
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &gFG_voltage);
 	gFG_capacity_by_v = fgauge_read_capacity_by_v(gFG_voltage);
 
-#ifdef CONFIG_V36BML_BATTERY
-	gFG_capacity_by_hwocv_int = gFG_capacity_by_v;
-#endif
 	bm_print(BM_LOG_CRTI, "[FGADC] get_hw_ocv=%d, HW_SOC=%d, SW_SOC = %d\n",
 		 gFG_voltage, gFG_capacity_by_v, gFG_capacity_by_v_init);
 #if defined(EXTERNAL_SWCHR_SUPPORT)
@@ -2164,9 +2161,22 @@ if (((g_rtc_fg_soc != 0)
 		    || get_boot_reason() == BR_TOOL_BY_PASS_PWK || get_boot_reason() == BR_2SEC_REBOOT
 		    || get_boot_mode() == RECOVERY_BOOT)))
 #endif
+#ifdef CONFIG_V36BML_BATTERY
+        {
+		printk("[FGADC] boot with g_rtc_fg_soc\n");
+		if(battery_meter_get_battery_voltage(KAL_TRUE) <= VBAT_POWER_ON)
+		    g_rtc_fg_soc = 1;
+		gFG_capacity_by_v = g_rtc_fg_soc;
+		bat_set_ui_percentage(g_rtc_fg_soc);
+//		gFG_rtc_used = true;
+	} else {
+		bat_set_ui_percentage(gFG_capacity_by_v);
+	}
+#else
 	{
 		gFG_capacity_by_v = g_rtc_fg_soc;
 	}
+#endif
 #elif defined(SOC_BY_SW_FG)
 	if (((g_rtc_fg_soc != 0)
 	     &&
