@@ -3031,7 +3031,7 @@ void fgauge_algo_run(void)
 #ifdef CONFIG_V36BML_BATTERY
         if(need_sync_soc(gFG_capacity_by_c,gFG_capacity_by_v,gFG_Is_Charging)){
                 htc_battery_meter_overload(TRUE, &BMT_status.is_overload);
-                //battery_meter_reset(gFG_capacity_by_v);
+                battery_meter_reset(gFG_capacity_by_v);
                 battery_meter_reset();
                 g_recalc_co_soc = KAL_TRUE;
                 gFG_capacity_by_c = fgauge_read_capacity(1);

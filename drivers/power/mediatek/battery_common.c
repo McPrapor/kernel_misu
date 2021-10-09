@@ -2754,8 +2754,7 @@ void mt_battery_GetBatteryData(void)
 	static signed int batteryCurrentBuffer[BATTERY_AVERAGE_SIZE];
 	static signed int batteryTempBuffer[BATTERY_AVERAGE_SIZE];
 	static unsigned char batteryIndex;
-//#ifdef CONFIG_V36BML_BATTERY
-#if 0
+#ifdef CONFIG_V36BML_BATTERY
 	signed int previous_SOC = BMT_status.SOC;
 #else
 	static signed int previous_SOC = -1;
@@ -2839,8 +2838,7 @@ void mt_battery_GetBatteryData(void)
 #endif
 #endif
 
-//#ifndef CONFIG_V36BML_BATTERY
-#if 0
+#ifndef CONFIG_V36BML_BATTERY
 	previous_SOC = BMT_status.SOC;
 #endif
 
