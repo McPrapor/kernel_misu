@@ -1352,9 +1352,14 @@ static void pchr_turn_on_charging(void)
                                                 battery_charging_control(CHARGING_CMD_HTC_SET_VDM, &Vin_dpm);
                                                 battery_charging_control(CHARGING_CMD_SET_INPUT_CURRENT, &g_temp_input_CC_value);
                                                 battery_charging_control(CHARGING_CMD_SET_CURRENT, &g_temp_CC_value);
+                                                        printk("[chr_debug] AICL_CHECKING i %d Vin_dpm %d g_temp_input_CC_value %d g_temp_CC_value %d \n", i, Vin_dpm, g_temp_input_CC_value, g_temp_CC_value);
                                                 if( 2 == i)break;
-                                                if(htc_charging_avg_voltage_check())
+                                                if(htc_charging_avg_voltage_check()) {
                                                         temp_avg_voltage[i] = BMT_status.avg_charger_vol;
+                                                        printk("[chr_debug] htc_charging_avg_voltage_check() == false temp_avg_voltage[%d] = BMT_status.avg_charger_vol(%d) \n", i, BMT_status.avg_charger_vol);
+                                                } else {
+                                                        printk("[chr_debug] htc_charging_avg_voltage_check() == false \n");
+                                                }
                                         }
                                         battery_charging_control(CHARGINF_CMD_HTC_GET_DPM_STATUS, &DPM_status);
                                         battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] vol1= %d. vol2 = %d, PDM_status=%d\n", temp_avg_voltage[0], temp_avg_voltage[1],DPM_status);
