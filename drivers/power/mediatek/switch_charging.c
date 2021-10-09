@@ -1365,6 +1365,7 @@ static void pchr_turn_on_charging(void)
                                         battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] vol1= %d. vol2 = %d, PDM_status=%d\n", temp_avg_voltage[0], temp_avg_voltage[1],DPM_status);
                                         if(DPM_status == KAL_TRUE){
                                                 if(htc_charging_avg_voltage_check() && (temp_avg_voltage[0] != temp_avg_voltage[1])){
+                                                        printk("[chr_debug] (((temp_avg_voltage[1](%d) - BMT_status.avg_charger_vol(%d)) * 100 ) / (temp_avg_voltage[0](%d)- temp_avg_voltage[1](%d))) < HTC_AICL_VBUS_DROP_RATIO(%d)) = %d \n", temp_avg_voltage[1], BMT_status.avg_charger_vol, temp_avg_voltage[0], temp_avg_voltage[1], HTC_AICL_VBUS_DROP_RATIO, (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) );
                                                         if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) < HTC_AICL_VBUS_DROP_RATIO){
 								#if 1
 //                                                                #ifdef V36BML_BATT
