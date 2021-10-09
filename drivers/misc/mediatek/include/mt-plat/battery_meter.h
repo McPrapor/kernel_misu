@@ -351,7 +351,11 @@ extern signed int battery_meter_get_battery_temperature(void);
 extern signed int battery_meter_get_charger_voltage(void);
 extern signed int battery_meter_get_battery_percentage(void);
 extern signed int battery_meter_initial(void);
+#ifdef CONFIG_V36BML_BATTERY
+extern signed int battery_meter_reset(signed int uiUI_soc);
+#else
 extern signed int battery_meter_reset(void);
+#endif
 extern signed int battery_meter_sync(signed int bat_i_sense_offset);
 
 extern signed int battery_meter_get_battery_zcv(void);

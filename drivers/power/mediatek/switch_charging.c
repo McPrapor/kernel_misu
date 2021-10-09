@@ -1605,7 +1605,9 @@ PMU_STATUS BAT_BatteryFullAction(void)
 		BMT_status.bat_in_recharging_state = KAL_TRUE;
 		BMT_status.bat_charging_state = CHR_CC;
 #ifndef CONFIG_MTK_HAFG_20
+#ifndef CONFIG_V36BML_BATTERY
 		battery_meter_reset();
+#endif
 #endif
 #if defined(PUMPEX_PLUS_RECHG) && defined(CONFIG_MTK_PUMP_EXPRESS_PLUS_SUPPORT)
 		/*enable PE detection only once when recharge is needed */

@@ -3899,7 +3899,7 @@ void reset_parameter_dod_full(unsigned int ui_percentage)
 }
 
 #ifdef CONFIG_V36BML_BATTERY
-signed int battery_meter_reset(kal_uint32 uiUI_soc)
+signed int battery_meter_reset(signed int uiUI_soc)
 {
 #if defined(CONFIG_POWER_EXT)
         return 0;
@@ -3935,6 +3935,7 @@ signed int battery_meter_reset(void)
 	return 0;
 #endif
 }
+#endif
 
 signed int battery_meter_sync(signed int bat_i_sense_offset)
 {
