@@ -1207,6 +1207,7 @@ static void pchr_turn_on_charging(void)
 	unsigned int charging_enable = KAL_TRUE;
 
 #ifdef CONFIG_V36BML_BATTERY
+        kal_uint32 aicl_cond = 0;
                 kal_uint32 charger_vol_sum = 0;
                 int j = 0, k = 0;
                 kal_uint32 Vin_dpm;
@@ -1365,8 +1366,9 @@ static void pchr_turn_on_charging(void)
                                         battery_log(BAT_LOG_CRTI, "[BATTERY][AICL] vol1= %d. vol2 = %d, PDM_status=%d\n", temp_avg_voltage[0], temp_avg_voltage[1],DPM_status);
                                         if(DPM_status == KAL_TRUE){
                                                 if(htc_charging_avg_voltage_check() && (temp_avg_voltage[0] != temp_avg_voltage[1])){
-                                                        printk("[chr_debug] (((temp_avg_voltage[1](%d) - BMT_status.avg_charger_vol(%d)) * 100 ) / (temp_avg_voltage[0](%d)- temp_avg_voltage[1](%d))) < HTC_AICL_VBUS_DROP_RATIO(%d)) = %d \n", temp_avg_voltage[1], BMT_status.avg_charger_vol, temp_avg_voltage[0], temp_avg_voltage[1], HTC_AICL_VBUS_DROP_RATIO, (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) );
-                                                        if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) < HTC_AICL_VBUS_DROP_RATIO){
+                                                        aicl_cond = ((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1]);
+                                                        printk("[chr_debug] (((temp_avg_voltage[1](%d) - BMT_status.avg_charger_vol(%d)) * 100 ) / (temp_avg_voltage[0](%d)- temp_avg_voltage[1](%d))) < HTC_AICL_VBUS_DROP_RATIO(%d)) = %d , aicl_cond = %d \n", temp_avg_voltage[1], BMT_status.avg_charger_vol, temp_avg_voltage[0], temp_avg_voltage[1], HTC_AICL_VBUS_DROP_RATIO, (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) , aicl_cond);
+                                                        if((BMT_status.avg_charger_vol > 4350) && aicl_cond < HTC_AICL_VBUS_DROP_RATIO){
 								#if 1
 //                                                                #ifdef V36BML_BATT
                                                                 if(temp_avg_voltage[0] > 4780)
