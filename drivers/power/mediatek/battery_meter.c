@@ -3032,7 +3032,6 @@ void fgauge_algo_run(void)
         if(need_sync_soc(gFG_capacity_by_c,gFG_capacity_by_v,gFG_Is_Charging)){
                 htc_battery_meter_overload(TRUE, &BMT_status.is_overload);
                 battery_meter_reset(gFG_capacity_by_v);
-                battery_meter_reset();
                 g_recalc_co_soc = KAL_TRUE;
                 gFG_capacity_by_c = fgauge_read_capacity(1);
         }
@@ -3899,6 +3898,21 @@ void reset_parameter_dod_full(unsigned int ui_percentage)
 #endif
 }
 
+#ifdef CONFIG_V36BML_BATTERY
+signed int battery_meter_reset(kal_uint32 uiUI_soc)
+{
+#if defined(CONFIG_POWER_EXT)
+        return 0;
+#else
+//      kal_uint32 ui_percentage = bat_get_ui_percentage();
+
+        reset_parameter_car();
+        reset_parameter_dod_full(uiUI_soc);
+
+        return 0;
+#endif
+}
+#else
 signed int battery_meter_reset(void)
 {
 #if defined(CONFIG_POWER_EXT)
