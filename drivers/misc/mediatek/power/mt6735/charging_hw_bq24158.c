@@ -607,6 +607,7 @@ static void hw_bc11_done(void)
 	kal_uint16 register_value;
 //	kal_uint32 cv_value = *(kal_uint32 *)(data);
 
+        printk("[chr_debug] charging_set_cv_voltage cv_value %d\n", *(kal_uint32 *)(data));
 	register_value = charging_parameter_to_value(VBAT_CV_VTH, GETARRAYNUM(VBAT_CV_VTH) ,*(kal_uint32 *)(data));
 	bq24158_set_oreg(register_value);
  
@@ -625,6 +626,7 @@ static void hw_bc11_done(void)
     bq24158_read_interface(0x1, &reg_value, 0x3, 0x6);	//IINLIM
     *(kal_uint32 *)data = charging_value_to_parameter(CS_VTH,array_size,reg_value);
 	
+        printk("[chr_debug] charging_get_current %d\n", *(kal_uint32 *)(data));
     return status;
  }  
   
