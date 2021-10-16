@@ -3730,26 +3730,15 @@ signed int battery_meter_get_battery_percentage(void)
 		fgauge_algo_run();
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #ifdef CONFIG_V36BML_BATTERY
-#if 0
-	tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
-	if (tempvol == 100) {
-		tempvol = htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-		if (tempvol > 100) {
-			tempvol = 100;
-		}
-	}
-	return tempvol;
-#else
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
 	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
 	if (tempvol > 100)
 		tempvol = 100;
-	if (tempvol == 0) {
-            tempvol = fgauge_read_capacity_by_v(BMT_status.bat_vol);
-	printk("[bat_debug] battery_meter_get_battery_percentage result %d called fgauge_read_capacity_by_v(BMT_status.bat_vol(%d))\n", tempvol, BMT_status.bat_vol);
+	if (tempvol == 0 && gFG_capacity_by_v > 0) {
+	    printk("[bat_debug] battery_meter_get_battery_percentage result itempvol==0, gFG_capacity_by_v > 0, returning 1\n");
+            tempvol=1;
 	}
 	return tempvol;
-#endif
 #else
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */
 #endif
