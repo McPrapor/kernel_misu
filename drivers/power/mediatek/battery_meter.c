@@ -3802,14 +3802,6 @@ void reset_parameter_car(void)
 {
 #if defined(SOC_BY_HW_FG)
 	int ret = 0;
-#ifdef CONFIG_V36BML_BATTERY
-	if (bat_is_charging_full()){
-		gFG_columb_save = 0;
-		gFG_ever_full_charged=true;
-	}else{
-		gFG_columb_save += gFG_columb;
-	}
-#endif
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_HW_RESET, NULL);
 	gFG_columb = 0;
 
