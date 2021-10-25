@@ -1815,7 +1815,6 @@ static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)
 
         battery_xlog_printk(BAT_LOG_CRTI,"Suggested ui_soc = %d, UI_SOC = %d, time_cnt = %d\n",
             ui_soc, pUisoc_data->iUI_SOC, time_cnt);
-            __FUNCTION__, __LINE__, ui_soc, pUisoc_data->iUI_SOC, time_cnt);
 
         if(fg_wake_up_bat == KAL_TRUE && !pUisoc_data->bIs_charging)
                 time_cnt = update_cycle;
