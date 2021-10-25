@@ -2115,7 +2115,6 @@ if (((g_rtc_fg_soc != 0)
 			    || get_boot_reason() == BR_2SEC_REBOOT || get_boot_mode() == RECOVERY_BOOT)))
 #endif
 		{
-                        printk("[bat_debug] dod_init gFG_capacity_by_v(%d) = g_rtc_fg_soc(%d)\n", gFG_capacity_by_v,  g_rtc_fg_soc);
 			gFG_capacity_by_v = g_rtc_fg_soc;
 		} else {
 			if (abs(gFG_capacity_by_v - gFG_capacity_by_sw_ocv) >
@@ -2704,21 +2703,17 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 			jj++;
 		}
 		/* voltage = voltage + fgauge_compensate_battery_voltage(voltage); //mV */
-		printk("[bat_debug][dod0] voltage %d before compensation\n", voltage);
 		voltage = voltage + fgauge_compensate_battery_voltage_recursion(voltage, 5);	/* mV */
-		printk("[bat_debug][dod0] voltage %d after compensation\n", voltage);
 		bm_print(BM_LOG_CRTI, "[FGADC] compensate_battery_voltage, voltage=%d\r\n",
 			 voltage);
 	}
 	/* If battery voltage is less then mimimum profile voltage, then return 100 */
 	/* If battery voltage is greater then maximum profile voltage, then return 0 */
 	if (voltage > (profile_p + 0)->voltage) {
-		printk("[bat_debug][dod0] voltage(%d) > (profile_p + 0)->voltage(%d) return 0\n", voltage, (profile_p + 0)->voltage);
 		return 0;
 	}
 
 	if (voltage < (profile_p + saddles - 1)->voltage)
-		printk("[bat_debug][dod0] voltage(%d) < (profile_p + saddles - 1)->voltage(%d) return 100\n", voltage, (profile_p + saddles - 1)->voltage);
 		return 100;
 
 	/* get DOD0 according to current temperature */
@@ -2736,7 +2731,6 @@ signed int fgauge_get_dod0(signed int voltage, signed int temperature, kal_bool 
 			break;
 		}
 	}
-	printk("[bat_debug][dod0] dod0(%d) found by temp and voltage \n", dod0);
 
 	return dod0;
 }
@@ -2838,7 +2832,6 @@ signed int fgauge_read_capacity(signed int type)
 		bm_print(BM_LOG_FULL, "[fgauge_read_capacity] dvalue<=1 and set dvalue=1 !!\r\n");
 	}
 
-		printk("[bat_debug][fgauge_read_capacity] type %d dvalue %d\n", type, dvalue);
 	return dvalue;
 }
 
@@ -3731,7 +3724,6 @@ signed int battery_meter_get_battery_percentage(void)
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
 #ifdef CONFIG_V36BML_BATTERY
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
-	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
 	return tempvol;
 #else
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */

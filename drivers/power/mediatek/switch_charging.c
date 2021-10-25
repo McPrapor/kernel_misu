@@ -1369,7 +1369,8 @@ static void pchr_turn_on_charging(void)
                                                 if(htc_charging_avg_voltage_check() && (temp_avg_voltage[0] != temp_avg_voltage[1])){
                                                         printk("[chr_debug] tc_charging_avg_voltage_check() && (temp_avg_voltage[0] != temp_avg_voltage[1]\n" );
                                                         aicl_cond = (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1]));
-                                                        if((BMT_status.avg_charger_vol > 4350) && ((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1]) < HTC_AICL_VBUS_DROP_RATIO){
+//                                                        if((BMT_status.avg_charger_vol > 4350) && ((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1]) < HTC_AICL_VBUS_DROP_RATIO){
+                                                        if((BMT_status.avg_charger_vol > 4350) && aicl_cond < HTC_AICL_VBUS_DROP_RATIO){
                                                                 printk("[chr_debug] BMT_status.avg_charger_vol(%d) > 4350 && (((temp_avg_voltage[1](%d) - BMT_status.avg_charger_vol(%d)) * 100 ) / (temp_avg_voltage[0](%d)- temp_avg_voltage[1](%d))) < HTC_AICL_VBUS_DROP_RATIO(%d)) = %d , aicl_cond = %d \n", BMT_status.avg_charger_vol, temp_avg_voltage[1], BMT_status.avg_charger_vol, temp_avg_voltage[0], temp_avg_voltage[1], HTC_AICL_VBUS_DROP_RATIO, (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) , aicl_cond);
 								#if 1
 //                                                                #ifdef V36BML_BATT
@@ -1382,7 +1383,8 @@ static void pchr_turn_on_charging(void)
                                                                         }
 //                                                                #ifdef V36BML_BATT
 								#if 1
-                                                        }else if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) >= HTC_AICL_VBUS_DROP_RATIO
+//                                                        }else if((BMT_status.avg_charger_vol > 4350) && (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) >= HTC_AICL_VBUS_DROP_RATIO
+                                                        }else if((BMT_status.avg_charger_vol > 4350) && aicl_cond >= HTC_AICL_VBUS_DROP_RATIO
                                                                 && (temp_avg_voltage[1] - BMT_status.avg_charger_vol) < 150){
                                                                 printk("[chr_debug] BMT_status.avg_charger_vol(%d) > 4350 && (((temp_avg_voltage[1](%d) - BMT_status.avg_charger_vol(%d)) * 100 ) / (temp_avg_voltage[0](%d)- temp_avg_voltage[1](%d))) >= HTC_AICL_VBUS_DROP_RATIO(%d)) = %d , aicl_cond = %d \n", BMT_status.avg_charger_vol, temp_avg_voltage[1], BMT_status.avg_charger_vol, temp_avg_voltage[0], temp_avg_voltage[1], HTC_AICL_VBUS_DROP_RATIO, (((temp_avg_voltage[1] - BMT_status.avg_charger_vol) * 100 ) / (temp_avg_voltage[0]- temp_avg_voltage[1])) , aicl_cond);
                                                                 BMT_status.htc_acil_state = AICL_DONE;

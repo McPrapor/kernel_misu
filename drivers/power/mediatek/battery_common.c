@@ -1738,14 +1738,12 @@ void htc_battery_check_overload(void)
     }
 
         battery_xlog_printk(BAT_LOG_FULL, "[%s] overload = %d\n", __FUNCTION__, BMT_status.is_overload);
-        printk("[bat_debug] [%s] overload = %d\n", __FUNCTION__, BMT_status.is_overload);
     pre_state = BMT_status.bat_charging_state;
 }
 
 kal_int32 htc_battery_calc_co(kal_int32 soc,kal_int32 ui_soc,kal_bool is_charging)
 {
         kal_int32 k;
-    printk("[bat_debug] func: %s line: %d soc %d ui_soc %d\n", __FUNCTION__, __LINE__, soc, ui_soc);
         if (is_charging)
                 k =(soc==100?100:(100*(100-ui_soc)/(100-soc)));
         else
@@ -1759,7 +1757,6 @@ kal_int32 htc_battery_calc_co(kal_int32 soc,kal_int32 ui_soc,kal_bool is_chargin
 
 void htc_battery_calc_co_soc(kal_int32 soc,kal_int32 ui_soc,kal_bool is_charging)
 {
-    printk("[bat_debug] func: %s line: %d soc: %d ui_soc: %d is_charging: %d\n", __FUNCTION__, __LINE__, soc, ui_soc, is_charging);
         g_co_soc=htc_battery_calc_co(soc,ui_soc,is_charging);
 }
 #if 0
@@ -1791,16 +1788,13 @@ static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
                 g_recalc_co_soc = KAL_FALSE;
         }
         battery_xlog_printk(BAT_LOG_FULL,"Cov = %d\n",g_co_soc);
-        printk("[bat_debug] func: %s line: %d Cov = %d\n",__FUNCTION__,__LINE__,g_co_soc);
 
         if (is_charging) {
                 rc = 100-g_co_soc+(g_co_soc*soc)/100;
-		printk("[bat_debug] htc_battery_adjust_ui_soc rc(%d) = 100-g_co_soc(%d)+(g_co_soc(%d)*soc(%d))/100\n", rc, g_co_soc, g_co_soc, soc);
 	}
         else
 	{
                 rc = (g_co_soc*soc+99)/100;
-		printk("[bat_debug] htc_battery_adjust_ui_soc rc(%d) = (g_co_soc(%d)*soc(%d)+99)/100\n", rc, g_co_soc, soc);
 	}
 
         pre_charging_status = is_charging;
@@ -1809,7 +1803,6 @@ static kal_int32 htc_battery_adjust_ui_soc(pSync_uisoc pUisoc_data)
         if (rc<0) rc = 0;
         if (rc>100)rc =100;
 
-		printk("[bat_debug] htc_battery_adjust_ui_soc final rc(%d)\n", rc);
         return rc;
 }
 static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)
@@ -1822,7 +1815,6 @@ static void htc_battery_ui_soc_sync(pSync_uisoc pUisoc_data)
 
         battery_xlog_printk(BAT_LOG_CRTI,"Suggested ui_soc = %d, UI_SOC = %d, time_cnt = %d\n",
             ui_soc, pUisoc_data->iUI_SOC, time_cnt);
-        printk("[bat_debug] func: %s, line: %d Suggested ui_soc = %d, UI_SOC = %d, time_cnt = %d\n",
             __FUNCTION__, __LINE__, ui_soc, pUisoc_data->iUI_SOC, time_cnt);
 
         if(fg_wake_up_bat == KAL_TRUE && !pUisoc_data->bIs_charging)
@@ -1871,7 +1863,6 @@ static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
 
     kal_bool bIs_chr_chg = pre_is_charging != bIs_charging;
     sSync_uisoc sUisoc_data;
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
     if( bIs_charging )                     /* charging */
         bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_CHARGING;
         else
@@ -1880,7 +1871,6 @@ static void htc_battery_sync_ui_soc(struct battery_data *bat_data)
     sUisoc_data.bIs_cnt_rst = bIs_chr_chg;
     sUisoc_data.bIs_charging = bIs_charging;
     sUisoc_data.iUI_SOC = BMT_status.UI_SOC;
-    printk("[bat_debug][ui_soc] %s %d : sUisoc_data.iUI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, sUisoc_data.iUI_SOC, BMT_status.UI_SOC);
     sUisoc_data.iSOC = BMT_status.SOC;
         if( BMT_status.bat_full )
                 sUisoc_data.iSOC = 100;
@@ -1950,8 +1940,6 @@ static void htc_battery_update(struct battery_data *bat_data)
         else
                 BMT_status.htc_extension &= ~HTC_EXT_UNKNOWN_USB_CHARGER;
 #endif
-    printk("[bat_debug][htc_battery_update] cmd_discharging: %d adjust_power: %d suspend_discharging: %d charger_ctrl_stat: %d meta_charging_enable: %d current_now: %d voltage_now: %d\n", cmd_discharging, adjust_power, suspend_discharging, charger_ctrl_stat, meta_charging_enable, current_now, voltage_now);
-    printk("[bat_debug][htc_battery_update] BAT_batt_vol: %d\n", bat_data->BAT_batt_vol );
     power_supply_changed(bat_psy);
 }
 #endif
@@ -1998,7 +1986,6 @@ static kal_bool mt_battery_100Percent_tracking_check(void)
 	}
 #endif
 
-    printk("[bat_debug] func: %s line: %d\n", __FUNCTION__, __LINE__);
 
 	if (BMT_status.bat_full == KAL_TRUE) {	/* charging full first, UI tracking to 100% */
 		if (BMT_status.UI_SOC >= 100) {
@@ -2197,11 +2184,9 @@ static void mt_battery_Sync_UI_Percentage_to_Real(void)
 		timer_counter = 0;
 
 #if !defined(CUST_CAPACITY_OCV2CV_TRANSFORM)
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = BMT_status.SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, BMT_status.UI_SOC);
 		BMT_status.UI_SOC = BMT_status.SOC;
 #else
 		if (BMT_status.UI_SOC == -1) {
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = BMT_status.SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, BMT_status.UI_SOC);
 			BMT_status.UI_SOC = BMT_status.SOC;
 		}
 		else if (BMT_status.charger_exist && BMT_status.bat_charging_state != CHR_ERROR) {
@@ -2211,7 +2196,6 @@ static void mt_battery_Sync_UI_Percentage_to_Real(void)
 			}
 			else
 			{
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = BMT_status.SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, BMT_status.UI_SOC);
 				BMT_status.UI_SOC = BMT_status.SOC;
 			}
 		}
@@ -2219,7 +2203,6 @@ static void mt_battery_Sync_UI_Percentage_to_Real(void)
 	}
 
 	if (BMT_status.UI_SOC <= 0) {
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 1\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC;
 		BMT_status.UI_SOC = 1;
 		battery_log(BAT_LOG_CRTI, "[Battery]UI_SOC get 0 first (%d)\r\n",
 			    BMT_status.UI_SOC);
@@ -2272,7 +2255,6 @@ static void battery_update(struct battery_data *bat_data)
 		} else {	/* No Battery, Only Charger */
 
 			bat_data->BAT_STATUS = POWER_SUPPLY_STATUS_UNKNOWN;
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 0\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
 			BMT_status.UI_SOC = 0;
 		}
 
@@ -2500,10 +2482,8 @@ kal_bool bat_is_charging_full(void)
 #ifdef CONFIG_V36BML_BATTERY
 void bat_set_ui_percentage(kal_int32 uiSoc)
 {
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = uiSoc(%d)<0?0:uiSoc\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, uiSoc);
     BMT_status.UI_SOC = uiSoc<0?0:uiSoc;
         if(BMT_status.UI_SOC - BMT_status.PRE_UI_SOC >= 2 && BMT_status.PRE_UI_SOC != 0) {
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = BMT_status.PRE_UI_SOC(%d)+1\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, BMT_status.PRE_UI_SOC);
                         BMT_status.UI_SOC = BMT_status.PRE_UI_SOC + 1;
 	}
 
@@ -2513,7 +2493,6 @@ void bat_set_ui_percentage(kal_int32 uiSoc)
     } else {
         set_rtc_spare_fg_value(BMT_status.UI_SOC);
     }
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.PRE_UI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.PRE_UI_SOC, BMT_status.UI_SOC);
         BMT_status.PRE_UI_SOC = BMT_status.UI_SOC;
 }
 #endif
@@ -2724,7 +2703,6 @@ kal_uint16 htc_charging_avg_voltage_check(void)
 {
         kal_int32 charger_vol_sum = 0;
         kal_int32 batteryIndex = 0;
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
         battery_log(BAT_LOG_CRTI,"wxx_dumpReg:");
         battery_charging_control(CHARGING_CMD_DUMP_REGISTER, NULL);
         do{
@@ -2745,7 +2723,6 @@ EXPORT_SYMBOL(htc_charging_avg_voltage_check);
 
 kal_uint16 htc_battery_get_AICL_status(void)
 {
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
         return ((BMT_status.htc_acil_state == AICL_DONE) ? 1 : 0);
 }
 EXPORT_SYMBOL(htc_battery_get_AICL_status);
@@ -2782,12 +2759,10 @@ void mt_battery_GetBatteryData(void)
 	temperatureR = battery_meter_get_tempR(temperatureV);
 
 	current_now = ICharging * 1000;
-printk("[bat_debug] current_now %d htc_battery_meter_get_battery_current_imm %d\n", current_now, htc_battery_meter_get_battery_current_imm(TRUE));
 	voltage_now = bat_vol * 1000;
 
 	if (bat_meter_timeout == KAL_TRUE || bat_spm_timeout == TRUE || fg_wake_up_bat == KAL_TRUE) {
 		SOC = battery_meter_get_battery_percentage();
-		printk("[bat_debug] mt_battery_GetBatteryData SOC %d\n", SOC);
 		/* if (bat_spm_timeout == true) */
 		/* BMT_status.UI_SOC = battery_meter_get_battery_percentage(); */
 
@@ -3381,7 +3356,6 @@ static void mt_battery_update_status(void)
                                 usb_update(&usb_main);
                         }
                         last_src = BMT_status.charger_type;
-    printk("[bat_debug][ui_soc] %s %d : last_UI_SOC(%d) = BMT_status.UI_SOC(%d)\n", __FUNCTION__, __LINE__, last_UI_SOC, BMT_status.UI_SOC);
                         last_UI_SOC = BMT_status.UI_SOC;
                         last_htc_extension = BMT_status.htc_extension;
                         last_temperature = BMT_status.temperature;
@@ -3720,7 +3694,6 @@ void htc_battery_limited_power(void)
 {
         kal_int32 temperature;
 
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
         temperature = battery_meter_get_battery_temperature();
         battery_xlog_printk(BAT_LOG_CRTI, "htc_battery_limited_power = %d degC+++\n", temperature);
 
@@ -3745,7 +3718,6 @@ void htc_battery_limited_power(void)
 void BAT_thread(void)
 {
 	static kal_bool battery_meter_initilized = KAL_FALSE;
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
 	if (battery_meter_initilized == KAL_FALSE) {
 #ifdef CONFIG_V36BML_BATTERY
 		mt_battery_charger_detect_check();
@@ -3757,7 +3729,6 @@ void BAT_thread(void)
 #if defined(CONFIG_POWER_EXT)
 #else
 		BMT_status.SOC = battery_meter_get_battery_percentage();
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = BMT_status.SOC(%d)\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC, BMT_status.SOC);
 		BMT_status.UI_SOC = BMT_status.SOC;
 		BMT_status.ZCV = battery_meter_get_battery_zcv();
 
@@ -3790,13 +3761,11 @@ void BAT_thread(void)
 #ifdef CONFIG_V36BML_BATTERY
     htc_battery_check_overload();
 
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
     htc_battery_sync_ui_soc(&battery_main);
 #endif
         mt_battery_update_status();
         mt_kpoc_power_off_check();
 #ifdef CONFIG_HTC_LIMIT_POWER
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
         htc_battery_limited_power();
 #endif
 }
@@ -4379,7 +4348,6 @@ void charger_hv_detect_sw_workaround_init(void)
 /* HTC feature start */
 void htc_battery_para_init(void)
 {
-    printk("[bat_debug] func: %s  line: %d\n", __FUNCTION__, __LINE__);
         BMT_status.test_power_monitor =
                 (get_kernel_flag() & KERNEL_FLAG_TEST_PWR_SUPPLY) ? KAL_TRUE : KAL_FALSE;
 
@@ -5512,7 +5480,6 @@ static int battery_probe(struct platform_device *dev)
         BMT_status.TOPOFF_charging_time = 0;
         BMT_status.POSTFULL_charging_time = 0;
         BMT_status.SOC = -1;
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 0\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
         BMT_status.UI_SOC = 0;
         BMT_status.full_level = 100;
 //#ifdef HTC_ENABLE_AICL
@@ -5541,10 +5508,8 @@ static int battery_probe(struct platform_device *dev)
 	BMT_status.POSTFULL_charging_time = 0;
 	BMT_status.SOC = 0;
 #ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = -1\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
 	BMT_status.UI_SOC = -1;
 #else
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = 0\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
 	BMT_status.UI_SOC = 0;
 #endif
 
@@ -5644,7 +5609,6 @@ static void battery_timer_resume(void)
 	if (g_call_state == CALL_ACTIVE &&
 		(bat_time_after_sleep.tv_sec - g_bat_time_before_sleep.tv_sec >= batt_cust_data.talking_sync_time)) {
 		/* phone call last than x min */
-    printk("[bat_debug][ui_soc] %s %d : BMT_status.UI_SOC(%d) = battery_meter_get_battery_percentage()\n", __FUNCTION__, __LINE__, BMT_status.UI_SOC);
 		BMT_status.UI_SOC = battery_meter_get_battery_percentage();
 		battery_log(BAT_LOG_CRTI, "Sync UI SOC to SOC immediately\n");
 	}
