@@ -3732,12 +3732,6 @@ signed int battery_meter_get_battery_percentage(void)
 #ifdef CONFIG_V36BML_BATTERY
 	tempvol=htc_battery_meter_estimate_percentage(gFG_capacity_by_v,gFG_capacity_by_c,gFG_Is_Charging);
 	printk("[bat_debug] battery_meter_get_battery_percentage result %d called htc_battery_meter_estimate_percentage(gFG_capacity_by_v(%d),gFG_capacity_by_c(%d),gFG_Is_Charging(%d))\n", tempvol, gFG_capacity_by_v, gFG_capacity_by_c, gFG_Is_Charging);
-	if (tempvol > 100)
-		tempvol = 100;
-	if (tempvol == 0 && gFG_capacity_by_v > 0) {
-	    printk("[bat_debug] battery_meter_get_battery_percentage result itempvol==0, gFG_capacity_by_v > 0, returning 1\n");
-            tempvol=1;
-	}
 	return tempvol;
 #else
 		return gFG_capacity_by_c;	/* hw fg, //return gfg_percent_check_point; // voltage mode */
@@ -3816,6 +3810,14 @@ void reset_parameter_car(void)
 {
 #if defined(SOC_BY_HW_FG)
 	int ret = 0;
+#ifdef CONFIG_V36BML_BATTERY
+	if (bat_is_charging_full()){
+		gFG_columb_save = 0;
+		gFG_ever_full_charged=true;
+	}else{
+		gFG_columb_save += gFG_columb;
+	}
+#endif
 	ret = battery_meter_ctrl(BATTERY_METER_CMD_HW_RESET, NULL);
 	gFG_columb = 0;
 
